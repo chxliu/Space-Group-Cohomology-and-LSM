@@ -274,6 +274,7 @@ local
         i, j, p, q, u, v, ln, iu, iv, w, x, sw;
 
 #This function computes, for a given n, the generators at degree 1,2,...,n.
+#e.g. Mod2RingGenerators(IT=76,n=4);
 
 n:=arg[2];
 spacedim:=3;
@@ -291,7 +292,8 @@ else
 fi;
 R := ResolutionAlmostCrystalGroup(GG,n+1);
 
-else if IsGroup(arg[1]) then
+else
+    if IsGroup(arg[1]) then
     GG := Image(IsomorphismPcpGroup(arg[1]));
     R := ResolutionAlmostCrystalGroup(GG,n+1);
     else
@@ -301,7 +303,7 @@ fi;
 
 
 TR:=HomToIntegersModP(R,2);
-if Cohomology(TR,n) = 0 then return []; fi;
+
 #####################################################################
 CohomologyBasis:=function(Torsion)
 local i, v, Basis;
@@ -333,92 +335,87 @@ end;
 
 CB:=[];
 for p in [1..n] do
-CB[p]:=CR_Mod2CocyclesAndCoboundaries(R,p,true);
-#CR_Mod2CocyclesAndCoboundaries gives allo the cocycles followed by all the coboundaries as vectors
+    CB[p]:=CR_Mod2CocyclesAndCoboundaries(R,p,true);  #CR_Mod2CocyclesAndCoboundaries gives all the cocycles followed by all the coboundaries as vectors
 od;
 
-GensBasis1ton :=[];
 
-for j in [1..n] do
-
-Cups:=CohomologyBasis(List([1..Cohomology(TR,j)],i->1));
-#Make an identity matrix, consisting of basis vectors for cocycles
-
-Cupped :=[];
-
-for p in [QuoInt(j+1,2)..(j-1)] do  #QuoInt(j,2) is gap command for the usual Int(j/2)
-    q:=j-p;
-    BasisP:=CohomologyBasis(List([1..Cohomology(TR,p)],i->1));
-    BasisQ:=CohomologyBasis(List([1..Cohomology(TR,q)],i->1));
+GensBasis1ton :=[CohomologyBasis(List([1..Cohomology(TR,1)],i->1))];  # Record degree-1 generators  #Make an identity matrix, consisting of basis vectors for cocycles
 
 
-    iu :=1;
-    for u in BasisP do
+for j in [2..n] do        # Then deal with degree-j generators for j=2,3,...,n
 
-        uCocycle:=CB[p].classToCocycle(u);
-        uChainMap:=CR_ChainMapFromCocycle(R,uCocycle,p,q);
-        ww:=[];
-        for i in [1..(R!.dimension(j))] do
-            Append(ww, [uChainMap([[i,1]])]);
-        od;
+    Cups:=CohomologyBasis(List([1..Cohomology(TR,j)],i->1));    #Make an identity matrix, consisting of basis vectors for cocycles
 
-        iv :=1;
-        for v in BasisQ do
+    Cupped :=[];
 
-            vCocycle:=CB[q].classToCocycle(v);
+    for p in [QuoInt(j+1,2)..(j-1)] do  #QuoInt(j,2) is gap command for the usual Int(j/2)
+        q:=j-p;
+        BasisP:=CohomologyBasis(List([1..Cohomology(TR,p)],i->1));
+        BasisQ:=CohomologyBasis(List([1..Cohomology(TR,q)],i->1));
 
-            if ((p > q) or (p=q and iv>=iu)) then
+        iu :=1;
+        for u in BasisP do
 
-                uvCocycle:=[];
-                for i in [1..(R!.dimension(j))] do
-                    w:=ww[i];
-                    sw:=0;
-                    for x in w do
-                        sw:=sw + vCocycle[AbsoluteValue(x[1])];
+            uCocycle:=CB[p].classToCocycle(u);
+            uChainMap:=CR_ChainMapFromCocycle(R,uCocycle,p,q);
+            ww:=[];
+            for i in [1..(R!.dimension(j))] do
+                Append(ww, [uChainMap([[i,1]])]);
+            od;
+
+            iv :=1;
+            for v in BasisQ do
+
+                vCocycle:=CB[q].classToCocycle(v);
+
+                if ((p > q) or (p=q and iv>=iu)) then
+
+                    uvCocycle:=[];
+                    for i in [1..(R!.dimension(j))] do
+                        w:=ww[i];
+                        sw:=0;
+                        for x in w do
+                            sw:=sw + vCocycle[AbsoluteValue(x[1])];
+                        od;
+                        uvCocycle[i]:=sw mod 2;
                     od;
-                    uvCocycle[i]:=sw mod 2;
-                od;
 
-                cupped := CB[j].cocycleToClass(uvCocycle);
+                    cupped := CB[j].cocycleToClass(uvCocycle);
     
-                Append(Cupped,[cupped*Z(2)]);
+                    Append(Cupped,[cupped*Z(2)]);
 
-                #cupped :=Mod2CupProduct(R,u,v,p,q,CB[p],CB[q],CB[j]);
+                    #cupped :=Mod2CupProduct(R,u,v,p,q,CB[p],CB[q],CB[j]);
 
-            fi;
+                fi;
 
-        iv := iv+1;
+                iv := iv+1;
+            od;
+
+            iu := iu+1;
         od;
 
-    iu := iu+1;
     od;
 
-od;
+    if Cups = [] then        #This is when cohomology dim = 0
+        GensBasis1ton[j]:= [];
+    else
+        CuppedBasis := List(BaseMat(Cupped),ShallowCopy);
+        Gens := BaseSteinitzVectors(Cups*Z(2),CuppedBasis)!.factorspace;
 
-if Cupped = [] then
-CuppedBasis := [];
-else
-CuppedBasis := List(BaseMat(Cupped),ShallowCopy);
-fi;
+        GensBasis :=[];
 
-#Append(CuppedBasis,[List([1..Cohomology(TR,n)],x->0*Z(2))]);
-#Gens := List(BaseOrthogonalSpaceMat(CuppedBasis),ShallowCopy);
-#Print(Cups);
+        for i in [1..Length(Gens)] do
+            GensBasis[i]:=GF2ToZ(Gens[i]);
+        od;
 
-Gens := BaseSteinitzVectors(Cups*Z(2),CuppedBasis)!.factorspace;
-
-GensBasis :=[];
-
-for i in [1..Length(Gens)] do
-    GensBasis[i]:=GF2ToZ(Gens[i]);
-od;
-
-GensBasis1ton[j]:=GensBasis;
+        GensBasis1ton[j]:=GensBasis;
+    fi;
 
 od;
 
 return GensBasis1ton;
 end;
+
 #####################################################################
 #####################################################################
 
@@ -448,6 +445,9 @@ local
 #e.g.: Mod2RingGensAndRels(89);
 #e.g.: Mod2RingGensAndRels(89,6);
 
+
+
+
 if Length(arg)=1 then
 n:=6;
 spacedim:=3;
@@ -463,6 +463,9 @@ fi;
 
 if IsInt(arg[1]) then
 IT := arg[1];
+
+Print("===========================================\n");
+Print("Begin Group No. ", IT, ":\n");
 
 if IT = 219 then
     Print("Caution: the group being calculated (No. 219) has two degree-6 generators!\n");
@@ -587,6 +590,8 @@ fi;
 return [v0];
 end;
 ######################################################################
+
+
 
 Letters := [["A1","A2","A3","A4","A5","A6","A7"],["B1","B2","B3","B4","B5","B6","B7"],                             ["C1","C2","C3","C4","C5","C6","C7"],["D1","D2","D3","D4","D5","D6","D7"]];
 
@@ -1341,6 +1346,9 @@ Print(Length(CupRel4Lett)," at deg 4: ");List(CupRel4Lett,x->PrintMonomialString
 Print(Length(CupRel5Lett)," at deg 5: ");List(CupRel5Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
 Print(Length(CupRel6Lett)," at deg 6: ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
 
+
+Print("End Group No. ", IT, ".\n");
+Print("===========================================\n");
 
 return true;
 #rec(GensAtDegN:=List([1..4],x->List([1..Length(Gens[x])],y->Letters[x,y])),RelsAtDegN:=[CupRel2Lett,CupRel3Lett,CupRel4Lett,CupRel5Lett,CupRel6Lett]);
