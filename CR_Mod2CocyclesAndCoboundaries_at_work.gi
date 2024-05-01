@@ -161,7 +161,6 @@ local u;
 if cohdim = 0 then
 return [];
 fi;
-
 u:=GF2ToZ(SolutionMat(CobandCoc*Z(2),v*Z(2)));
 return List([1..cohdim],x->u[Length(u)-cohdim+x]);
 
@@ -788,8 +787,10 @@ od;
 
 if CupBase3 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
     if (CupTemp = []) = false then
-        Append(CupBase3,[CupTemp[1]]);
-        Append(CupBase3Lett,[CupTempLett[1]]);
+        if (CupTemp[1] = []) = false then  #if cohomology dimension is not zero
+            Append(CupBase3,[CupTemp[1]]);
+            Append(CupBase3Lett,[CupTempLett[1]]);
+        fi;
     fi;
 fi;
 
@@ -840,6 +841,7 @@ for u in CupBase3 do
 
         cupped :=Mod2CupProduct(R,u,v,3,1,CB[3],CB[1],CB[4]);      #then calculate u-cup-v
     
+        
         #### begin checking if u-cup-v contains letters of the lower-degree relations
         ####
         Lett1 := CupBase3Lett[iu] + GensLett[iv];
@@ -888,15 +890,18 @@ od;
 
 if CupBase4 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
     if (CupTemp = []) = false then
-        Append(CupBase4,[CupTemp[1]]);
-        Append(CupBase4Lett,[CupTempLett[1]]);
+        if (CupTemp[1] = []) = false then  #if cohomology dimension is not zero
+            Append(CupBase4,[CupTemp[1]]);
+            Append(CupBase4Lett,[CupTempLett[1]]);
+        fi;
     fi;
 fi;
+
+
 
 if (CupBase4 = []) = false then
 
     for cupped in CupTemp do
-
         sol :=SolutionMat(CupBase4*Z(2),cupped*Z(2));
         if sol = fail then                  #if u-cup-v is a genuine new cocycle
             Append(CupBase4,[cupped]);
@@ -1158,10 +1163,13 @@ od;
 
 if CupBase5 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
     if (CupTemp = []) = false then
-        Append(CupBase5,[CupTemp[1]]);
-        Append(CupBase5Lett,[CupTempLett[1]]);
+        if (CupTemp[1] = []) = false then  #if cohomology dimension is not zero
+            Append(CupBase5,[CupTemp[1]]);
+            Append(CupBase5Lett,[CupTempLett[1]]);
+        fi;
     fi;
 fi;
+
 
 if (CupBase5 = []) = false then
 
@@ -1374,10 +1382,13 @@ od;
 
 if CupBase6 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
     if (CupTemp = []) = false then
-        Append(CupBase6,[CupTemp[1]]);
-        Append(CupBase6Lett,[CupTempLett[1]]);
+        if (CupTemp[1] = []) = false then  #if cohomology dimension is not zero
+            Append(CupBase6,[CupTemp[1]]);
+            Append(CupBase6Lett,[CupTempLett[1]]);
+        fi;
     fi;
 fi;
+
 
 if (CupBase6 = []) = false then
 
@@ -1569,372 +1580,616 @@ Read("~/Downloads/Space_Group_Cocycles.gi");
 
 
 if IT=47 then
+    M147:=[[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M247:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    M347:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[M147,M247,M347];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in47,Am2in47,Am3in47,Axin47,Ayin47,Azin47],[],[]];
 elif IT=48 then
+    M148:=[[1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M248:=[[1, 0, 0, 1/2], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M348:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[M148,M248,M348];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in48,Am2in48,Am3in48,Axyzin48],[],[]];
 elif IT=49 then
+    M149:=[[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M249:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M349:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[M149,M249,M349];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in49,Am2in49,Am3in49,Axin49,Ayin49],[],[]];
 elif IT=50 then
+    M150:=[[1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M250:=[[1, 0, 0, 1/2], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    M350:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[M150,M250,M350];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
     funcs:=[[Am1in50,Am2in50,Am3in50,Azin50],[BGAPin50],[]];
 elif IT=51 then
+    M151:=[[1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M251:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    M351:=[[-1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[M151,M251,M351];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in51,Am2in51,Am3in51,Ayin51,Azin51],[],[]];
 elif IT=52 then
+    M152:=[[1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M252:=[[1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M352:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[M152,M252,M352];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
     funcs:=[[Am1in52,Am2in52,Am3in52],[B1in52,B2in52],[]];
 elif IT=53 then
+    M153:=[[1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M253:=[[1, 0, 0, 1/2], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M353:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[M153,M253,M353];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
     funcs:=[[Am1in53,Am2in53,Am3in53,Ayin53],[Bin53],[]];
 elif IT=54 then
+    M154:=[[1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M254:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M354:=[[-1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[M154,M254,M354];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in54,Am2in54,Am3in54,Ayin54],[],[]];
 elif IT=55 then
+    M155:=[[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M255:=[[1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    M355:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[M155,M255,M355];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in55,Am2in55,Am3in55,Azin55],[Bin55],[]];
 elif IT=56 then
+    M156:=[[1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M256:=[[1, 0, 0, 0], [0, -1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M356:=[[-1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[M156,M256,M356];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in56,Am2in56,Am3in56],[B1in56,B2in56],[]];
 elif IT=57 then
+    M157:=[[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M257:=[[1, 0, 0, 0], [0, -1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M357:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[M157,M257,M357];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
     funcs:=[[Am1in57,Am2in57,Am3in57,Axin57],[],[]];
 elif IT=58 then
+    M158:=[[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M258:=[[1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M358:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[M158,M258,M358];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in58,Am2in58,Am3in58],[B1in58,B2in58,B3in58],[CGAPin58]];
 elif IT=59 then
+    M159:=[[1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M259:=[[1, 0, 0, 0], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    M359:=[[-1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[M159,M259,M359];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in59,Am2in59,Am3in59,Azin59],[Bin59],[]];
 elif IT=60 then
+    M160:=[[1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M260:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M360:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[M160,M260,M360];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
     funcs:=[[Am1in60,Am2in60,Am3in60],[Bin60],[]];
 elif IT=61 then
+    M161:=[[1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M261:=[[1, 0, 0, 0], [0, -1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M361:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[M161,M261,M361];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in61,Am2in61,Am3in61],[],[CGAPin61]];
 elif IT=62 then
+    M162:=[[1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M262:=[[1, 0, 0, 0], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    M362:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[M162,M262,M362];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in62,Am2in62,Am3in62],[B1in62,B2in62],[]];
 elif IT=63 then
+    M163:=[[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M263:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M363:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[M163,M263,M363];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in63,Am2in63,Am3in63,Axyin63],[Bin63],[]];
 elif IT=64 then
+    M164:=[[1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M264:=[[0, -1, 0, 1/2], [-1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M364:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[M164,M264,M364];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in64,Am2in64,Am3in64,Axyin64],[],[CGAPin64]];
 elif IT=65 then
+    M165:=[[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M265:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    M365:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[M165,M265,M365];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in65,Am2in65,Am3in65,Axyin65,Azin65],[Bin65],[]];
 elif IT=66 then
+    M166:=[[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M266:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M366:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[M166,M266,M366];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in66,Am2in66,Am3in66,Axyin66],[B1in66,B2in66],[]];
 elif IT=67 then
+    M167:=[[1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M267:=[[0, -1, 0, 1/2], [-1, 0, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    M367:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[M167,M267,M367];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
     funcs:=[[Am1in67,Am2in67,Am3in67,Axyin67,Azin67],[],[]];
 elif IT=68 then
+    M168:=[[1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M268:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M368:=[[0, -1, 0, 1/2], [-1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[M168,M268,M368];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
     funcs:=[[Am1in68,Am2in68,Am3in68,Axyin68],[],[CGAPin68]];
 elif IT=69 then
+    M169:=[[0, -1, 0, 0], [-1, 0, 0, 0], [1, 1, 1, 0], [0, 0, 0, 1]];
+    M269:=[[0, 0, -1, 0], [1, 1, 1, 0], [-1, 0, 0, 0], [0, 0, 0, 1]];
+    M369:=[[1, 1, 1, 0], [0, 0, -1, 0], [0, -1, 0, 0], [0, 0, 0, 1]];
     PGGen:=[M169,M269,M369];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in69,Am2in69,Am3in69,Axyin69,Axzin69],[],[CGAPin69]];
 elif IT=70 then
+    M170:=[[0, -1, 0, 0], [-1, 0, 0, 0], [1, 1, 1, 1/2], [0, 0, 0, 1]];
+    M270:=[[0, 0, -1, 0], [1, 1, 1, 1/2], [-1, 0, 0, 0], [0, 0, 0, 1]];
+    M370:=[[1, 1, 1, 1/2], [0, 0, -1, 0], [0, -1, 0, 0], [0, 0, 0, 1]];
     PGGen:=[M170,M270,M370];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
     funcs:=[[Am1in70,Am2in70,Am3in70],[Bin70],[CGAPin70]];
 elif IT=71 then
+    M171:=[[0, -1, 1, 0], [-1, 0, 1, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    M271:=[[0, 1, -1, 0], [0, 1, 0, 0], [-1, 1, 0, 0], [0, 0, 0, 1]];
+    M371:=[[1, 0, 0, 0], [1, 0, -1, 0], [1, -1, 0, 0], [0, 0, 0, 1]];
     PGGen:=[M171,M271,M371];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in71,Am2in71,Am3in71,Axyzin71],[B1in71,B2in71,B3in71],[CGAPin71]];
 elif IT=72 then
+    M172:=[[0, -1, 1, 0], [-1, 0, 1, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    M272:=[[0, 1, -1, 1/2], [0, 1, 0, 1/2], [-1, 1, 0, 0], [0, 0, 0, 1]];
+    M372:=[[1, 0, 0, 1/2], [1, 0, -1, 1/2], [1, -1, 0, 0], [0, 0, 0, 1]];
     PGGen:=[M172,M272,M372];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
     funcs:=[[Am1in72,Am2in72,Am3in72,Axyzin72],[Bin72],[]];
 elif IT=73 then
+    M173:=[[0, -1, 1, 1/2], [-1, 0, 1, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M273:=[[0, 1, -1, 0], [0, 1, 0, 1/2], [-1, 1, 0, 1/2], [0, 0, 0, 1]];
+    M373:=[[1, 0, 0, 1/2], [1, 0, -1, 1/2], [1, -1, 0, 0], [0, 0, 0, 1]];
     PGGen:=[M173,M273,M373];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
     funcs:=[[Am1in73,Am2in73,Am3in73,Axyzin73],[],[]];
 elif IT=74 then
+    M174:=[[0, -1, 1, 1/2], [-1, 0, 1, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M274:=[[0, 1, -1, 1/2], [0, 1, 0, 0], [-1, 1, 0, 1/2], [0, 0, 0, 1]];
+    M374:=[[1, 0, 0, 0], [1, 0, -1, 0], [1, -1, 0, 0], [0, 0, 0, 1]];
     PGGen:=[M174,M274,M374];
-    G:=Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
     funcs:=[[Am1in74,Am2in74,Am3in74,Axyzin74],[B1in74,B2in74],[]];
+elif IT=75 then
+    C275:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C475:=[[0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    PGGen:=[C275,C475];
+    funcs:=[[Aqin75,Axyin75,Azin75],[Bdeltain75,Bxyin75],[]];
+elif IT=76 then
+    C276:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    C476:=[[0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/4], [0, 0, 0, 1]];
+    PGGen:=[C276,C476];
+    funcs:=[[Aqin76,Axyin76],[Bxyin76],[]];
+elif IT=77 then
+    C277:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C477:=[[0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    PGGen:=[C277,C477];
+    funcs:=[[Aqin77,Axyin77,Azin77],[Bxyin77],[]];
+elif IT=78 then
+    C278:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    C478:=[[0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 3/4], [0, 0, 0, 1]];
+    PGGen:=[C278,C478];
+    funcs:=[[Aqin78,Axyin78],[Bxyin78],[]];
+elif IT=79 then
+    C279:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C479:=[[0, 1, 0, 0], [0, 1, -1, 0], [-1, 1, 0, 0], [0, 0, 0, 1]];
+    PGGen:=[C279,C479];
+    funcs:=[[Aqin79,Axyzin79],[Bdeltain79,B2in79,B3in79],[C1in79,C2in79]];
+elif IT=80 then
+    C280:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C480:=[[0, 1, 0, 3/4], [0, 1, -1, 1/4], [-1, 1, 0, -1/2], [0, 0, 0, 1]];
+    PGGen:=[C280,C480];
+    funcs:=[[Aqin80,Axyzin80],[Bxyzin80],[CGAPin80]];
+elif IT=81 then
+    C281:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C481:=[[0, 1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C281,C481];
+    funcs:=[[Aqin81,Axyin81,Azin81],[Bdeltain81,Bxyin81],[]];
+elif IT=82 then
+    C282:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C482:=[[0, -1, 0, 0], [0, -1, 1, 0], [1, -1, 0, 0], [0, 0, 0, 1]];
+    PGGen:=[C282,C482];
+    funcs:=[[Aqin82,Axyzin82],[Bdeltain82,B2in82,Bzxyin82],[C1in82,C2in82]];
+elif IT=83 then
+    C283:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C483:=[[0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    P83:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C283,C483,P83];
+    funcs:=[[Aiin83,Aqin83,Axyin83,Azin93],[Bdeltain83,Bxyin83],[]];
+elif IT=84 then
+    C284:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C484:=[[0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    P84:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C284,C484,P84];
+    funcs:=[[Aiin84,Aqin84,Axyin84],[Bdeltain84,Bczin84,Bxyin84,Bzxyin84],[]];
+elif IT=85 then
+    C285:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C485:=[[0, -1, 0, 1/2], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    P85:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C285,C485,P85];
+    funcs:=[[Aiin85,Aqin85,Azin85],[Bdeltain85,Bcxyin85],[]];
+elif IT=86 then
+    C286:=[[-1, 0, 0, -1/2], [0, -1, 0, 1/2], [0, 0, 1, 1], [0, 0, 0, 1]];
+    C486:=[[0, -1, 0, 0], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    P86:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C286,C486,P86];
+    funcs:=[[Aiin86,Aqin86,Axyzin86],[Bdeltain86],[]];
+elif IT=87 then
+    C287:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C487:=[[0, 1, 0, 0], [0, 1, -1, 0], [-1, 1, 0, 0], [0, 0, 0, 1]];
+    P87:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C287,C487,P87];
+    funcs:=[[Aiin87,Aqin87,Axyzin87],[Bdeltain87,Bphiin87,Bxyzin87],[CGAPin87]];
+elif IT=88 then
+    C288:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C488:=[[0, 1, 0, 0], [0, 1, -1, 0], [-1, 1, 0, 0], [0, 0, 0, 1]];
+    P88:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C288,C488,P88];
+    funcs:=[[],[],[]];
+elif IT=89 then
+    C289:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p89:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C2pp89:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C289,C2p89,C2pp89];
+    funcs:=[[Acpin89,Acppin89,Axyin89,Azin89],[Bdeltain89,Bxyin89],[]];
+elif IT=90 then
+    C290:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p90:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C2pp90:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C290,C2p90,C2pp90];
+    funcs:=[[Acpin90,Acppin90,Azin90],[Bdeltain90,Bphiin90],[CGAPin90]];
 elif IT=91 then
-    PGGen:=[C291, C2p91, C2pp91];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
-    funcs:=[[Acpin91,Acppin91,Axyin91],[BGAPin91],[]];
+    C291:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    C2p91:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C2pp91:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 1/4], [0, 0, 0, 1]];
+    PGGen:=[C291,C2p91,C2pp91];
+    funcs:=[[Acpin91,Acppin91,Axyin91],[Bxyin91],[]];
 elif IT=92 then
-    PGGen:=[C292, C2p92, C2pp92];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
-    funcs:=[[Acpin92,Acppin92],[BGAPin92],[CGAPin92]];
+    C292:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    C2p92:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 1/4], [0, 0, 0, 1]];
+    C2pp92:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    PGGen:=[C292,C2p92,C2pp92];
+    funcs:=[[Acpin92,Acppin92],[Bphiin92],[CGAPin92]];
 elif IT=93 then
-    PGGen:=[C293, C2p93, C2pp93];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
-    funcs:=[[Acpin93,Acppin93,Axyin93,Azin93],[BGAPin93],[]];
+    C293:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p93:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C2pp93:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    PGGen:=[C293,C2p93,C2pp93];
+    funcs:=[[Acpin93,Acppin93,Axyin93,Azin93],[Bxyin93],[]];
 elif IT=94 then
-    PGGen:=[C294, C2p94, C2pp94];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
-    funcs:=[[Acpin94,Acppin94,Azin94],[BGAPin94],[CGAPin94]];
+    C294:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p94:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    C2pp94:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C294,C2p94,C2pp94];
+    funcs:=[[Acpin94,Acppin94,Azin94],[Bphiin94],[CGAPin94]];
 elif IT=95 then
-    PGGen:=[C295, C2p95, C2pp95];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
-    funcs:=[[Acpin95,Acppin95,Axyin95],[BGAPin95],[]];
+    C295:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    C2p95:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C2pp95:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 3/4], [0, 0, 0, 1]];
+    PGGen:=[C295,C2p95,C2pp95];
+    funcs:=[[Acpin95,Acppin95,Axyin95],[Bxyin95],[]];
 elif IT=96 then
-    PGGen:=[C296, C2p96, C2pp96];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
-    funcs:=[[Acpin96,Acppin96],[BGAPin96],[CGAPin96]];
+    C296:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    C2p96:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 3/4], [0, 0, 0, 1]];
+    C2pp96:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    PGGen:=[C296,C2p96,C2pp96];
+    funcs:=[[Acpin96,Acppin96],[Bphiin96],[CGAPin96]];
 elif IT=97 then
-    PGGen:=[C297, C2p97, C2pp97];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
+    C297:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C2p97:=[[0, -1, 1, 0], [0, -1, 0, 0], [1, -1, 0, 0], [0, 0, 0, 1]];
+    C2pp97:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C297,C2p97,C2pp97];
     funcs:=[[Acpin97,Acppin97,Axyzin97],[Bdeltain97,B2in97,B3in97],[C1in97,C2in97]];
 elif IT=98 then
-    PGGen:=[C298, C2p98, C2pp98];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
-    funcs:=[[Acpin98,Acppin98,Axyzin98],[BGAPin98],[CGAPin98]];
+    C298:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C2p98:=[[0, -1, 1, 3/4], [0, -1, 0, 5/4], [1, -1, 0, 1/2], [0, 0, 0, 1]];
+    C2pp98:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C298,C2p98,C2pp98];
+    funcs:=[[Acpin98,Acppin98,Axyzin98],[Bxyzin98],[CGAPin98]];
+elif IT=99 then
+    C299:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    Mp99:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    M99:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    PGGen:=[C299,Mp99,M99];
+    funcs:=[[Ampin99,Amin99,Axyin99,Azin99],[Bdeltain99,Bxyin99],[]];
+elif IT=100 then
+    C2100:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    Mp100:=[[1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    M100:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2100,Mp100,M100];
+    funcs:=[[Ampin100,Amin100,Azin100],[Bdeltain100,Bphiin100],[CGAPin100]];
+elif IT=101 then
+    C2101:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    Mp101:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M101:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2101,Mp101,M101];
+    funcs:=[[Ampin101,Amin101,Axyin101],[Bdeltain101,Bmzin101,Bxyin101],[]];
 elif IT=102 then
-    PGGen:=[C2102, Mp102, M102];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2102:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    Mp102:=[[1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M102:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2102,Mp102,M102];
     funcs:=[[Ampin102,Amin102,Axyzin102],[Bdeltain102],[CGAPin102]];
+elif IT=103 then
+    C2103:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    Mp103:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M103:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    PGGen:=[C2103,Mp103,M103];
+    funcs:=[[Ampin103,Amin103,Axyin103],[Bdeltain103,Bxyin103],[]];
+elif IT=104 then
+    C2104:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    Mp104:=[[1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    M104:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    PGGen:=[C2104,Mp104,M104];
+    funcs:=[[Ampin104,Amin104],[Bdeltain104,Bcxyin104,Bcxyzin104],[C1GAPin104,C2GAPin104]];
+elif IT=105 then
+    C2105:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    Mp105:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    M105:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    PGGen:=[C2105,Mp105,M105];
+    funcs:=[[Ampin105,Amin105,Axyin105],[Bdeltain105,Bczin105,Bxyin105,Bzxyin105],[]];
 elif IT=106 then
-    PGGen:=[C2106, Mp106, M106];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2106:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    Mp106:=[[1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    M106:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    PGGen:=[C2106,Mp106,M106];
     funcs:=[[Ampin106,Amin106],[Bdeltain106,B2in106,B3in106],[C1in106,C2in106]];
+elif IT=107 then
+    C2107:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    Mp107:=[[0, 1, -1, 0], [0, 1, 0, 0], [-1, 1, 0, 0], [0, 0, 0, 1]];
+    M107:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2107,Mp107,M107];
+    funcs:=[[Ampin107,Amin107,Axyzin107],[Bdeltain107,Bphiin107,Bxyzin107],[CGAPin107]];
+elif IT=108 then
+    C2108:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    Mp108:=[[0, 1, -1, 1/2], [0, 1, 0, 1/2], [-1, 1, 0, 0], [0, 0, 0, 1]];
+    M108:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2108,Mp108,M108];
+    funcs:=[[Ampin108,Amin108,Axyzin108],[Bdeltain108,Bxyzin108],[]];
 elif IT=109 then
-    PGGen:=[C2109, Mp109, M109];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2109:=[[0, 1, -1, 1], [1, 0, -1, 1], [0, 0, -1, 1], [0, 0, 0, 1]];
+    Mp109:=[[0, 1, -1, 0], [0, 1, 0, 0], [-1, 1, 0, 0], [0, 0, 0, 1]];
+    M109:=[[0, 1, 0, 3/4], [1, 0, 0, 5/4], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    PGGen:=[C2109,Mp109,M109];
     funcs:=[[Ampin109,Amin109],[Bdeltain109,B2in109],[C1in109,C2in109]];
 elif IT=110 then
-    PGGen:=[C2110, Mp110, M110];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2110:=[[0, 1, -1, 1], [1, 0, -1, 1], [0, 0, -1, 1], [0, 0, 0, 1]];
+    Mp110:=[[0, 1, -1, 1/2], [0, 1, 0, 1/2], [-1, 1, 0, 0], [0, 0, 0, 1]];
+    M110:=[[0, 1, 0, 1/4], [1, 0, 0, 3/4], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    PGGen:=[C2110,Mp110,M110];
     funcs:=[[Ampin110,Amin110],[Bdeltain110],[CGAPin110]];
 elif IT=111 then
-    PGGen:=[C2111, C2p111, M111];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2111:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p111:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M111:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2111,C2p111,M111];
     funcs:=[[Acpin111,Amin111,Axyin111,Azin111],[Bdeltain111,Bxyin111],[]];
 elif IT=112 then
-    PGGen:=[C2112, C2p112, M112];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2112:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p112:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M112:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    PGGen:=[C2112,C2p112,M112];
     funcs:=[[Acpin112,Amin112,Axyin112],[Bdeltain112,Bxyin112,Bczin112,Bzxyin112],[]];
 elif IT=113 then
-    PGGen:=[C2113, C2p113, M113];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
-    funcs:=[[Acpin113,Amin113,Azin113],[Bdeltain113,Bcxyin113],[Cin113]];
+    C2113:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p113:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M113:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2113,C2p113,M113];
+    funcs:=[[Acpin113,Amin113,Azin113],[Bdeltain113,Bphiin113],[Cin113]];
 elif IT=114 then
-    PGGen:=[C2114, C2p114, M114];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2114:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p114:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M114:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    PGGen:=[C2114,C2p114,M114];
     funcs:=[[Acpin114,Amin114],[Bdeltain114,Bcxyin114,Bcxyzin114],[C1in114,C2in114]];
 elif IT=115 then
-    PGGen:=[C2115, C2p115, M115];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
+    C2115:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p115:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M115:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2115,C2p115,M115];
     funcs:=[[Acpin115,Amin115,Axyin115,Azin115],[Bdeltain115,Bxyin115],[]];
 elif IT=116 then
-    PGGen:=[C2116, C2p116, M116];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
+    C2116:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p116:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M116:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    PGGen:=[C2116,C2p116,M116];
     funcs:=[[Acpin116,Amin116,Axyin116],[Bdeltain116,Bxyin116,Bcpzin116],[]];
 elif IT=117 then
-    PGGen:=[C2117, C2p117, M117];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2117:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p117:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M117:=[[1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2117,C2p117,M117];
     funcs:=[[Acpin117,Amin117,Azin117],[Bdeltain117,B2in117],[CGAPin117]];
 elif IT=118 then
-    PGGen:=[C2118, C2p118, M118];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2118:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p118:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M118:=[[1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    PGGen:=[C2118,C2p118,M118];
     funcs:=[[Acpin118,Amin118,Axyzin118],[Bdeltain118],[CGAPin118]];
 elif IT=119 then
-    PGGen:=[C2119, C2p119, M119];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
-    funcs:=[[Acpin119,Amin119,Axyzin119],[Bdeltain119,B2in119,B3in119],[C1in119,C2in119]];
+    C2119:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C2p119:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M119:=[[0, 1, -1, 0], [0, 1, 0, 0], [-1, 1, 0, 0], [0, 0, 0, 1]];
+    PGGen:=[C2119,C2p119,M119];
+    funcs:=[[Acpin119,Amin119,Axyzin119],[Bdeltain119,Bphiin119,Bzxyin119],[C1in119,C2in119]];
 elif IT=120 then
-    PGGen:=[C2120, C2p120, M120];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
+    C2120:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C2p120:=[[-1, 0, 1, 1/2], [0, -1, 1, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    M120:=[[0, 1, -1, 1/2], [0, 1, 0, 1/2], [-1, 1, 0, 0], [0, 0, 0, 1]];
+    PGGen:=[C2120,C2p120,M120];
     funcs:=[[Acpin120,Amin120,Axyzin120],[Bdeltain120,B2in120],[]];
 elif IT=121 then
-    PGGen:=[C2121, C2p121, M121];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
-    funcs:=[[Acpin121,Amin121,Axyzin121],[Bdeltain121,Bphiin121,Bxyzin121],[CGAPin121]];
+    C2121:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C2p121:=[[0, -1, 1, 0], [0, -1, 0, 0], [1, -1, 0, 0], [0, 0, 0, 1]];
+    M121:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2121,C2p121,M121];
+    funcs:=[[Acpin121,Amin121,Axyzin121],[Bdeltain121,Bxyzin121,Bphiin121],[CGAPin121]];
+elif IT=122 then
+    C2122:=[[0, 1, -1, 1/2], [1, 0, -1, 1], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    C2p122:=[[0, -1, 1, 1/2], [0, -1, 0, 1], [1, -1, 0, 1/2], [0, 0, 0, 1]];
+    M122:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    PGGen:=[C2122,C2p122,M122];
+    funcs:=[[],[],[]];
 elif IT=123 then
-    PGGen:=[C2123, C2p123, M123, P123];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2123:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p123:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M123:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    P123:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2123,C2p123,M123,P123];
     funcs:=[[Aiin123,Amin123,Acpin123,Axyin123,Azin123],[Bdeltain123,Bxyin123],[]];
 elif IT=124 then
-    PGGen:=[C2124, C2p124, M124, P124];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2124:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p124:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M124:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    P124:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2124,C2p124,M124,P124];
     funcs:=[[Aiin124,Amin124,Acpin124,Axyin124],[Bdeltain124,Bxyin124],[]];
 elif IT=125 then
-    PGGen:=[C2125, C2p125, M125, P125];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2125:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p125:=[[-1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M125:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    P125:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2125,C2p125,M125,P125];
     funcs:=[[Aiin125,Amin125,Acpin125,Azin125],[Bdeltain125,Bcxyin125],[]];
+elif IT=126 then
+    C2126:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p126:=[[-1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M126:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    P126:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2126,C2p126,M126,P126];
+    funcs:=[[],[],[]];
 elif IT=127 then
-    PGGen:=[C2127, C2p127, M127, P127];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
-    funcs:=[[Aiin127,Amin127,Acpin127,Azin127],[Bdeltain127,Bcxyin127],[CGAPin127]];
+    C2127:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p127:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M127:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    P127:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2127,C2p127,M127,P127];
+    funcs:=[[Aiin127,Amin127,Acpin127,Azin127],[Bdeltain127,Bphiin127],[CGAPin127]];
 elif IT=128 then
-    PGGen:=[C2128, C2p128, M128, P128];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2128:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p128:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M128:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    P128:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2128,C2p128,M128,P128];
     funcs:=[[Aiin128,Amin128,Acpin128],[Bdeltain128,Bcxyin128,Bcxyzin128],[C1GAPin128,C2GAPin128]];
 elif IT=129 then
-    PGGen:=[C2129, C2p129, M129, P129];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2129:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p129:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M129:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    P129:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2129,C2p129,M129,P129];
     funcs:=[[Aiin129,Amin129,Acpin129,Azin129],[Bdeltain129,Bcxyin129],[]];
 elif IT=130 then
-    PGGen:=[C2130, C2p130, M130, P130];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2130:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p130:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M130:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    P130:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2130,C2p130,M130,P130];
     funcs:=[[Aiin130,Amin130,Acpin130],[Bdeltain130,Bcxyin130],[]];
 elif IT=131 then
-    PGGen:=[C2131, C2p131, M131, P131];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2131:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p131:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M131:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    P131:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2131,C2p131,M131,P131];
     funcs:=[[Aiin131,Amin131,Acpin131,Axyin131],[Bdeltain131,Bczin131,Bxyin131,Bzxyin131],[]];
 elif IT=132 then
-    PGGen:=[C2132, C2p132, M132, P132];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2132:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p132:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M132:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    P132:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2132,C2p132,M132,P132];
     funcs:=[[Aiin132,Amin132,Acpin132,Axyin132],[Bdeltain132,Bmzin132,Bxyin132],[]];
+elif IT=133 then
+    C2133:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p133:=[[-1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M133:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    P133:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2133,C2p133,M133,P133];
+    funcs:=[[],[],[]];
 elif IT=134 then
-    PGGen:=[C2134, C2p134, M134, P134];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2134:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p134:=[[-1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M134:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    P134:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2134,C2p134,M134,P134];
     funcs:=[[Aiin134,Amin134,Acpin134,Axyzin134],[Bdeltain134],[]];
 elif IT=135 then
-    PGGen:=[C2135, C2p135, M135, P135];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2135:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p135:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M135:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    P135:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2135,C2p135,M135,P135];
     funcs:=[[Aiin135,Amin135,Acpin135],[Bdeltain135,Bcxyin135,Bczin135],[CGAPin135]];
 elif IT=136 then
-    PGGen:=[C2136, C2p136, M136, P136];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2136:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p136:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M136:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    P136:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2136,C2p136,M136,P136];
     funcs:=[[Aiin136,Amin136,Acpin136],[Bdeltain136,Bcxyin136,Bpxyzin136,Bmzin136],[CGAP1in136,CGAP2in136]];
+elif IT=137 then
+    C2137:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p137:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
+    M137:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    P137:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2137,C2p137,M137,P137];
+    funcs:=[[],[],[]];
 elif IT=138 then
-    PGGen:=[C2138, C2p138, M138, P138];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+    C2138:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    C2p138:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    M138:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    P138:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2138,C2p138,M138,P138];
     funcs:=[[Aiin138,Amin138,Acpin138],[Bdeltain138,Bmzin138,Bcxyin138,Bpxyzin138],[]];
 elif IT=139 then
-    PGGen:=[C2139, C2p139, M139, P139];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
+    C2139:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C2p139:=[[0, -1, 1, 0], [0, -1, 0, 0], [1, -1, 0, 0], [0, 0, 0, 1]];
+    M139:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    P139:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2139,C2p139,M139,P139];
     funcs:=[[Aiin139,Amin139,Acpin139,Axyzin139],[Bdeltain139,Bphiin139,Bxyzin139],[CGAPin139]];
 elif IT=140 then
-    PGGen:=[C2140, C2p140, M140, P140];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
-    funcs:=[[Aiin140,Amin140,Acpin140,Axyzin140],[Bdeltain140,Bcxyin140],[]];
+    C2140:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    C2p140:=[[0, -1, 1, 1/2], [0, -1, 0, 1/2], [1, -1, 0, 0], [0, 0, 0, 1]];
+    M140:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
+    P140:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2140,C2p140,M140,P140];
+    funcs:=[[Aiin140,Amin140,Acpin140,Axyzin140],[Bdeltain140,Bzxyin140],[]];
+elif IT=141 then
+    C2141:=[[0, 1, -1, 1/2], [1, 0, -1, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    C2p141:=[[0, -1, 1, 1/2], [0, -1, 0, 1], [1, -1, 0, 1/2], [0, 0, 0, 1]];
+    M141:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    P141:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2141,C2p141,M141,P141];
+    funcs:=[[],[],[]];
 elif IT=142 then
-    PGGen:=[C2142, C2p142, M142, P142];
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4]);
-    Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
+    C2142:=[[0, 1, -1, 1/2], [1, 0, -1, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
+    C2p142:=[[0, -1, 1, 0], [0, -1, 0, 1/2], [1, -1, 0, 1/2], [0, 0, 0, 1]];
+    M142:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
+    P142:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
+    PGGen:=[C2142,C2p142,M142,P142];
     funcs:=[[Aiin142,Amin142,Acpin142],[Bdeltain142],[]];
+else
+    Print("Space Group IT not found!!!!", "\n");
 fi;
 
+PGGen33 := List([1..Length(PGGen)],k->List([1..3],i->List([1..3],j->PGGen[k][i,j])));
 
-o0:=Length(PGGen);
-
-
-
-if o0 = 1 then
-    G:= Group(T1,T2,T3,PGGen[1]);
-    PGGen33 := [List([1..3],i->List([1..3],j->PGGen[1][i,j]))];
+if Length(PGGen) = 1 then
     for o1 in [0..(Order(PGGen33[1])-1)] do
         Append(PGind,[[o1]]);
         Append(PGMat33,[PGGen33[1]^o1]);
         Append(PGMatinv,[(PGGen[1]^o1)^(-1)]);
     od;
-fi;
-if o0 = 2 then
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2]);
-    PGGen33 := List([1..2],k->List([1..3],i->List([1..3],j->PGGen[k][i,j])));
+elif Length(PGGen) = 2 then
     for o1 in [0..(Order(PGGen33[1])-1)] do
-        for o2 in [0..(Order(PGGen33[2])-1)] do
+        for o2 in [0..1] do  #the ordering of the group generators must strictly follow this condition
             Append(PGind,[[o1,o2]]);
             Append(PGMat33,[PGGen33[1]^o1*PGGen33[2]^o2]);
             Append(PGMatinv,[(PGGen[1]^o1*PGGen[2]^o2)^(-1)]);
         od;
     od;
-fi;
-if o0 = 3 then
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3]);
-    PGGen33 := List([1..3],k->List([1..3],i->List([1..3],j->PGGen[k][i,j])));
+elif Length(PGGen) = 3 then
     for o1 in [0..(Order(PGGen33[1])-1)] do
-        for o2 in [0..(Order(PGGen33[2])-1)] do
+        for o2 in [0..1] do  #the ordering of the group generators must strictly follow this condition
             for o3 in [0..(Order(PGGen33[3])-1)] do
                 Append(PGind,[[o1,o2,o3]]);
                 Append(PGMat33,[PGGen33[1]^o1*PGGen33[2]^o2*PGGen33[3]^o3]);
@@ -1942,11 +2197,9 @@ if o0 = 3 then
             od;
         od;
     od;
-fi;
-if o0 = 4 then
-    PGGen33 := List([1..4],k->List([1..3],i->List([1..3],j->PGGen[k][i,j])));
+elif Length(PGGen) = 4 then
     for o1 in [0..(Order(PGGen33[1])-1)] do
-        for o2 in [0..(Order(PGGen33[2])-1)] do
+        for o2 in [0..1] do  #the ordering of the group generators must strictly follow this condition
             for o3 in [0..(Order(PGGen33[3])-1)] do
                 for o4 in [0..(Order(PGGen33[4])-1)] do
                     Append(PGind,[[o1,o2,o3,o4]]);
@@ -1956,12 +2209,9 @@ if o0 = 4 then
             od;
         od;
     od;
-fi;
-if o0 = 5 then
-    G:= Group(T1,T2,T3,PGGen[1],PGGen[2],PGGen[3],PGGen[4],PGGen[5]);
-    PGGen33 := List([1..5],k->List([1..3],i->List([1..3],j->PGGen[k][i,j])));
+elif Length(PGGen) = 5 then
     for o1 in [0..(Order(PGGen33[1])-1)] do
-        for o2 in [0..(Order(PGGen33[2])-1)] do
+        for o2 in [0..1] do  #the ordering of the group generators must strictly follow this condition
             for o3 in [0..(Order(PGGen33[3])-1)] do
                 for o4 in [0..(Order(PGGen33[4])-1)] do
                     for o5 in [0..(Order(PGGen33[5])-1)] do
@@ -1973,11 +2223,17 @@ if o0 = 5 then
             od;
         od;
     od;
+else
+    Print("Number of Point Group Generators Exceeds 5 -- WRONG!!!");
 fi;
 
 
 
 
+G:= Group(Concatenation([T1,T2,T3],PGGen));
+Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
+#Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
+    
 R:=ResolutionAlmostCrystalGroup(Image(Gp),7);
 
 Homotopydeg1:=List([1..R!.dimension(1)],x->List(R!.boundary(1,x),y->[y[2]]));
@@ -2009,20 +2265,28 @@ od;
 Gen4:=[];
 
 
-GensGAP:=Mod2RingGenerators(R,6,3);
+GensGAP:=Mod2RingGenerators(R,4,3);
 
+Print("Matching generators for space group No. ", IT, "\n");
 
-Print("Degree-1 generator:", Gen1,"=",GensGAP[1],"\n");
-Print("Degree-2 generator:", Gen2,"=",GensGAP[2],"\n");
-Print("Degree-3 generator:", Gen3,"=",GensGAP[3],"\n");
+if (Length(Gen1) = Length(GensGAP[1])) = false then
+    Print("Number of Degree-1 generator does not match!!!:", Length(Gen1),"!=",Length(GensGAP[1]),"\n");
+elif (Length(Gen2) = Length(GensGAP[2])) = false then
+    Print("Number of Degree-2 generator does not match!!!:", Length(Gen2),"!=",Length(GensGAP[2]),"\n");
+elif (Length(Gen3) = Length(GensGAP[3])) = false then
+    Print("Number of Degree-3 generator does not match!!!:", Length(Gen3),"!=",Length(GensGAP[3]),"\n");
+else
+    Print("Generators at degree 1,2,3 matched.","\n");
+fi;
+
 
 if (IT in [108, 109, 120, 130, 136, 140, 142, 197, 204, 230]) = true then
     Gen4 := GensGAP[4];
 fi;
 
-Print("Degree-4 generator:", GensGAP[4],"\n");
-Print("Degree-5 generator:", GensGAP[5],"\n");
-Print("Degree-6 generator:", GensGAP[6],"\n");
+#Print("Degree-4 generator:", GensGAP[4],"\n");
+#Print("Degree-5 generator:", GensGAP[5],"\n");
+#Print("Degree-6 generator:", GensGAP[6],"\n");
 
 
 Mod2RingGensAndRels(IT,3,R,[Gen1,Gen2,Gen3,Gen4]);
