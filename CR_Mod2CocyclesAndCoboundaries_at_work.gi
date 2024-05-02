@@ -588,7 +588,7 @@ PrintMonomialString:=function(vecs,GensDim,sep)
 local poly;
 
 poly:=List(vecs,x->Letter2Monomial(x,GensDim));
-Print(JoinStringsWithSeparator(poly,sep)," ");
+Print(JoinStringsWithSeparator(poly,sep),"  ");
 return 0;
 end;
 ######################################################################
