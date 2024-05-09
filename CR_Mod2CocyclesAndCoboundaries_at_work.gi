@@ -429,18 +429,19 @@ end;
 
 Mod2RingGensAndRels:=function(arg)
 local
-        R,n,GG,IT,Gen1,Gen2,Gen3,Gen4,Gen5,spacedim,GenDim1to4,
+        R,n,GG,IT,Gen0,Gen1,Gen2,Gen3,Gen4,Gen5,spacedim,GenDim1to4,GenDeg1to4,
         Gens, GensLett, Cupped, CupRelsLett, CupTemp, CupTempLett,
-        CupBase2all, CupBase2, CupBase3,CupBase4,CupBase5,CupBase6,
-        CupBase2Lett,CupBase3Lett,CupBase4Lett,CupBase5Lett,CupBase6Lett,
+        CupBase2all,CupBase2,CupBase3,CupBase4,CupBase5,CupBase6,
+        CupBase1Lett, CupBase2Lett,CupBase3Lett,CupBase4Lett,CupBase5Lett,CupBase6Lett,
         CupRel2Lett, CupRel3Lett, CupRel4Lett, CupRel5Lett, CupRel6Lett,
+        RelReduceLett, RelReduceMat, RelReduceVec, RelRedLen, solrelred,
         cupped,
-        Lett1, Lett2, IO,
+        Lett1, Lett2, mono, IO,
         uCocycle, vCocycle, uvCocycle, uChainMap, ww,
         sol, solrel, cc, CB, CohomologyBasis, TR,
         BasisP, BasisQ, SmithRecord, GF2ToZ, IToPosition,
         NonNegativeVec, Letter2Monomial, PrintMonomialString,
-        i, p, q, r, u, v, ln, iu, iv, w, x, sw;
+        i,p,q,r,s,t,u,v,w,x, ln, rk, rk1, ip,iq,ir,is,it,iu,iv, sw;
 
 #Standard input: arg[1] = IT (# of space group), arg[2] = n (relations up to deg(n) is calculated)
 #e.g.: Mod2RingGensAndRels(89);
@@ -463,7 +464,7 @@ fi;
 IT := arg[1];  #Group number in International Table for Crystallography
 
 Print("===========================================\n");
-Print("Begin Group No. ", IT, ":\n");
+#Print("Begin Group No. ", IT, ":\n");
 
 if IT = 219 then
     Print("Caution: the group being calculated (No. 219) has two degree-6 generators!\n");
@@ -506,6 +507,7 @@ Gen3:=Gens[3];
 Gen4:=Gens[4];
 Gen5:=[]; #based on the a posteriori fact that no space group has degree-5 generators.
 GenDim1to4:=[Length(Gen1),Length(Gen2),Length(Gen3),Length(Gen4)];
+GenDeg1to4:=Concatenation(List([1..Length(Gen1)],x->1),List([1..Length(Gen2)],x->2),List([1..Length(Gen3)],x->3),List([1..Length(Gen4)],x->4));
 
 if Length(Gen4)>0 then
     Print("Caution: this group contains degree-4 generators!\n");
@@ -599,6 +601,7 @@ end;
 GensLett:=CohomologyBasis(List([1..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))],i->1));
 #GensLett records the powers, later to be used to convert generators/relations to letters.
 
+Gen0 := List([1..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))],i->0);
 
 TR:=HomToIntegersModP(R,2);            #Apply the Hom functor.
 
@@ -608,18 +611,19 @@ for p in [1..n] do
 CB[p]:=CR_Mod2CocyclesAndCoboundaries(R,p,true);
 od;
 
-Print("Number of Generators at degrees 1-4: ");
-Print(GenDim1to4);
-Print("\n");
-
+#Print("Number of Generators at degrees 1-4: ");
+#Print(GenDim1to4);
 
 ####################### r = 1 ##########################
 
 #Print("Chosen basis at degree 1:\n");
 #PrintMonomialString(List([1..Length(Gen1)],x->GensLett[x]),GenDim1to4,",");
 
-Print("Matching dimensions... [dim(Chosen basis) = dim(H)]\n");
-Print("dim(H^1)=", Cohomology(TR,1),", ");
+#Print("Matching dimensions... [dim(Chosen basis) = dim(H)]\n");
+#Print("dim(H^1)=", Cohomology(TR,1),", ");
+
+CupBase1Lett:= List([1..Length(Gen1)],x->GensLett[x]);
+
 
 ####################### r = 2 ##########################
 
@@ -628,6 +632,8 @@ CupRelsLett := [];
 CupBase2 := [];
 CupBase2Lett := [];
 CupRel2Lett := [];
+
+
 
 iu :=1;                                           #First step: calculate u-cup-v for u != v
 for u in Gen1 do
@@ -649,11 +655,11 @@ for u in Gen1 do
                     if sol = fail then                        #if u-cup-v is a genuine new cocycle
                         Append(CupBase2,[cupped]);
                         Append(CupBase2Lett,[Lett1]);
-                    else                       #if u-cup-v is expressable by other cocycles
+                    else                       #if u-cup-v is expressable by other cocycles in basis
                         solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase2Lett[x]));
                         if (Lett1 in CupBase2Lett) = false then
-                            Append(CupRelsLett,[Lett1]);
-                            Append(CupRel2Lett,[solrel]);
+                            Append(CupRelsLett,[Lett1]);  #Record the letter that appears on the LHS of the relation equation
+                            Append(CupRel2Lett,[solrel]); #Record the letters that appear in the relation equation. Note that all but the first letters are in the cohomology basis (that we choose).
                         fi;
                     fi;
                 fi;
@@ -682,11 +688,11 @@ for u in Gen1 do
                 if sol = fail then                                  #if u-cup-u is a genuine new cocycle
                     Append(CupBase2,[cupped]);
                     Append(CupBase2Lett,[Lett1]);
-                else                              #if u-cup-u is expressable by other cocycles
+                else                              #if u-cup-u is expressable by other cocycles in basis
                     solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase2Lett[x]));
                     if (Lett1 in CupBase2Lett) = false then
-                        Append(CupRelsLett,[Lett1]);
-                        Append(CupRel2Lett,[solrel]);
+                        Append(CupRelsLett,[Lett1]);  #Record the letter that appears on the LHS of the relation equation
+                        Append(CupRel2Lett,[solrel]); #Record the letters that appear in the relation equation. Note that all but the first letters are in the cohomology basis (that we choose).
                     fi;
                 fi;
             fi;
@@ -709,7 +715,7 @@ od;
 #PrintMonomialString(CupBase2Lett,GenDim1to4,",");
 
 if Length(CupBase2Lett) = Cohomology(TR,2) then
-    Print("dim(H^2)=", Cohomology(TR,2),", ");
+    Print("");#Print("dim(H^2)=", Cohomology(TR,2),", ");
 else
     Print("!!!! No match!!!! dim(Chosen basis) - dim(H^2) = ", Length(CupBase2Lett) - Cohomology(TR,2),"\n");
 fi;
@@ -725,6 +731,37 @@ CupBase3Lett :=[];
 CupRel3Lett := [];
 CupTemp := [];
 CupTempLett := [];
+RelReduceLett := [];
+RelReduceMat  := [];
+
+
+
+#### Begin preparation for relation reduction
+####
+iu := 1;
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        for r in Concatenation([Gen0],GensLett) do
+            if (p+q+r)*GenDeg1to4 = 3 then
+                Append(RelReduceLett,[p+q+r]);
+                iu := iu+1;
+            fi;
+        od;
+    od;
+od;
+RelRedLen := iu;
+for u in CupBase1Lett do
+    for v in CupRel2Lett do
+        RelReduceVec := List([1..RelRedLen],x->0);
+        for w in v do
+            RelReduceVec[Position(RelReduceLett,u+w)] := 1;
+        od;
+        Append(RelReduceMat,[RelReduceVec]);
+    od;
+od;
+####
+#### End preparation for relation reduction
+
 
 #Begins: degree-2 cup with degree-1-gen
 #
@@ -735,26 +772,31 @@ for u in CupBase2 do
     for v in Gen1 do
         
         cupped :=Mod2CupProduct(R,u,v,2,1,CB[2],CB[1],CB[3]);      #then calculate u-cup-v
-        
+        Lett1 := CupBase2Lett[iu] + GensLett[iv];
+                
         #### begin checking if u-cup-v contains letters of the lower-degree relations
         ####
-        Lett1 := CupBase2Lett[iu] + GensLett[iv];
-        IO := false;
-        for Lett2 in CupRelsLett do
-            if NonNegativeVec(Lett1-Lett2) then #u-cup-v contains patterns in CupRelsLett
-                IO :=true;                      #then rewrite IO
-                Append(CupTemp,[cupped]);       #and store u-cup-v, whose cocycle-ness to be checked
-                Append(CupTempLett,[Lett1]);
-            fi;
-        od;
+        #Lett1 := CupBase2Lett[iu] + GensLett[iv];
+        #IO := false;
+        #for Lett2 in CupRelsLett do
+        #    if NonNegativeVec(Lett1-Lett2) then #u-cup-v contains patterns in CupRelsLett
+        #        IO :=true;                      #then rewrite IO
+        #        Append(CupTemp,[cupped]);       #and store u-cup-v, whose cocycle-ness to be checked
+        #        Append(CupTempLett,[Lett1]);
+        #    fi;
+        #od;
         ####
         #### finished checking if u-cup-v contains letters of the lower-degree relations
 
-        if IO = false then   #If u-cup-v does not contain patterns in CupRelsLett,
-            if cupped = List([1..Cohomology(TR,3)],x->0) then         #if u-cup-v is a coboundary
-                Append(CupRelsLett,[Lett1]);
-                Append(CupRel3Lett,[[Lett1]]);
-            elif CupBase3 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
+        #if IO = false then   #If u-cup-v does not contain patterns in CupRelsLett,
+
+
+        #### Start: determine whether u-cup-v goes to the basis
+        ####
+        if (cupped = List([1..Cohomology(TR,3)],x->0)) then         #if u-cup-v is a coboundary
+            solrel := [Lett1];
+        else
+            if CupBase3 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
                 Append(CupBase3,[cupped]);
                 Append(CupBase3Lett,[Lett1]);
             else
@@ -762,15 +804,51 @@ for u in CupBase2 do
                 if sol = fail then                  #if u-cup-v is a genuine new cocycle
                     Append(CupBase3,[cupped]);
                     Append(CupBase3Lett,[Lett1]);
-                else                                #if u-cup-v is expressable by other cocycles
+                else                                #if u-cup-v is expressable by other cocycles in basis
                     solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase3Lett[x]));
-                    if (Lett1 in CupBase3Lett) = false then
-                        Append(CupRelsLett,[Lett1]);
-                        Append(CupRel3Lett,[solrel]);
-                    fi;
                 fi;
             fi;
         fi;
+        ####
+        #### End:  determine whether u-cup-v goes to the basis
+                    
+                    
+        #Append(CupTemp,[cupped]);       #and store u-cup-v, whose cocycle-ness to be checked
+        #Append(CupTempLett,[Lett1]);
+                
+                
+        #### Start: determine whether u-cup-v gives a new relation
+        ####
+        if (Lett1 in CupBase3Lett) = false then
+                    
+            #### begin checking whether the relation is reducible from lower degree ones
+            ####
+            RelReduceVec := List([1..RelRedLen],x->0); #check whether this relation is reducible from lower ones
+            for w in solrel do
+                #Print(w,"\n");
+                solrelred := Position(RelReduceLett,w);
+                            
+                if solrelred = fail then      #if this relation contains new terms then we find a new relation
+                    break;
+                else
+                    RelReduceVec[solrelred] := 1;
+                fi;
+            od;
+            if (solrelred = fail) = false then
+                solrelred := SolutionMat(RelReduceMat*Z(2),RelReduceVec*Z(2));
+            fi;
+            ####
+            #### end checking whether the relation is reducible from lower degree ones
+
+            if solrelred = fail then          #if not reducible from lower degree ones, then we have found a new relation
+                Append(CupRelsLett,[Lett1]);  #Record the letter that appears on the LHS of the relation equation
+                Append(CupRel3Lett,[solrel]); #Record the letters that appear in the relation equation. Note that all but the first letters are in the cohomology basis (that we choose).
+                Append(RelReduceMat,[RelReduceVec]);
+            fi;
+        fi;
+        ####
+        #### End: determine whether u-cup-v gives a new relation
+        
         iv := iv+1;
     od;
     iu := iu+1;
@@ -785,26 +863,25 @@ for iu in [(1+Length(Gen1)+Length(Gen2))..(Length(Gen1)+Length(Gen2)+Length(Gen3
     Append(CupBase3Lett,[GensLett[iu]]);
 od;
 
-if CupBase3 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
-    if (CupTemp = []) = false then
-        if (CupTemp[1] = []) = false then  #if cohomology dimension is not zero
-            Append(CupBase3,[CupTemp[1]]);
-            Append(CupBase3Lett,[CupTempLett[1]]);
-        fi;
-    fi;
-fi;
+#if CupBase3 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
+#    if (CupTemp = []) = false then
+#        if (CupTemp[1] = []) = false then  #if cohomology dimension is not zero
+#            Append(CupBase3,[CupTemp[1]]);
+#            Append(CupBase3Lett,[CupTempLett[1]]);
+#        fi;
+#    fi;
+#fi;
 
-if (CupBase3 = []) = false then
-
-    for cupped in CupTemp do
-
-        sol :=SolutionMat(CupBase3*Z(2),cupped*Z(2));
-        if sol = fail then                  #if u-cup-v is a genuine new cocycle
-            Append(CupBase3,[cupped]);
-            Append(CupBase3Lett,[Lett1]);
-        fi;
-    od;
-fi;
+#if (CupBase3 = []) = false then
+#
+#    for cupped in CupTemp do                #check the cocycle-ness of those u-cup-v's that contain patterns in CupRelsLett
+#        sol :=SolutionMat(CupBase3*Z(2),cupped*Z(2));
+#        if sol = fail then                  #if u-cup-v is a genuine new cocycle
+#            Append(CupBase3,[cupped]);
+#            Append(CupBase3Lett,[Lett1]);
+#        fi;
+#    od;
+#fi;
 
 #Print("Independent relations:\n");
 #Print(CupRelsLett);
@@ -815,7 +892,7 @@ fi;
 #PrintMonomialString(CupBase3Lett,GenDim1to4,",");
 
 if Length(CupBase3Lett) = Cohomology(TR,3) then
-    Print("dim(H^3)=", Cohomology(TR,3),", ");
+    Print("");#Print("dim(H^3)=", Cohomology(TR,3),", ");
 else
     Print("!!!! No match!!!! dim(Chosen basis) - dim(H^3) = ", Length(CupBase3Lett) - Cohomology(TR,3),"\n");
 fi;
@@ -830,6 +907,51 @@ CupBase4Lett :=[];
 CupRel4Lett := [];
 CupTemp := [];
 CupTempLett := [];
+RelReduceLett := [];
+RelReduceMat  := [];
+
+#### Begin preparation for relation reduction
+####
+iu := 1;
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        for r in Concatenation([Gen0],GensLett) do
+            for s in Concatenation([Gen0],GensLett) do
+                if (p+q+r+s)*GenDeg1to4 = 4 then
+                    Append(RelReduceLett,[p+q+r+s]);
+                    iu := iu+1;
+                fi;
+            od;
+        od;
+    od;
+od;
+RelRedLen := iu;
+for u in CupBase1Lett do
+    for v in CupRel3Lett do
+        RelReduceVec := List([1..RelRedLen],x->0);
+        for w in v do
+            RelReduceVec[Position(RelReduceLett,u+w)] := 1;
+        od;
+        Append(RelReduceMat,[RelReduceVec]);
+    od;
+od;
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        if (p+q)*GenDeg1to4 = 2 then
+            for v in CupRel2Lett do
+                RelReduceVec := List([1..RelRedLen],x->0);
+                for w in v do
+                    RelReduceVec[Position(RelReduceLett,p+q+w)] := 1;
+                od;
+                Append(RelReduceMat,[RelReduceVec]);
+            od;
+        fi;
+    od;
+od;
+####
+#### End preparation for relation reduction
+
+
 
 #Step-1 begins here: degree-3 cup with degree-1-gen
 #
@@ -840,44 +962,79 @@ for u in CupBase3 do
     for v in Gen1 do
 
         cupped :=Mod2CupProduct(R,u,v,3,1,CB[3],CB[1],CB[4]);      #then calculate u-cup-v
-    
+        Lett1 := CupBase3Lett[iu] + GensLett[iv];
         
         #### begin checking if u-cup-v contains letters of the lower-degree relations
         ####
-        Lett1 := CupBase3Lett[iu] + GensLett[iv];
-        IO := false;
-        for Lett2 in CupRelsLett do
-            if NonNegativeVec(Lett1-Lett2) then #u-cup-v contains patterns in CupRelsLett
-                IO :=true;                      #then rewrite IO
-                Append(CupTemp,[cupped]);       #and store u-cup-v, whose cocycle-ness to be checked
-                Append(CupTempLett,[Lett1]);
-            fi;
-        od;
+        #Lett1 := CupBase3Lett[iu] + GensLett[iv];
+        #IO := false;
+        #for Lett2 in CupRelsLett do
+        #    if NonNegativeVec(Lett1-Lett2) then #u-cup-v contains patterns in CupRelsLett
+        #        IO :=true;                      #then rewrite IO
+        #        Append(CupTemp,[cupped]);       #and store u-cup-v, whose cocycle-ness to be checked
+        #        Append(CupTempLett,[Lett1]);
+        #    fi;
+        #od;
         ####
         #### finished checking if u-cup-v contains letters of the lower-degree relations
     
-        if IO = false then   #If u-cup-v does not contain patterns in CupRelsLett,
+        #if IO = false then   #If u-cup-v does not contain patterns in CupRelsLett,
 
-            if cupped = List([1..Cohomology(TR,4)],x->0) then         #if u-cup-v is a coboundary
-                Append(CupRelsLett,[Lett1]);
-                Append(CupRel4Lett,[[Lett1]]);
-            elif CupBase4 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
-                    Append(CupBase4,[cupped]);
-                    Append(CupBase4Lett,[Lett1]);
+        #### Start: determine whether u-cup-v goes to the basis
+        ####
+        if cupped = List([1..Cohomology(TR,4)],x->0) then         #if u-cup-v is a coboundary
+            solrel := [Lett1];
+            
+        else
+            if CupBase4 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+                Append(CupBase4,[cupped]);
+                Append(CupBase4Lett,[Lett1]);
             else
                 sol :=SolutionMat(CupBase4*Z(2),cupped*Z(2));
                 if sol = fail then                  #if u-cup-v is a genuine new cocycle
                     Append(CupBase4,[cupped]);
                     Append(CupBase4Lett,[Lett1]);
-                else                                #if u-cup-v is expressable by other cocycles
+                else                                #if u-cup-v is expressable by other cocycles in basis
                     solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase4Lett[x]));
-                    if (Lett1 in CupBase4Lett) = false then
-                        Append(CupRelsLett,[Lett1]);
-                        Append(CupRel4Lett,[solrel]);
-                    fi;
                 fi;
             fi;
         fi;
+        ####
+        #### End:  determine whether u-cup-v goes to the basis
+            
+            
+        #### Start: determine whether u-cup-v gives a new relation
+        ####
+        if (Lett1 in CupBase4Lett) = false then
+                    
+            #### begin checking whether the relation is reducible from lower degree ones
+            ####
+            RelReduceVec := List([1..RelRedLen],x->0); #check whether this relation is reducible from lower ones
+            for w in solrel do
+                #Print(w,"\n");
+                solrelred := Position(RelReduceLett,w);
+                            
+                if solrelred = fail then      #if this relation contains new terms then we find a new relation
+                    break;
+                else
+                    RelReduceVec[solrelred] := 1;
+                fi;
+            od;
+            if (solrelred = fail) = false then
+                solrelred := SolutionMat(RelReduceMat*Z(2),RelReduceVec*Z(2));
+            fi;
+            ####
+            #### end checking whether the relation is reducible from lower degree ones
+
+            if solrelred = fail then          #if not reducible from lower degree ones, then we have found a new relation
+                Append(CupRelsLett,[Lett1]);  #Record the letter that appears on the LHS of the relation equation
+                Append(CupRel4Lett,[solrel]); #Record the letters that appear in the relation equation. Note that all but the first letters are in the cohomology basis (that we choose).
+                Append(RelReduceMat,[RelReduceVec]);
+            fi;
+        fi;
+        ####
+        #### End: determine whether u-cup-v gives a new relation
+        
         iv := iv+1;
     od;
     iu := iu+1;
@@ -888,27 +1045,27 @@ od;
 
 
 
-if CupBase4 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
-    if (CupTemp = []) = false then
-        if (CupTemp[1] = []) = false then  #if cohomology dimension is not zero
-            Append(CupBase4,[CupTemp[1]]);
-            Append(CupBase4Lett,[CupTempLett[1]]);
-        fi;
-    fi;
-fi;
+#if CupBase4 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
+#    if (CupTemp = []) = false then
+#        if (CupTemp[1] = []) = false then  #if cohomology dimension is not zero
+#            Append(CupBase4,[CupTemp[1]]);
+#            Append(CupBase4Lett,[CupTempLett[1]]);
+#        fi;
+#    fi;
+#fi;
 
 
 
-if (CupBase4 = []) = false then
-
-    for cupped in CupTemp do
-        sol :=SolutionMat(CupBase4*Z(2),cupped*Z(2));
-        if sol = fail then                  #if u-cup-v is a genuine new cocycle
-            Append(CupBase4,[cupped]);
-            Append(CupBase4Lett,[Lett1]);
-        fi;
-    od;
-fi;
+#if (CupBase4 = []) = false then
+#
+#    for cupped in CupTemp do                #check the cocycle-ness of those u-cup-v's that contain patterns in CupRelsLett
+#        sol :=SolutionMat(CupBase4*Z(2),cupped*Z(2));
+#        if sol = fail then                  #if u-cup-v is a genuine new cocycle
+#            Append(CupBase4,[cupped]);
+#            Append(CupBase4Lett,[Lett1]);
+#        fi;
+#    od;
+#fi;
 
 
 
@@ -936,11 +1093,11 @@ for u in Gen2 do
                 if sol = fail then                  #if u-cup-v is a genuine new cocycle
                     Append(CupBase4,[cupped]);
                     Append(CupBase4Lett,[Lett1]);
-                else                                #if u-cup-v is expressable by other cocycles
+                else                                #if u-cup-v is expressable by other cocycles in basis
                     solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase4Lett[x]));
                     if (Lett1 in CupBase4Lett) = false then
-                        Append(CupRelsLett,[Lett1]);
-                        Append(CupRel4Lett,[solrel]);
+                        Append(CupRelsLett,[Lett1]);  #Record the letter that appears on the LHS of the relation equation
+                        Append(CupRel4Lett,[solrel]); #Record the letters that appear in the relation equation. Note that all but the first letters are in the cohomology basis (that we choose).
                     fi;
                 fi;
             fi;
@@ -970,7 +1127,7 @@ od;
 #PrintMonomialString(CupBase4Lett,GenDim1to4,",");
 
 if Length(CupBase4Lett) = Cohomology(TR,4) then
-    Print("dim(H^4)=", Cohomology(TR,4),", ");
+    Print("");#Print("dim(H^4)=", Cohomology(TR,4),", ");
 else
     Print("!!!! No match!!!! dim(Chosen basis) - dim(H^4) = ", Length(CupBase4Lett) - Cohomology(TR,4),"\n");
 fi;
@@ -984,6 +1141,77 @@ CupBase5Lett :=[];
 CupRel5Lett := [];
 CupTemp := [];
 CupTempLett := [];
+RelReduceLett := [];
+RelReduceMat  := [];
+
+#### Begin preparation for relation reduction
+####
+iu := 1;
+
+for ip in [1..(Sum(GenDim1to4)+1)] do
+    p := Concatenation([Gen0],GensLett)[ip];
+    for iq in [ip..(Sum(GenDim1to4)+1)] do
+        q := Concatenation([Gen0],GensLett)[iq];
+        for ir in [iq..(Sum(GenDim1to4)+1)] do
+            r := Concatenation([Gen0],GensLett)[ir];
+            for is in [ir..(Sum(GenDim1to4)+1)] do
+                s := Concatenation([Gen0],GensLett)[is];
+                for it in [is..(Sum(GenDim1to4)+1)] do
+                    t := Concatenation([Gen0],GensLett)[it];
+                    if (p+q+r+s+t)*GenDeg1to4 = 5 then
+                        Append(RelReduceLett,[p+q+r+s+t]);
+                        iu := iu+1;
+                    fi;
+                od;
+            od;
+        od;
+    od;
+od;
+
+RelRedLen := iu;
+
+for u in CupBase1Lett do
+    for v in CupRel4Lett do
+        RelReduceVec := List([1..RelRedLen],x->0);
+        for w in v do
+            RelReduceVec[Position(RelReduceLett,u+w)] := 1;
+        od;
+        Append(RelReduceMat,[RelReduceVec]);
+    od;
+od;
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        if (p+q)*GenDeg1to4 = 2 then
+            for v in CupRel3Lett do
+                RelReduceVec := List([1..RelRedLen],x->0);
+                for w in v do
+                    RelReduceVec[Position(RelReduceLett,p+q+w)] := 1;
+                od;
+                Append(RelReduceMat,[RelReduceVec]);
+            od;
+        fi;
+    od;
+od;
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        for r in Concatenation([Gen0],GensLett) do
+            if (p+q+r)*GenDeg1to4 = 3 then
+                for v in CupRel2Lett do
+                     RelReduceVec := List([1..RelRedLen],x->0);
+                    for w in v do
+                        RelReduceVec[Position(RelReduceLett,p+q+r+w)] := 1;
+                    od;
+                    Append(RelReduceMat,[RelReduceVec]);
+                od;
+            fi;
+        od;
+    od;
+od;
+####
+#### End preparation for relation reduction
+
+rk:=RankMatrix(RelReduceMat*Z(2));
+
 
 #Step-1 begins here: degree-4 cup with degree-1-gen
 #
@@ -1023,29 +1251,35 @@ for u in CupBase4 do
         ####
         #### implementing Mod2CupProduct(R,u,v,4,1,CB[4],CB[1],CB[5]) -- part 2 ended ####
 
+        Lett1 := CupBase4Lett[iu] + GensLett[iv];
+
 
         #### begin checking if u-cup-v contains letters of the lower-degree relations
         ####
-        Lett1 := CupBase4Lett[iu] + GensLett[iv];
-        IO := false;
+        #Lett1 := CupBase4Lett[iu] + GensLett[iv];
+        #IO := false;
         
-        for Lett2 in CupRelsLett do
-            if NonNegativeVec(Lett1-Lett2) then #u-cup-v contains patterns in CupRelsLett
-                IO :=true;                      #then rewrite IO
-                Append(CupTemp,[cupped]);       #and store u-cup-v, whose cocycle-ness to be checked
-                Append(CupTempLett,[Lett1]);
-            fi;
-        od;
+        #for Lett2 in CupRelsLett do
+        #    if NonNegativeVec(Lett1-Lett2) then #u-cup-v contains patterns in CupRelsLett
+        #        IO :=true;                      #then rewrite IO
+        #        Append(CupTemp,[cupped]);       #and store u-cup-v, whose cocycle-ness to be checked
+        #        Append(CupTempLett,[Lett1]);
+        #    fi;
+        #od;
         ####
         #### finished checking if u-cup-v contains letters of the lower-degree relations
 
         
-        if IO = false then   #If u-cup-v does not contain patterns in CupRelsLett,
+        #if IO = false then   #If u-cup-v does not contain patterns in CupRelsLett,
         
-            if cupped = List([1..Cohomology(TR,5)],x->0) then         #if u-cup-v is a coboundary
-                Append(CupRelsLett,[Lett1]);
-                Append(CupRel5Lett,[[Lett1]]);
-            elif CupBase5 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
+        
+        #### Start: determine whether u-cup-v goes to the basis
+        ####
+        if cupped = List([1..Cohomology(TR,5)],x->0) then         #if u-cup-v is a coboundary
+            solrel := [Lett1];
+            
+        else
+            if CupBase5 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
                 Append(CupBase5,[cupped]);
                 Append(CupBase5Lett,[Lett1]);
             else
@@ -1053,15 +1287,52 @@ for u in CupBase4 do
                 if sol = fail then                  #if u-cup-v is a genuine new cocycle
                     Append(CupBase5,[cupped]);
                     Append(CupBase5Lett,[Lett1]);
-                else                                #if u-cup-v is expressable by other cocycles
+                else                                #if u-cup-v is expressable by other cocycles in basis
                     solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase5Lett[x]));
-                    if (Lett1 in CupBase5Lett) = false then
-                        Append(CupRelsLett,[Lett1]);
-                        Append(CupRel5Lett,[solrel]);
-                    fi;
                 fi;
             fi;
         fi;
+        ####
+        #### End:  determine whether u-cup-v goes to the basis
+            
+            
+        #### Start: determine whether u-cup-v gives a new relation
+        ####
+        if (Lett1 in CupBase5Lett) = false then
+                    
+            #### begin checking whether the relation is reducible from lower degree ones
+            ####
+            RelReduceVec := List([1..RelRedLen],x->0); #check whether this relation is reducible from lower ones
+            for w in solrel do
+                #Print(w,"\n");
+                solrelred := Position(RelReduceLett,w);
+                            
+                if solrelred = fail then      #if this relation contains new terms then we find a new relation
+                    break;
+                else
+                    RelReduceVec[solrelred] := 1;
+                fi;
+            od;
+            if (solrelred = fail) = false then
+                rk1:=RankMatrix(Concatenation(RelReduceMat*Z(2),[RelReduceVec]*Z(2)));
+                if (rk = rk1) = false then
+                    solrelred :=fail;
+                fi;
+                #solrelred := SolutionMat(RelReduceMat*Z(2),RelReduceVec*Z(2));
+            fi;
+            ####
+            #### end checking whether the relation is reducible from lower degree ones
+
+            if solrelred = fail then          #if not reducible from lower degree ones, then we have found a new relation
+                Append(CupRelsLett,[Lett1]);  #Record the letter that appears on the LHS of the relation equation
+                Append(CupRel5Lett,[solrel]); #Record the letters that appear in the relation equation. Note that all but the first letters are in the cohomology basis (that we choose).
+                Append(RelReduceMat,[RelReduceVec]);
+                rk := rk1;
+            fi;
+        fi;
+        ####
+        #### End: determine whether u-cup-v gives a new relation
+        
         iv := iv+1;
     od;
     iu := iu+1;
@@ -1069,6 +1340,7 @@ od;
 #
 #
 #Step-1 finished: degree-4 cup with degree-1-gen
+
 
 
 #Step-2 begins here: degree-3-gen cup with degree-2-gen
@@ -1109,27 +1381,16 @@ for u in Gen3 do
         ####
         #### implementing Mod2CupProduct(R,u,v,3,2,CB[3],CB[2],CB[5]) -- part 2 ended ####
         
-        
-        #### begin checking if u-cup-v contains letters of the lower-degree relations
-        ####
         Lett1 := GensLett[Length(Gen1)+Length(Gen2)+iu] + GensLett[Length(Gen1)+iv];
-        IO := false;
-        for Lett2 in CupRelsLett do
-            if NonNegativeVec(Lett1-Lett2) then #u-cup-v contains patterns in CupRelsLett
-                IO :=true;                      #then rewrite IO
-                Append(CupTemp,[cupped]);       #and store u-cup-v, whose cocycle-ness to be checked
-                Append(CupTempLett,[Lett1]);
-            fi;
-        od;
+                
+        
+        #### Start: determine whether u-cup-v goes to the basis
         ####
-        #### finished checking if u-cup-v contains letters of the lower-degree relations
-
-        if IO = false then   #If u-cup-v does not contain patterns in CupRelsLett,
-
-            if cupped = List([1..Cohomology(TR,5)],x->0) then         #if u-cup-v is a coboundary
-                Append(CupRelsLett,[Lett1]);
-                Append(CupRel5Lett,[[Lett1]]);
-            elif CupBase5 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
+        if cupped = List([1..Cohomology(TR,5)],x->0) then         #if u-cup-v is a coboundary
+            solrel := [Lett1];
+            
+        else
+            if CupBase5 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
                 Append(CupBase5,[cupped]);
                 Append(CupBase5Lett,[Lett1]);
             else
@@ -1137,15 +1398,52 @@ for u in Gen3 do
                 if sol = fail then                  #if u-cup-v is a genuine new cocycle
                     Append(CupBase5,[cupped]);
                     Append(CupBase5Lett,[Lett1]);
-                else                                #if u-cup-v is expressable by other cocycles
+                else                                #if u-cup-v is expressable by other cocycles in basis
                     solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase5Lett[x]));
-                    if (Lett1 in CupBase5Lett) = false then
-                        Append(CupRelsLett,[Lett1]);
-                        Append(CupRel5Lett,[solrel]);
-                    fi;
                 fi;
             fi;
         fi;
+        ####
+        #### End:  determine whether u-cup-v goes to the basis
+            
+            
+        #### Start: determine whether u-cup-v gives a new relation
+        ####
+        if (Lett1 in CupBase5Lett) = false then
+                    
+            #### begin checking whether the relation is reducible from lower degree ones
+            ####
+            RelReduceVec := List([1..RelRedLen],x->0); #check whether this relation is reducible from lower ones
+            for w in solrel do
+                #Print(w,"\n");
+                solrelred := Position(RelReduceLett,w);
+                            
+                if solrelred = fail then      #if this relation contains new terms then we find a new relation
+                    break;
+                else
+                    RelReduceVec[solrelred] := 1;
+                fi;
+            od;
+            if (solrelred = fail) = false then
+                rk1:=RankMatrix(Concatenation(RelReduceMat*Z(2),[RelReduceVec]*Z(2)));
+                if (rk = rk1) = false then
+                    solrelred :=fail;
+                fi;
+                #solrelred := SolutionMat(RelReduceMat*Z(2),RelReduceVec*Z(2));
+            fi;
+            ####
+            #### end checking whether the relation is reducible from lower degree ones
+
+            if solrelred = fail then          #if not reducible from lower degree ones, then we have found a new relation
+                Append(CupRelsLett,[Lett1]);  #Record the letter that appears on the LHS of the relation equation
+                Append(CupRel5Lett,[solrel]); #Record the letters that appear in the relation equation. Note that all but the first letters are in the cohomology basis (that we choose).
+                Append(RelReduceMat,[RelReduceVec]);
+                rk := rk1;
+            fi;
+        fi;
+        ####
+        #### End: determine whether u-cup-v gives a new relation
+        
         iv := iv+1;
     od;
     iu := iu+1;
@@ -1161,27 +1459,26 @@ for iu in [(1+Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4))..(Length(Gen1
 od;
 
 
-if CupBase5 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
-    if (CupTemp = []) = false then
-        if (CupTemp[1] = []) = false then  #if cohomology dimension is not zero
-            Append(CupBase5,[CupTemp[1]]);
-            Append(CupBase5Lett,[CupTempLett[1]]);
-        fi;
-    fi;
-fi;
+#if CupBase5 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
+#    if (CupTemp = []) = false then
+#        if (CupTemp[1] = []) = false then  #if cohomology dimension is not zero
+#            Append(CupBase5,[CupTemp[1]]);
+#            Append(CupBase5Lett,[CupTempLett[1]]);
+#        fi;
+#    fi;
+#fi;
 
 
-if (CupBase5 = []) = false then
-
-    for cupped in CupTemp do
-
-        sol :=SolutionMat(CupBase5*Z(2),cupped*Z(2));
-        if sol = fail then                  #if u-cup-v is a genuine new cocycle
-            Append(CupBase5,[cupped]);
-            Append(CupBase5Lett,[Lett1]);
-        fi;
-    od;
-fi;
+#if (CupBase5 = []) = false then
+#
+#    for cupped in CupTemp do                #check the cocycle-ness of those u-cup-v's that contain patterns in CupRelsLett
+#        sol :=SolutionMat(CupBase5*Z(2),cupped*Z(2));
+#        if sol = fail then                  #if u-cup-v is a genuine new cocycle
+#            Append(CupBase5,[cupped]);
+#            Append(CupBase5Lett,[Lett1]);
+#        fi;
+#    od;
+#fi;
 
 
 #Print("Independent relations:\n");
@@ -1194,7 +1491,7 @@ fi;
 
 
 if Length(CupBase5Lett) = Cohomology(TR,5) then
-        Print("dim(H^5)=", Cohomology(TR,5),", ");
+    Print("");#Print("dim(H^5)=", Cohomology(TR,5),", ");
 else
     Print("!!!! No match!!!! dim(Chosen basis) - dim(H^5) = ", Length(CupBase5Lett) - Cohomology(TR,5),"\n");
 fi;
@@ -1208,6 +1505,103 @@ CupBase6Lett :=[];
 CupRel6Lett := [];
 CupTemp := [];
 CupTempLett := [];
+RelReduceLett := [];
+RelReduceMat  := [];
+
+#### Begin preparation for relation reduction
+####
+iv := 1;
+for ip in [1..(Sum(GenDim1to4)+1)] do
+    p := Concatenation([Gen0],GensLett)[ip];
+    for iq in [ip..(Sum(GenDim1to4)+1)] do
+        q := Concatenation([Gen0],GensLett)[iq];
+        for ir in [iq..(Sum(GenDim1to4)+1)] do
+            r := Concatenation([Gen0],GensLett)[ir];
+            for is in [ir..(Sum(GenDim1to4)+1)] do
+                s := Concatenation([Gen0],GensLett)[is];
+                for it in [is..(Sum(GenDim1to4)+1)] do
+                    t := Concatenation([Gen0],GensLett)[it];
+                    for iu in [it..(Sum(GenDim1to4)+1)]  do
+                        u := Concatenation([Gen0],GensLett)[iu];
+                        if (p+q+r+s+t+u)*GenDeg1to4 = 6 then
+                            Append(RelReduceLett,[p+q+r+s+t+u]);
+                            iv := iv+1;
+                        fi;
+                    od;
+                od;
+            od;
+        od;
+    od;
+od;
+
+RelRedLen := iv;
+
+for u in CupBase1Lett do
+    for v in CupRel5Lett do
+        RelReduceVec := List([1..RelRedLen],x->0);
+        for w in v do
+            RelReduceVec[Position(RelReduceLett,u+w)] := 1;
+        od;
+        Append(RelReduceMat,[RelReduceVec]);
+    od;
+od;
+
+
+
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        if (p+q)*GenDeg1to4 = 2 then
+            for v in CupRel4Lett do
+                RelReduceVec := List([1..RelRedLen],x->0);
+                for w in v do
+                    RelReduceVec[Position(RelReduceLett,p+q+w)] := 1;
+                od;
+                Append(RelReduceMat,[RelReduceVec]);
+            od;
+        fi;
+    od;
+od;
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        for r in Concatenation([Gen0],GensLett) do
+            if (p+q+r)*GenDeg1to4 = 3 then
+                for v in CupRel3Lett do
+                    RelReduceVec := List([1..RelRedLen],x->0);
+                    for w in v do
+                        RelReduceVec[Position(RelReduceLett,p+q+r+w)] := 1;
+                    od;
+                    Append(RelReduceMat,[RelReduceVec]);
+                od;
+            fi;
+        od;
+    od;
+od;
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        for r in Concatenation([Gen0],GensLett) do
+            for s in Concatenation([Gen0],GensLett) do
+                if (p+q+r+s)*GenDeg1to4 = 4 then
+                    for v in CupRel2Lett do
+                        RelReduceVec := List([1..RelRedLen],x->0);
+                        for w in v do
+                            RelReduceVec[Position(RelReduceLett,p+q+r+s+w)] := 1;
+                        od;
+                        Append(RelReduceMat,[RelReduceVec]);
+                    od;
+                fi;
+            od;
+        od;
+    od;
+od;
+
+
+####
+#### End preparation for relation reduction
+
+
+rk:=RankMatrix(RelReduceMat*Z(2));
+
+
 
 #Step-1 begins here: degree-5 cup with degree-1-gen
 #
@@ -1246,27 +1640,17 @@ for u in CupBase5 do
         cupped := CB[6].cocycleToClass(uvCocycle);
         ####
         #### implementing Mod2CupProduct(R,u,v,5,1,CB[5],CB[1],CB[6]) -- part 2 ended ####
-        
-        #### begin checking if u-cup-v contains letters of the lower-degree relations
-        ####
+
         Lett1 := CupBase5Lett[iu] + GensLett[iv];
-        IO := false;
-        for Lett2 in CupRelsLett do
-            if NonNegativeVec(Lett1-Lett2) then #u-cup-v contains patterns in CupRelsLett
-                IO :=true;                      #then rewrite IO
-                Append(CupTemp,[cupped]);       #and store u-cup-v, whose cocycle-ness to be checked
-                Append(CupTempLett,[Lett1]);
-            fi;
-        od;
-        ####
-        #### finished checking if u-cup-v contains letters of the lower-degree relations
+
         
-        if IO = false then   #If u-cup-v does not contain patterns in CupRelsLett,
-                
-            if cupped = List([1..Cohomology(TR,6)],x->0) then         #if u-cup-v is a coboundary
-                Append(CupRelsLett,[Lett1]);
-                Append(CupRel6Lett,[[Lett1]]);
-            elif CupBase6 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
+        #### Start: determine whether u-cup-v goes to the basis
+        ####
+        if cupped = List([1..Cohomology(TR,6)],x->0) then         #if u-cup-v is a coboundary
+            solrel := [Lett1];
+            
+        else
+            if CupBase6 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
                 Append(CupBase6,[cupped]);
                 Append(CupBase6Lett,[Lett1]);
             else
@@ -1274,15 +1658,53 @@ for u in CupBase5 do
                 if sol = fail then                  #if u-cup-v is a genuine new cocycle
                     Append(CupBase6,[cupped]);
                     Append(CupBase6Lett,[Lett1]);
-                else                                #if u-cup-v is expressable by other cocycles
+                else                                #if u-cup-v is expressable by other cocycles in basis
                     solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase6Lett[x]));
-                    if (Lett1 in CupBase6Lett) = false then
-                        Append(CupRelsLett,[Lett1]);
-                        Append(CupRel6Lett,[solrel]);
-                    fi;
                 fi;
             fi;
         fi;
+        ####
+        #### End:  determine whether u-cup-v goes to the basis
+            
+            
+        #### Start: determine whether u-cup-v gives a new relation
+        ####
+        if (Lett1 in CupBase6Lett) = false then
+                    
+            #### begin checking whether the relation is reducible from lower degree ones
+            ####
+            RelReduceVec := List([1..RelRedLen],x->0); #check whether this relation is reducible from lower ones
+            for w in solrel do
+                #Print(w,"\n");
+                solrelred := Position(RelReduceLett,w);
+                            
+                if solrelred = fail then      #if this relation contains new terms then we find a new relation
+                    break;
+                else
+                    RelReduceVec[solrelred] := 1;
+                fi;
+            od;
+            if (solrelred = fail) = false then
+                rk1:=RankMatrix(Concatenation(RelReduceMat*Z(2),[RelReduceVec]*Z(2)));
+                if (rk = rk1) = false then
+                    solrelred :=fail;
+                fi;
+                #solrelred := SolutionMat(RelReduceMat*Z(2),RelReduceVec*Z(2));
+            fi;
+            ####
+            #### end checking whether the relation is reducible from lower degree ones
+
+            if solrelred = fail then          #if not reducible from lower degree ones, then we have found a new relation
+                Append(CupRelsLett,[Lett1]);  #Record the letter that appears on the LHS of the relation equation
+                Append(CupRel6Lett,[solrel]); #Record the letters that appear in the relation equation. Note that all but the first letters are in the cohomology basis (that we choose).
+                Append(RelReduceMat,[RelReduceVec]);
+                rk := rk1;
+            fi;
+        fi;
+        ####
+        #### End: determine whether u-cup-v gives a new relation
+
+    
         iv := iv+1;
     od;
     iu := iu+1;
@@ -1330,28 +1752,17 @@ for u in CupBase4 do
             ####
             #### implementing Mod2CupProduct(R,u,v,4,2,CB[4],CB[2],CB[6]) -- part 2 ended ####
         
-            
-            #### begin checking if u-cup-v contains letters of the lower-degree relations
-            ####
+
             Lett1 := CupBase4Lett[iu] + GensLett[Length(Gen1)+iv];
-            IO := false;
-            for Lett2 in CupRelsLett do
-                if NonNegativeVec(Lett1-Lett2) then #u-cup-v contains patterns in CupRelsLett
-                    IO :=true;                      #then rewrite IO
-                    Append(CupTemp,[cupped]);       #and store u-cup-v, whose cocycle-ness to be checked
-                    Append(CupTempLett,[Lett1]);
-                fi;
-            od;
-            ####
-            #### finished checking if u-cup-v contains letters of the lower-degree relations
-            
-            
-            if IO = false then   #If u-cup-v does not contain patterns in CupRelsLett,
+
         
-                if cupped = List([1..Cohomology(TR,6)],x->0) then         #if u-cup-v is a coboundary
-                    Append(CupRelsLett,[Lett1]);
-                    Append(CupRel6Lett,[[Lett1]]);
-                elif CupBase6 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
+            #### Start: determine whether u-cup-v goes to the basis
+            ####
+            if cupped = List([1..Cohomology(TR,6)],x->0) then         #if u-cup-v is a coboundary
+                solrel := [Lett1];
+              
+            else
+                if CupBase6 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
                     Append(CupBase6,[cupped]);
                     Append(CupBase6Lett,[Lett1]);
                 else
@@ -1359,15 +1770,52 @@ for u in CupBase4 do
                     if sol = fail then                  #if u-cup-v is a genuine new cocycle
                         Append(CupBase6,[cupped]);
                         Append(CupBase6Lett,[Lett1]);
-                    else                                #if u-cup-v is expressable by other cocycles
+                    else                                #if u-cup-v is expressable by other cocycles in basis
                         solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase6Lett[x]));
-                        if (Lett1 in CupBase6Lett) = false then
-                            Append(CupRelsLett,[Lett1]);
-                            Append(CupRel6Lett,[solrel]);
-                        fi;
                     fi;
                 fi;
             fi;
+            ####
+            #### End:  determine whether u-cup-v goes to the basis
+            
+            
+            #### Start: determine whether u-cup-v gives a new relation
+            ####
+            if (Lett1 in CupBase6Lett) = false then
+               
+                #### begin checking whether the relation is reducible from lower degree ones
+                ####
+                RelReduceVec := List([1..RelRedLen],x->0); #check whether this relation is reducible from lower ones
+                for w in solrel do
+                    #Print(w,"\n");
+                    solrelred := Position(RelReduceLett,w);
+                            
+                    if solrelred = fail then      #if this relation contains new terms then we find a new relation
+                        break;
+                    else
+                        RelReduceVec[solrelred] := 1;
+                    fi;
+                od;
+                if (solrelred = fail) = false then
+                    rk1:=RankMatrix(Concatenation(RelReduceMat*Z(2),[RelReduceVec]*Z(2)));
+                    if (rk = rk1) = false then
+                        solrelred :=fail;
+                    fi;
+                    #solrelred := SolutionMat(RelReduceMat*Z(2),RelReduceVec*Z(2));
+                fi;
+                ####
+                #### end checking whether the relation is reducible from lower degree ones
+
+                if solrelred = fail then          #if not reducible from lower degree ones, then we have found a new     relation
+                    Append(CupRelsLett,[Lett1]);  #Record the letter that appears on the LHS of the relation equation
+                    Append(CupRel6Lett,[solrel]); #Record the letters that appear in the relation equation. Note that all but the first letters are in the cohomology basis (that we choose).
+                    Append(RelReduceMat,[RelReduceVec]);
+                    rk := rk1;
+                fi;
+            fi;
+            ####
+            #### End: determine whether u-cup-v gives a new relation
+        
             iv := iv+1;
         od;
     fi;
@@ -1380,27 +1828,26 @@ od;
 
 
 
-if CupBase6 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
-    if (CupTemp = []) = false then
-        if (CupTemp[1] = []) = false then  #if cohomology dimension is not zero
-            Append(CupBase6,[CupTemp[1]]);
-            Append(CupBase6Lett,[CupTempLett[1]]);
-        fi;
-    fi;
-fi;
+#if CupBase6 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
+#    if (CupTemp = []) = false then
+#        if (CupTemp[1] = []) = false then  #if cohomology dimension is not zero
+#            Append(CupBase6,[CupTemp[1]]);
+#            Append(CupBase6Lett,[CupTempLett[1]]);
+#        fi;
+#    fi;
+#fi;
 
 
-if (CupBase6 = []) = false then
+#if (CupBase6 = []) = false then
 
-    for cupped in CupTemp do
-
-        sol :=SolutionMat(CupBase6*Z(2),cupped*Z(2));
-        if sol = fail then                  #if u-cup-v is a genuine new cocycle
-            Append(CupBase6,[cupped]);
-            Append(CupBase6Lett,[Lett1]);
-        fi;
-    od;
-fi;
+#    for cupped in CupTemp do                #check the cocycle-ness of those u-cup-v's that contain patterns in CupRelsLett
+#        sol :=SolutionMat(CupBase6*Z(2),cupped*Z(2));
+#        if sol = fail then                  #if u-cup-v is a genuine new cocycle
+#            Append(CupBase6,[cupped]);
+#            Append(CupBase6Lett,[Lett1]);
+#        fi;
+#    od;
+#fi;
 
 
 
@@ -1462,7 +1909,7 @@ for u in Gen3 do
                 if sol = fail then                  #if u-cup-v is a genuine new cocycle
                     Append(CupBase6,[cupped]);
                     Append(CupBase6Lett,[Lett1]);
-                else                                #if u-cup-v is expressable by other cocycles
+                else                                #if u-cup-v is expressable by other cocycles in basis
                     solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase6Lett[x]));
                     if (Lett1 in CupBase6Lett) = false then
                         Append(CupRelsLett,[Lett1]);
@@ -1490,22 +1937,89 @@ od;
 #PrintMonomialString(CupBase6Lett,GenDim1to4,",");
 
 if Length(CupBase6Lett) = Cohomology(TR,6) then
-        Print("dim(H^6)=", Cohomology(TR,6),".\n");
+    Print("");#Print("dim(H^6)=", Cohomology(TR,6),".\n");
 else
     Print("!!!! No match!!!! dim(Chosen basis) - dim(H^6) = ", Length(CupBase6Lett) - Cohomology(TR,6),"\n");
 fi;
 
 
-Print("Independent relations:\n");
+
+#
+####   Begin printing cohomology ring   ####
+#
+mono:=List(List([1..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4))],x->GensLett[x]),x->Letter2Monomial(x,GenDim1to4));
+Print("Mod-2 Cohomology Ring of Group No. ", IT, ":\n");
+Print("Z2[", JoinStringsWithSeparator(mono,","), "]");
+mono := 0;
+if Length(CupRel2Lett)+Length(CupRel3Lett)+Length(CupRel4Lett)+Length(CupRel5Lett)+Length(CupRel6Lett)> 0 then
+    Print("/<");
+    if Length(CupRel2Lett)>0 then
+        Print("R2");
+        mono := 1;
+    fi;
+    if Length(CupRel3Lett)>0 then
+        if mono = 1 then           #mono = 1 means at least one relation already printed
+            Print(",R3");
+        else
+            Print("R3");
+        fi;
+        mono := 1;
+    fi;
+    if Length(CupRel4Lett)>0 then
+        if mono = 1 then           #mono = 1 means at least one relation already printed
+            Print(",R4");
+        else
+            Print("R4");
+        fi;
+        mono := 1;
+    fi;
+    if Length(CupRel5Lett)>0 then
+        if mono = 1 then           #mono = 1 means at least one relation already printed
+            Print(",R5");
+        else
+            Print("R5");
+        fi;
+        mono := 1;
+    fi;
+    if Length(CupRel6Lett)>0 then
+        if mono = 1 then           #mono = 1 means at least one relation already printed
+            Print(",R6");
+        else
+            Print("R6");
+        fi;
+    fi;
+        Print(">\n");
+fi;
+
+#Print("with relations:\n");
 #Print(CupRelsLett,"\n");
-Print(Length(CupRel2Lett)," at deg 2: ");List(CupRel2Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
-Print(Length(CupRel3Lett)," at deg 3: ");List(CupRel3Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
-Print(Length(CupRel4Lett)," at deg 4: ");List(CupRel4Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
-Print(Length(CupRel5Lett)," at deg 5: ");List(CupRel5Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
-Print(Length(CupRel6Lett)," at deg 6: ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+if Length(CupRel2Lett) > 0 then
+    #Print(Length(CupRel2Lett)," at deg 2: ");List(CupRel2Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+    Print("R2:  ");List(CupRel2Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+fi;
+if Length(CupRel3Lett) > 0 then
+    #Print(Length(CupRel3Lett)," at deg 3: ");List(CupRel3Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+    Print("R3:  ");List(CupRel3Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+fi;
+if Length(CupRel4Lett) > 0 then
+    #Print(Length(CupRel4Lett)," at deg 4: ");List(CupRel4Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+    Print("R4:  ");List(CupRel4Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+fi;
+if Length(CupRel5Lett) >0 then
+    #Print(Length(CupRel5Lett)," at deg 5: ");List(CupRel5Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+    Print("R5:  ");List(CupRel5Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+fi;
+if Length(CupRel6Lett) >0 then
+    #Print(Length(CupRel6Lett)," at deg 6: ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+    Print("R6:  ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+fi;
+#
+####   End printing cohomology ring   ####
+#
 
 
-Print("End Group No. ", IT, ".\n");
+
+#Print("End Group No. ", IT, ".\n");
 Print("===========================================\n");
 
 return true;
@@ -1576,595 +2090,295 @@ PGMatinv := [];
 PGind := [];
 
 #below are to be read from the file:
-Read("~/Downloads/Space_Group_Cocycles.gi");
+#Read("~/Downloads/Space_Group_Cocycles.gi");
 
 
 if IT=47 then
-    C247:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p47:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    P47:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C247,C2p47,P47];
     funcs:=[[Aiin47,Acpin47,Acin47,Axin47,Ayin47,Azin47],[],[]];
 elif IT=48 then
-    C248:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p48:=[[-1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    P48:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C248,C2p48,P48];
     funcs:=[[Aiin48,Acpin48,Acin48,Axyzin48],[],[]];
 elif IT=49 then
-    C249:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p49:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    P49:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C249,C2p49,P49];
     funcs:=[[Aiin49,Acpin49,Acin49,Axin49,Ayin49],[],[]];
 elif IT=50 then
-    C250:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p50:=[[-1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    P50:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C250,C2p50,P50];
     funcs:=[[Aiin50,Acpin50,Acin50,Azin50],[Bphiin50],[]];
 elif IT=51 then
-    C251:=[[-1, 0, 0, 1/2], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p51:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    P51:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C251,C2p51,P51];
     funcs:=[[Aiin51,Acpin51,Acin51,Ayin51,Azin51],[],[]];
 elif IT=52 then
-    C252:=[[-1, 0, 0, 1/2], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p52:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    P52:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C252,C2p52,P52];
     funcs:=[[Aiin52,Acpin52,Acin52],[Bphi1in52,Bphi2in52],[]];
 elif IT=53 then
-    C253:=[[-1, 0, 0, 1/2], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    C2p53:=[[-1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    P53:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C253,C2p53,P53];
     funcs:=[[Aiin53,Acpin53,Acin53,Ayin53],[Bphiin53],[]];
 elif IT=54 then
-    C254:=[[-1, 0, 0, 1/2], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p54:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    P54:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C254,C2p54,P54];
     funcs:=[[Aiin54,Acpin54,Acin54,Ayin54],[],[]];
 elif IT=55 then
-    C255:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p55:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
-    P55:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C255,C2p55,P55];
     funcs:=[[Aiin55,Acpin55,Acin55,Azin55],[Bphiin55],[]];
 elif IT=56 then
-    C256:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p56:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    P56:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C256,C2p56,P56];
     funcs:=[[Aiin56,Acpin56,Acin56],[Bphi1in56,Bphi2in56],[]];
 elif IT=57 then
-    C257:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    C2p57:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    P57:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C257,C2p57,P57];
     funcs:=[[Aiin57,Acpin57,Acin57,Axin57],[],[]];
 elif IT=58 then
-    C258:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p58:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    P58:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C258,C2p58,P58];
     funcs:=[[Aiin58,Acpin58,Acin58],[Bphi1in58,Bphi2in58,Bphi3in58],[Cin58]];
 elif IT=59 then
-    C259:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p59:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
-    P59:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C259,C2p59,P59];
     funcs:=[[Aiin59,Acpin59,Acin59,Azin59],[Bphiin59],[]];
 elif IT=60 then
-    C260:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    C2p60:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    P60:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C260,C2p60,P60];
     funcs:=[[Aiin60,Acpin60,Acin60],[Bphiin60],[]];
 elif IT=61 then
-    C261:=[[-1, 0, 0, 1/2], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    C2p61:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    P61:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C261,C2p61,P61];
     funcs:=[[Aiin61,Acpin61,Acin61],[],[Cin61]];
 elif IT=62 then
-    C262:=[[-1, 0, 0, 1/2], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    C2p62:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
-    P62:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C262,C2p62,P62];
     funcs:=[[Aiin62,Acpin62,Acin62],[Bphi1in62,Bphi2in62],[]];
 elif IT=63 then
-    C263:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    C2p63:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    P63:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C263,C2p63,P63];
     funcs:=[[Aiin63,Acpin63,Acin63,Axyin63],[Bxyin63],[]];
 elif IT=64 then
-    C264:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    C2p64:=[[0, 1, 0, 1/2], [1, 0, 0, -1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    P64:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C264,C2p64,P64];
     funcs:=[[Aiin64,Acpin64,Acin64,Axyin64],[],[Cin64]];
 elif IT=65 then
-    C265:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p65:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    P65:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C265,C2p65,P65];
     funcs:=[[Aiin65,Acpin65,Acin65,Axyin65,Azin65],[Bxyin65],[]];
 elif IT=66 then
-    C266:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p66:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    P66:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C266,C2p66,P66];
     funcs:=[[Aiin66,Acpin66,Acin66,Axyin66],[Bxyin66,Bzxyin66],[]];
 elif IT=67 then
-    C267:=[[-1, 0, 0, 1/2], [0, -1, 0, -1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p67:=[[0, 1, 0, 1/2], [1, 0, 0, -1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
-    P67:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C267,C2p67,P67];
     funcs:=[[Aiin67,Acpin67,Acin67,Axyin67,Azin67],[],[]];
 elif IT=68 then
-    C268:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p68:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    P68:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C268,C2p68,P68];
     funcs:=[[Aiin68,Acpin68,Acin68,Axyin68],[],[Cin68]];
 elif IT=69 then
-    C269:=[[0, 1, 0, 0], [1, 0, 0, 0], [-1, -1, -1, 0], [0, 0, 0, 1]];
-    C2p69:=[[0, 0, 1, 0], [-1, -1, -1, 0], [1, 0, 0, 0], [0, 0, 0, 1]];
-    P69:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C269,C2p69,P69];
     funcs:=[[Aiin69,Acpin69,Acin69,Axzin69,Ayzin69],[],[Cin69]];
 elif IT=70 then
-    C270:=[[0, 1, 0, 0], [1, 0, 0, 0], [-1, -1, -1, 1/2], [0, 0, 0, 1]];
-    C2p70:=[[0, 0, 1, 0], [-1, -1, -1, 1/2], [1, 0, 0, 0], [0, 0, 0, 1]];
-    P70:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C270,C2p70,P70];
     funcs:=[[Aiin70,Acpin70,Acin70],[Bxyxzyzin70],[Cin70]];
 elif IT=71 then
-    C271:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C2p71:=[[0, -1, 1, 0], [0, -1, 0, 0], [1, -1, 0, 0], [0, 0, 0, 1]];
-    P71:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C271,C2p71,P71];
     funcs:=[[Aiin71,Acpin71,Acin71,Axyzin71],[Bphiin71,Bxyzin71,Byxzin71],[Cxyzin71]];
 elif IT=72 then
-    C272:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C2p72:=[[0, -1, 1, 1/2], [0, -1, 0, 1/2], [1, -1, 0, 0], [0, 0, 0, 1]];
-    P72:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C272,C2p72,P72];
     funcs:=[[Aiin72,Acpin72,Acin72,Axyzin72],[Bzxyin72],[]];
 elif IT=73 then
-    C273:=[[0, 1, -1, 1/2], [1, 0, -1, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    C2p73:=[[0, -1, 1, 0], [0, -1, 0, 1/2], [1, -1, 0, 1/2], [0, 0, 0, 1]];
-    P73:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C273,C2p73,P73];
     funcs:=[[Aiin73,Acpin73,Acin73,Axyzin73],[],[]];
 elif IT=74 then
-    C274:=[[0, 1, -1, 1/2], [1, 0, -1, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    C2p74:=[[0, -1, 1, 1/2], [0, -1, 0, 1], [1, -1, 0, 1/2], [0, 0, 0, 1]];
-    P74:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C274,C2p74,P74];
     funcs:=[[Aiin74,Acpin74,Acin74,Axyzin74],[Byxzin74,Bzxyin74],[]];
 elif IT=75 then
-    C275:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C475:=[[0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[C275,C475];
     funcs:=[[Aqin75,Axyin75,Azin75],[Bdeltain75,Bxyin75],[]];
 elif IT=76 then
-    C276:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    C476:=[[0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/4], [0, 0, 0, 1]];
     PGGen:=[C276,C476];
     funcs:=[[Aqin76,Axyin76],[Bxyin76],[]];
 elif IT=77 then
-    C277:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C477:=[[0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[C277,C477];
     funcs:=[[Aqin77,Axyin77,Azin77],[Bxyin77],[]];
 elif IT=78 then
-    C278:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    C478:=[[0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 3/4], [0, 0, 0, 1]];
     PGGen:=[C278,C478];
     funcs:=[[Aqin78,Axyin78],[Bxyin78],[]];
 elif IT=79 then
-    C279:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C479:=[[0, 1, 0, 0], [0, 1, -1, 0], [-1, 1, 0, 0], [0, 0, 0, 1]];
     PGGen:=[C279,C479];
     funcs:=[[Aqin79,Axyzin79],[Bdeltain79,B2in79,B3in79],[C1in79,C2in79]];
 elif IT=80 then
-    C280:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C480:=[[0, 1, 0, 3/4], [0, 1, -1, 1/4], [-1, 1, 0, -1/2], [0, 0, 0, 1]];
     PGGen:=[C280,C480];
     funcs:=[[Aqin80,Axyzin80],[Bxyzin80],[CGAPin80]];
 elif IT=81 then
-    C281:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C481:=[[0, 1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C281,C481];
     funcs:=[[Aqin81,Axyin81,Azin81],[Bdeltain81,Bxyin81],[]];
 elif IT=82 then
-    C282:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C482:=[[0, -1, 0, 0], [0, -1, 1, 0], [1, -1, 0, 0], [0, 0, 0, 1]];
     PGGen:=[C282,C482];
     funcs:=[[Aqin82,Axyzin82],[Bdeltain82,B2in82,Bzxyin82],[C1in82,C2in82]];
 elif IT=83 then
-    C283:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C483:=[[0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    P83:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C283,C483,P83];
     funcs:=[[Aiin83,Aqin83,Axyin83,Azin83],[Bdeltain83,Bxyin83],[]];
 elif IT=84 then
-    C284:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C484:=[[0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    P84:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C284,C484,P84];
     funcs:=[[Aiin84,Aqin84,Axyin84],[Bdeltain84,Bczin84,Bxyin84,Bzxyin84],[]];
 elif IT=85 then
-    C285:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C485:=[[0, -1, 0, 1/2], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    P85:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C285,C485,P85];
     funcs:=[[Aiin85,Aqin85,Azin85],[Bdeltain85,Bcxyin85],[]];
 elif IT=86 then
-    C286:=[[-1, 0, 0, -1/2], [0, -1, 0, 1/2], [0, 0, 1, 1], [0, 0, 0, 1]];
-    C486:=[[0, -1, 0, 0], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    P86:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C286,C486,P86];
     funcs:=[[Aiin86,Aqin86,Axyzin86],[Bdeltain86],[]];
 elif IT=87 then
-    C287:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C487:=[[0, 1, 0, 0], [0, 1, -1, 0], [-1, 1, 0, 0], [0, 0, 0, 1]];
-    P87:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C287,C487,P87];
     funcs:=[[Aiin87,Aqin87,Axyzin87],[Bdeltain87,Bphiin87,Bxyzin87],[CGAPin87]];
 elif IT=88 then
-    C288:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C488:=[[0, 1, 0, 0], [0, 1, -1, 0], [-1, 1, 0, 0], [0, 0, 0, 1]];
-    P88:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C288,C488,P88];
     funcs:=[[],[],[]];
 elif IT=89 then
-    C289:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p89:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C2pp89:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C289,C2p89,C2pp89];
     funcs:=[[Acpin89,Acppin89,Axyin89,Azin89],[Bdeltain89,Bxyin89],[]];
 elif IT=90 then
-    C290:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p90:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C2pp90:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C290,C2p90,C2pp90];
     funcs:=[[Acpin90,Acppin90,Azin90],[Bdeltain90,Bphiin90],[CGAPin90]];
 elif IT=91 then
-    C291:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    C2p91:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C2pp91:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 1/4], [0, 0, 0, 1]];
     PGGen:=[C291,C2p91,C2pp91];
     funcs:=[[Acpin91,Acppin91,Axyin91],[Bxyin91],[]];
 elif IT=92 then
-    C292:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    C2p92:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 1/4], [0, 0, 0, 1]];
-    C2pp92:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
     PGGen:=[C292,C2p92,C2pp92];
     funcs:=[[Acpin92,Acppin92],[Bphiin92],[CGAPin92]];
 elif IT=93 then
-    C293:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p93:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C2pp93:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
     PGGen:=[C293,C2p93,C2pp93];
     funcs:=[[Acpin93,Acppin93,Axyin93,Azin93],[Bxyin93],[]];
 elif IT=94 then
-    C294:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p94:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    C2pp94:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C294,C2p94,C2pp94];
     funcs:=[[Acpin94,Acppin94,Azin94],[Bphiin94],[CGAPin94]];
 elif IT=95 then
-    C295:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    C2p95:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C2pp95:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 3/4], [0, 0, 0, 1]];
     PGGen:=[C295,C2p95,C2pp95];
     funcs:=[[Acpin95,Acppin95,Axyin95],[Bxyin95],[]];
 elif IT=96 then
-    C296:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    C2p96:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 3/4], [0, 0, 0, 1]];
-    C2pp96:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
     PGGen:=[C296,C2p96,C2pp96];
     funcs:=[[Acpin96,Acppin96],[Bphiin96],[CGAPin96]];
 elif IT=97 then
-    C297:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C2p97:=[[0, -1, 1, 0], [0, -1, 0, 0], [1, -1, 0, 0], [0, 0, 0, 1]];
-    C2pp97:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C297,C2p97,C2pp97];
     funcs:=[[Acpin97,Acppin97,Axyzin97],[Bdeltain97,B2in97,B3in97],[C1in97,C2in97]];
 elif IT=98 then
-    C298:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C2p98:=[[0, -1, 1, 3/4], [0, -1, 0, 5/4], [1, -1, 0, 1/2], [0, 0, 0, 1]];
-    C2pp98:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C298,C2p98,C2pp98];
     funcs:=[[Acpin98,Acppin98,Axyzin98],[Bxyzin98],[CGAPin98]];
 elif IT=99 then
-    C299:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    Mp99:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    M99:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[C299,Mp99,M99];
     funcs:=[[Ampin99,Amin99,Axyin99,Azin99],[Bdeltain99,Bxyin99],[]];
 elif IT=100 then
-    C2100:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    Mp100:=[[1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    M100:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[C2100,Mp100,M100];
     funcs:=[[Ampin100,Amin100,Azin100],[Bdeltain100,Bphiin100],[CGAPin100]];
 elif IT=101 then
-    C2101:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    Mp101:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    M101:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[C2101,Mp101,M101];
     funcs:=[[Ampin101,Amin101,Axyin101],[Bdeltain101,Bmzin101,Bxyin101],[]];
 elif IT=102 then
-    C2102:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    Mp102:=[[1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    M102:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[C2102,Mp102,M102];
     funcs:=[[Ampin102,Amin102,Axyzin102],[Bdeltain102],[CGAPin102]];
 elif IT=103 then
-    C2103:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    Mp103:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    M103:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[C2103,Mp103,M103];
     funcs:=[[Ampin103,Amin103,Axyin103],[Bdeltain103,Bxyin103],[]];
 elif IT=104 then
-    C2104:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    Mp104:=[[1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    M104:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[C2104,Mp104,M104];
     funcs:=[[Ampin104,Amin104],[Bdeltain104,Bcxyin104,Bcxyzin104],[C1GAPin104,C2GAPin104]];
 elif IT=105 then
-    C2105:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    Mp105:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    M105:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[C2105,Mp105,M105];
     funcs:=[[Ampin105,Amin105,Axyin105],[Bdeltain105,Bczin105,Bxyin105,Bzxyin105],[]];
 elif IT=106 then
-    C2106:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    Mp106:=[[1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    M106:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[C2106,Mp106,M106];
     funcs:=[[Ampin106,Amin106],[Bdeltain106,B2in106,B3in106],[C1in106,C2in106]];
 elif IT=107 then
-    C2107:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    Mp107:=[[0, 1, -1, 0], [0, 1, 0, 0], [-1, 1, 0, 0], [0, 0, 0, 1]];
-    M107:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[C2107,Mp107,M107];
     funcs:=[[Ampin107,Amin107,Axyzin107],[Bdeltain107,Bphiin107,Bxyzin107],[CGAPin107]];
 elif IT=108 then
-    C2108:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    Mp108:=[[0, 1, -1, 1/2], [0, 1, 0, 1/2], [-1, 1, 0, 0], [0, 0, 0, 1]];
-    M108:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[C2108,Mp108,M108];
     funcs:=[[Ampin108,Amin108,Axyzin108],[Bdeltain108,Bxyzin108],[]];
 elif IT=109 then
-    C2109:=[[0, 1, -1, 1], [1, 0, -1, 1], [0, 0, -1, 1], [0, 0, 0, 1]];
-    Mp109:=[[0, 1, -1, 0], [0, 1, 0, 0], [-1, 1, 0, 0], [0, 0, 0, 1]];
-    M109:=[[0, 1, 0, 3/4], [1, 0, 0, 5/4], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[C2109,Mp109,M109];
     funcs:=[[Ampin109,Amin109],[Bdeltain109,B2in109],[C1in109,C2in109]];
 elif IT=110 then
-    C2110:=[[0, 1, -1, 1], [1, 0, -1, 1], [0, 0, -1, 1], [0, 0, 0, 1]];
-    Mp110:=[[0, 1, -1, 1/2], [0, 1, 0, 1/2], [-1, 1, 0, 0], [0, 0, 0, 1]];
-    M110:=[[0, 1, 0, 1/4], [1, 0, 0, 3/4], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[C2110,Mp110,M110];
     funcs:=[[Ampin110,Amin110],[Bdeltain110],[CGAPin110]];
 elif IT=111 then
-    C2111:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p111:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    M111:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[C2111,C2p111,M111];
     funcs:=[[Acpin111,Amin111,Axyin111,Azin111],[Bdeltain111,Bxyin111],[]];
 elif IT=112 then
-    C2112:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p112:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    M112:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[C2112,C2p112,M112];
     funcs:=[[Acpin112,Amin112,Axyin112],[Bdeltain112,Bxyin112,Bczin112,Bzxyin112],[]];
 elif IT=113 then
-    C2113:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p113:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
-    M113:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[C2113,C2p113,M113];
     funcs:=[[Acpin113,Amin113,Azin113],[Bdeltain113,Bphiin113],[Cin113]];
 elif IT=114 then
-    C2114:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p114:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    M114:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[C2114,C2p114,M114];
     funcs:=[[Acpin114,Amin114],[Bdeltain114,Bcxyin114,Bcxyzin114],[C1in114,C2in114]];
 elif IT=115 then
-    C2115:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p115:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    M115:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[C2115,C2p115,M115];
     funcs:=[[Acpin115,Amin115,Axyin115,Azin115],[Bdeltain115,Bxyin115],[]];
 elif IT=116 then
-    C2116:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p116:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    M116:=[[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[C2116,C2p116,M116];
     funcs:=[[Acpin116,Amin116,Axyin116],[Bdeltain116,Bxyin116,Bcpzin116],[]];
 elif IT=117 then
-    C2117:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p117:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
-    M117:=[[1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[C2117,C2p117,M117];
     funcs:=[[Acpin117,Amin117,Azin117],[Bdeltain117,B2in117],[CGAPin117]];
 elif IT=118 then
-    C2118:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p118:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    M118:=[[1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[C2118,C2p118,M118];
     funcs:=[[Acpin118,Amin118,Axyzin118],[Bdeltain118],[CGAPin118]];
 elif IT=119 then
-    C2119:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C2p119:=[[0, -1, 0, 0], [-1, 0, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    M119:=[[0, 1, -1, 0], [0, 1, 0, 0], [-1, 1, 0, 0], [0, 0, 0, 1]];
     PGGen:=[C2119,C2p119,M119];
     funcs:=[[Acpin119,Amin119,Axyzin119],[Bdeltain119,Bphiin119,Bzxyin119],[C1in119,C2in119]];
 elif IT=120 then
-    C2120:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C2p120:=[[-1, 0, 1, 1/2], [0, -1, 1, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    M120:=[[0, 1, -1, 1/2], [0, 1, 0, 1/2], [-1, 1, 0, 0], [0, 0, 0, 1]];
     PGGen:=[C2120,C2p120,M120];
     funcs:=[[Acpin120,Amin120,Axyzin120],[Bdeltain120,B2in120],[]];
 elif IT=121 then
-    C2121:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C2p121:=[[0, -1, 1, 0], [0, -1, 0, 0], [1, -1, 0, 0], [0, 0, 0, 1]];
-    M121:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     PGGen:=[C2121,C2p121,M121];
     funcs:=[[Acpin121,Amin121,Axyzin121],[Bdeltain121,Bxyzin121,Bphiin121],[CGAPin121]];
 elif IT=122 then
-    C2122:=[[0, 1, -1, 1/2], [1, 0, -1, 1], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    C2p122:=[[0, -1, 1, 1/2], [0, -1, 0, 1], [1, -1, 0, 1/2], [0, 0, 0, 1]];
-    M122:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
     PGGen:=[C2122,C2p122,M122];
     funcs:=[[],[],[]];
 elif IT=123 then
-    C2123:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p123:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    M123:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    P123:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2123,C2p123,M123,P123];
     funcs:=[[Aiin123,Amin123,Acpin123,Axyin123,Azin123],[Bdeltain123,Bxyin123],[]];
 elif IT=124 then
-    C2124:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p124:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    M124:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    P124:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2124,C2p124,M124,P124];
     funcs:=[[Aiin124,Amin124,Acpin124,Axyin124],[Bdeltain124,Bxyin124],[]];
 elif IT=125 then
-    C2125:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p125:=[[-1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    M125:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    P125:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2125,C2p125,M125,P125];
     funcs:=[[Aiin125,Amin125,Acpin125,Azin125],[Bdeltain125,Bcxyin125],[]];
 elif IT=126 then
-    C2126:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p126:=[[-1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    M126:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    P126:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2126,C2p126,M126,P126];
     funcs:=[[],[],[]];
 elif IT=127 then
-    C2127:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p127:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
-    M127:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    P127:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2127,C2p127,M127,P127];
     funcs:=[[Aiin127,Amin127,Acpin127,Azin127],[Bdeltain127,Bphiin127],[CGAPin127]];
 elif IT=128 then
-    C2128:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p128:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    M128:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    P128:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2128,C2p128,M128,P128];
     funcs:=[[Aiin128,Amin128,Acpin128],[Bdeltain128,Bcxyin128,Bcxyzin128],[C1GAPin128,C2GAPin128]];
 elif IT=129 then
-    C2129:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p129:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
-    M129:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    P129:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2129,C2p129,M129,P129];
     funcs:=[[Aiin129,Amin129,Acpin129,Azin129],[Bdeltain129,Bcxyin129],[]];
 elif IT=130 then
-    C2130:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p130:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    M130:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    P130:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2130,C2p130,M130,P130];
     funcs:=[[Aiin130,Amin130,Acpin130],[Bdeltain130,Bcxyin130],[]];
 elif IT=131 then
-    C2131:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p131:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    M131:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    P131:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2131,C2p131,M131,P131];
     funcs:=[[Aiin131,Amin131,Acpin131,Axyin131],[Bdeltain131,Bczin131,Bxyin131,Bzxyin131],[]];
 elif IT=132 then
-    C2132:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p132:=[[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    M132:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    P132:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2132,C2p132,M132,P132];
     funcs:=[[Aiin132,Amin132,Acpin132,Axyin132],[Bdeltain132,Bmzin132,Bxyin132],[]];
 elif IT=133 then
-    C2133:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p133:=[[-1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    M133:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    P133:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2133,C2p133,M133,P133];
     funcs:=[[],[],[]];
 elif IT=134 then
-    C2134:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p134:=[[-1, 0, 0, 1/2], [0, 1, 0, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    M134:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    P134:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2134,C2p134,M134,P134];
     funcs:=[[Aiin134,Amin134,Acpin134,Axyzin134],[Bdeltain134],[]];
 elif IT=135 then
-    C2135:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p135:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
-    M135:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    P135:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2135,C2p135,M135,P135];
     funcs:=[[Aiin135,Amin135,Acpin135],[Bdeltain135,Bcxyin135,Bczin135],[CGAPin135]];
 elif IT=136 then
-    C2136:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p136:=[[-1, 0, 0, 1/2], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    M136:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    P136:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2136,C2p136,M136,P136];
     funcs:=[[Aiin136,Amin136,Acpin136],[Bdeltain136,Bcxyin136,Bpxyzin136,Bmzin136],[CGAP1in136,CGAP2in136]];
 elif IT=137 then
-    C2137:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p137:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, -1, 0], [0, 0, 0, 1]];
-    M137:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    P137:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2137,C2p137,M137,P137];
     funcs:=[[],[],[]];
 elif IT=138 then
-    C2138:=[[-1, 0, 0, 1/2], [0, -1, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    C2p138:=[[-1, 0, 0, 0], [0, 1, 0, 1/2], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    M138:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    P138:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2138,C2p138,M138,P138];
     funcs:=[[Aiin138,Amin138,Acpin138],[Bdeltain138,Bmzin138,Bcxyin138,Bpxyzin138],[]];
 elif IT=139 then
-    C2139:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C2p139:=[[0, -1, 1, 0], [0, -1, 0, 0], [1, -1, 0, 0], [0, 0, 0, 1]];
-    M139:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    P139:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2139,C2p139,M139,P139];
     funcs:=[[Aiin139,Amin139,Acpin139,Axyzin139],[Bdeltain139,Bphiin139,Bxyzin139],[CGAPin139]];
 elif IT=140 then
-    C2140:=[[0, 1, -1, 0], [1, 0, -1, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
-    C2p140:=[[0, -1, 1, 1/2], [0, -1, 0, 1/2], [1, -1, 0, 0], [0, 0, 0, 1]];
-    M140:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 0], [0, 0, 0, 1]];
-    P140:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2140,C2p140,M140,P140];
     funcs:=[[Aiin140,Amin140,Acpin140,Axyzin140],[Bdeltain140,Bzxyin140],[]];
 elif IT=141 then
-    C2141:=[[0, 1, -1, 1/2], [1, 0, -1, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    C2p141:=[[0, -1, 1, 1/2], [0, -1, 0, 1], [1, -1, 0, 1/2], [0, 0, 0, 1]];
-    M141:=[[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    P141:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2141,C2p141,M141,P141];
     funcs:=[[],[],[]];
 elif IT=142 then
-    C2142:=[[0, 1, -1, 1/2], [1, 0, -1, 0], [0, 0, -1, 1/2], [0, 0, 0, 1]];
-    C2p142:=[[0, -1, 1, 0], [0, -1, 0, 1/2], [1, -1, 0, 1/2], [0, 0, 0, 1]];
-    M142:=[[0, 1, 0, 1/2], [1, 0, 0, 1/2], [0, 0, 1, 1/2], [0, 0, 0, 1]];
-    P142:=[[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]];
     PGGen:=[C2142,C2p142,M142,P142];
     funcs:=[[Aiin142,Amin142,Acpin142],[Bdeltain142],[]];
 else
@@ -2267,7 +2481,7 @@ Gen4:=[];
 
 GensGAP:=Mod2RingGenerators(R,4,3);
 
-Print("Matching generators for space group No. ", IT, "\n");
+#Print("Matching generators for space group No. ", IT, "\n");
 
 if (Length(Gen1) = Length(GensGAP[1])) = false then
     Print("Number of Degree-1 generator does not match!!!:", Length(Gen1),"!=",Length(GensGAP[1]),"\n");
@@ -2276,7 +2490,8 @@ elif (Length(Gen2) = Length(GensGAP[2])) = false then
 elif (Length(Gen3) = Length(GensGAP[3])) = false then
     Print("Number of Degree-3 generator does not match!!!:", Length(Gen3),"!=",Length(GensGAP[3]),"\n");
 else
-    Print("Generators at degree 1,2,3 matched.","\n");
+    #Print("Generators at degree 1,2,3 matched.","\n");
+    Print("\n");
 fi;
 
 
