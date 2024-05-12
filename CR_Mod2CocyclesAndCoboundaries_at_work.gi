@@ -5,6 +5,77 @@ Read("~/Downloads/Space_Group_Cocycles.gi");
 #####################################################################
 #####################################################################
 
+Letter2Monomial:=function(vec,GensDim,name)
+local j,k,u,v,lett;
+
+lett := [];
+u := 1;
+if name = [] then
+    for j in [1..Length(GensDim)] do
+        if GensDim[j] = 1 then
+            if vec[u]>1 then
+                Append(lett,[JoinStringsWithSeparator([["A","B","C","D","E","F"][j],"^",vec[u]],"")]);
+            elif vec[u]=1 then
+                Append(lett,[JoinStringsWithSeparator([["A","B","C","D","E","F"][j]],"")]);
+            fi;
+            u := u+1;
+        else
+            for k in [1..GensDim[j]] do
+                if vec[u]>1 then
+                    Append(lett,[JoinStringsWithSeparator([["A","B","C","D","E","F"][j],String(k),"^",vec[u]],"")]);
+                elif vec[u]=1 then
+                    Append(lett,[JoinStringsWithSeparator([["A","B","C","D","E","F"][j],String(k)],"")]);
+                fi;
+                u := u+1;
+            od;
+        fi;
+    od;
+else
+    for j in [1..Length(GensDim)] do
+    
+        for k in [1..GensDim[j]] do
+            if vec[u]>1 then
+                Append(lett,[JoinStringsWithSeparator([name[u],"^",vec[u]],"")]);
+            elif vec[u]=1 then
+                Append(lett,[JoinStringsWithSeparator([name[u]],"")]);
+            fi;
+            u := u+1;
+        od;
+    od;
+fi;
+return JoinStringsWithSeparator(lett, ".");
+end;
+
+#####################################################################
+######################################################################
+
+
+#####################################################################
+#####################################################################
+
+PrintMonomialString:=function(arg)
+local poly,vecs,GensDim,sep,gennames;
+
+vecs := arg[1];
+GensDim := arg[2];
+sep := arg[3];
+gennames := [];
+if Length(arg) >=4 then
+gennames := arg[4];
+fi;
+
+poly:=List(vecs,x->Letter2Monomial(x,GensDim,gennames));
+Print(JoinStringsWithSeparator(poly,sep),"  ");
+return 0;
+end;
+
+######################################################################
+#####################################################################
+
+
+#####################################################################
+#####################################################################
+
 CR_Mod2CocyclesAndCoboundaries:=function(arg)
 local
 	R, n, toggle, Dimension, Boundary, 
@@ -426,7 +497,6 @@ end;
 #####################################################################
 #####################################################################
 
-
 Mod2RingGensAndRels:=function(arg)
 local
         R,n,GG,IT,Gen0,Gen1,Gen2,Gen3,Gen4,Gen5,spacedim,GenDim1to4,GenDeg1to4,
@@ -440,7 +510,7 @@ local
         uCocycle, vCocycle, uvCocycle, uChainMap, ww,
         sol, solrel, cc, CB, CohomologyBasis, TR,
         BasisP, BasisQ, SmithRecord, GF2ToZ, IToPosition,
-        NonNegativeVec, Letter2Monomial, PrintMonomialString,
+        #NonNegativeVec,
         i,p,q,r,s,t,u,v,w,x, ln, rk, rk1, ip,iq,ir,is,it,iu,iv, sw;
 
 #Standard input: arg[1] = IT (# of space group), arg[2] = n (relations up to deg(n) is calculated)
@@ -554,46 +624,19 @@ od;
 return v0;
 end;
 ######################################################################
-NonNegativeVec:=function(v)
-local ps,k;
-
-ps := true;
-for k in [1..Length(v)] do
-    if v[k] < 0 then
-    ps := false;
-    fi;
-od;
-return ps;
-end;
+#NonNegativeVec:=function(v)
+#local ps,k;
+#
+#ps := true;
+#for k in [1..Length(v)] do
+#    if v[k] < 0 then
+#    ps := false;
+#    fi;
+#od;
+#return ps;
+#end;
 ######################################################################
-Letter2Monomial:=function(vec,GensDim)
-local j,k,u,v,lett;
 
-lett := [];
-u := 1;
-for j in [1..Length(GensDim)] do
-    for k in [1..GensDim[j]] do
-        if vec[u]>1 then
-            Append(lett,[JoinStringsWithSeparator([["A","B","C","D","E","F"][j],String(k),"^",vec[u]],"")]);
-        else
-            if vec[u]=1 then
-                Append(lett,[JoinStringsWithSeparator([["A","B","C","D","E","F"][j],String(k)],"")]);
-            fi;
-        fi;
-        u := u+1;
-    od;
-od;
-return JoinStringsWithSeparator(lett, ".");
-end;
-######################################################################
-PrintMonomialString:=function(vecs,GensDim,sep)
-local poly;
-
-poly:=List(vecs,x->Letter2Monomial(x,GensDim));
-Print(JoinStringsWithSeparator(poly,sep),"  ");
-return 0;
-end;
-######################################################################
 
 
 
@@ -1947,7 +1990,7 @@ fi;
 #
 ####   Begin printing cohomology ring   ####
 #
-mono:=List(List([1..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4))],x->GensLett[x]),x->Letter2Monomial(x,GenDim1to4));
+mono:=List(List([1..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4))],x->GensLett[x]),x->Letter2Monomial(x,GenDim1to4,GENNAMES[IT]));
 Print("Mod-2 Cohomology Ring of Group No. ", IT, ":\n");
 Print("Z2[", JoinStringsWithSeparator(mono,","), "]");
 mono := 0;
@@ -1994,24 +2037,24 @@ fi;
 #Print("with relations:\n");
 #Print(CupRelsLett,"\n");
 if Length(CupRel2Lett) > 0 then
-    #Print(Length(CupRel2Lett)," at deg 2: ");List(CupRel2Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
-    Print("R2:  ");List(CupRel2Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+    #Print(Length(CupRel2Lett)," at deg 2: ");List(CupRel2Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+    Print("R2:  ");List(CupRel2Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
 fi;
 if Length(CupRel3Lett) > 0 then
-    #Print(Length(CupRel3Lett)," at deg 3: ");List(CupRel3Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
-    Print("R3:  ");List(CupRel3Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+    #Print(Length(CupRel3Lett)," at deg 3: ");List(CupRel3Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+    Print("R3:  ");List(CupRel3Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
 fi;
 if Length(CupRel4Lett) > 0 then
-    #Print(Length(CupRel4Lett)," at deg 4: ");List(CupRel4Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
-    Print("R4:  ");List(CupRel4Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+    #Print(Length(CupRel4Lett)," at deg 4: ");List(CupRel4Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+    Print("R4:  ");List(CupRel4Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
 fi;
 if Length(CupRel5Lett) >0 then
-    #Print(Length(CupRel5Lett)," at deg 5: ");List(CupRel5Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
-    Print("R5:  ");List(CupRel5Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+    #Print(Length(CupRel5Lett)," at deg 5: ");List(CupRel5Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+    Print("R5:  ");List(CupRel5Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
 fi;
 if Length(CupRel6Lett) >0 then
-    #Print(Length(CupRel6Lett)," at deg 6: ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
-    Print("R6:  ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+"));Print("\n");
+    #Print(Length(CupRel6Lett)," at deg 6: ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+    Print("R6:  ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
 fi;
 #
 ####   End printing cohomology ring   ####
@@ -2022,7 +2065,7 @@ fi;
 #Print("End Group No. ", IT, ".\n");
 Print("===========================================\n");
 
-return true;
+return [CupBase1Lett,CupBase2Lett,CupBase3Lett,CupBase4Lett];
 #rec(GensAtDegN:=List([1..4],x->List([1..Length(Gens[x])],y->Letters[x,y])),RelsAtDegN:=[CupRel2Lett,CupRel3Lett,CupRel4Lett,CupRel5Lett,CupRel6Lett]);
 end;
 #####################################################################
@@ -2044,10 +2087,13 @@ local
     PGGen, PGGen33, PGMat33, PGMatinv, PGind,
     o0,o1,o2,o3,o4,o5,
     G,Gp,R,CB,
-    MatToPow,GapToPow,Fbarhomotopyindinv,
+    MatToPow,GapToPow,Fbarhomotopyindinv,Prodg1g2Pow,
     Homotopydeg1,Homotopydeg2,Homotopydeg3,Homotopydeg4,
-    func, funcs,receive,
-    Gen1, Gen2, Gen3, Gen4, GensGAP,
+    func,funcs,receive,FuncVal,GF2ToZ,TopoInvdeg3,
+    Gen1, Gen2, Gen3, Gen4, GensGAP, GensDim1to4, GensDeg1to4,
+    BasesLett, Base1Lett, Base2Lett, Base3Lett, Base4Lett,
+    g1,g2,overcomplete_g,Mat,
+    v1,v2,x1,y1,z1,x2,y2,z2,
     i,j,k,p,x,y;
 
 #####################################################################
@@ -2069,9 +2115,127 @@ GapToPow:=function(i)            #given the index i s.t. mat:=R!.elts[i], output
 return MatToPow(TransposedMat(PreImage(Gp,R!.elts[i])));
 end;
 #####################################################################
+Prodg1g2Pow:=function(v1,v2)
+local vpg1, vpg2, transmat1, transmat2, prod;
+
+transmat1 := [[1,0,0,v1[1]],[0,1,0,v1[2]],[0,0,1,v1[3]],[0,0,0,1]];
+transmat2 := [[1,0,0,v2[1]],[0,1,0,v2[2]],[0,0,1,v2[3]],[0,0,0,1]];
+vpg1 := List([4..(Length(v1))],x->v1[x]);
+vpg2 := List([4..(Length(v2))],x->v1[x]);
+
+prod := PGMatinv[Position(PGind,vpg1)]^(-1) * PGMatinv[Position(PGind,vpg2)]^(-1);
+
+return MatToPow(prod);
+end;
+#####################################################################
 Fbarhomotopyindinv:=function(i,lst)            #This is the function Fbarhomotopyindinv in Mathematica
 
 return List(lst,x->Concatenation(x,[i]));
+end;
+#####################################################################
+GF2ToZ:=function(v)
+local v0,k;
+
+v0:=[];
+for k in [1..Length(v)] do
+    if v[k] = 0*Z(2) then
+    v0[k]:=0;
+    else
+        v0[k]:=1;
+    fi;
+od;
+
+return v0;
+end;
+#####################################################################
+FuncVal:=function(lett,v)
+local ct,deg,i,ival,j,jval,k,val,lett1;
+deg := GensDeg1to4*lett;
+
+if deg = 0 then
+    Print("Degree of gen is wrong!!\n");
+fi;
+
+
+lett1 := ShallowCopy(lett);
+
+for i in [1..Length(lett)] do            #finding the first generator that exists in lett
+    if lett1[i] > 0 then
+        ival := lett1[i];                #label of generator stored in i; power of this generator stored in ival
+        break;
+    fi;
+od;
+
+if deg = 1 then                          #if evaluating a 1-cocycle
+    val := funcs[1][i](v[1]);
+elif deg = 2 then                        #if evaluating a 2-cocycle
+    if i > GensDim1to4[1] then
+    val := funcs[2][i-GensDim1to4[1]](v[1],v[2]);
+    else
+        lett1[i] := lett1[i] - 1;
+        j := Position(lett1,1);
+        val := funcs[1][i](v[1]) * funcs[2][j](v[2]);
+    fi;
+elif deg = 3 then                        #if evaluating a 3-cocycle
+    if i > GensDim1to4[1]+GensDim1to4[2] then
+        val := funcs[3][i-GensDim1to4[1]-GensDim1to4[2]](v[1],v[2],v[3]);
+    else
+        lett1[i] := lett1[i] - 1;
+        for j in [1..Length(lett)] do
+            if lett1[j] > 0 then
+                jval := lett1[j];
+                break;
+            fi;
+        od;
+        if j > GensDim1to4[1] then
+            val := funcs[1][i](v[1]) * funcs[2][j-GensDim1to4[1]](v[2],v[3]);
+        else
+            lett1[j] := lett1[j] - 1;
+            k := Position(lett1,1);
+            val := funcs[1][i](v[1]) * funcs[1][j](v[2]) * funcs[1][k](v[3]);
+        fi;
+    fi;
+else
+    Print("Error: Evaluating 4- or higher cocycles not implemented yet!! \n");
+fi;
+return val;
+end;
+#####################################################################
+TopoInvdeg3:=function(arg) #usage: TopoInvdeg3(list_of_group_elements,list_of_letters,[matrices giving linear combination of letters])
+local gs,letters,solrels, vallist;
+
+gs := arg[1];
+letters := arg[2];
+
+
+if Length(arg) = 2 then
+    solrels := List([1..Length(letters)],x->List([1..Length(letters)],y->0));
+    for i in [1..Length(letters)] do
+        solrels[i][i] := 1;
+    od;
+else
+    solrels := arg[3];
+fi;
+
+if Length(gs) = 1 then
+    if Prodg1g2Pow(gs[1],gs[1]) = gs[1]*0 then
+        vallist := List(letters,x->FuncVal(x,[gs[1],gs[1],gs[1]]));
+    else
+        Print("varphi(g,g,g) is not a topological invariant!!!!\n");
+    fi;
+elif Length(gs) = 2 then
+    if (Prodg1g2Pow(gs[2],gs[2]) = gs[2]*0) and (Prodg1g2Pow(gs[2],gs[2]) = Prodg1g2Pow(gs[2],gs[1])) then
+        vallist := List(letters,x->FuncVal(x,[gs[1],gs[2],gs[2]])+FuncVal(x,[gs[2],gs[1],gs[2]])+FuncVal(x,[gs[2],gs[2],gs[1]]));
+    else
+        Print("varphi(g1,g2,g2) is not a topological invariant!!!!\n");
+    fi;
+
+elif Length(gs) = 3 then
+    vallist := List(letters,x->FuncVal(x,[gs[1],gs[2],gs[3]])+FuncVal(x,[gs[1],gs[3],gs[2]])+FuncVal(x,[gs[2],gs[1],gs[3]])+FuncVal(x,[gs[2],gs[3],gs[1]])+FuncVal(x,[gs[3],gs[1],gs[2]])+FuncVal(x,[gs[3],gs[2],gs[1]]));
+else
+    Print("Number of group elements is not between 1 and 3!!\n");
+fi;
+return GF2ToZ((solrels*vallist)*Z(2));
 end;
 #####################################################################
 
@@ -2504,9 +2668,50 @@ fi;
 #Print("Degree-6 generator:", GensGAP[6],"\n");
 
 
-Mod2RingGensAndRels(IT,3,R,[Gen1,Gen2,Gen3,Gen4]);
+BasesLett := Mod2RingGensAndRels(IT,3,R,[Gen1,Gen2,Gen3,Gen4]);
+
+GensDim1to4 := [Length(Gen1),Length(Gen2),Length(Gen3),Length(Gen4)];
+GensDeg1to4:=Concatenation(List([1..Length(Gen1)],x->1),List([1..Length(Gen2)],x->2),List([1..Length(Gen3)],x->3),List([1..Length(Gen4)],x->4));
+
+Base1Lett := BasesLett[1];
+Base2Lett := BasesLett[2];
+Base3Lett := BasesLett[3];
+#Base4Lett := BasesLett[4];
 
 
+overcomplete_g:=[];
+
+for v2 in PGind do
+    for x2 in [-2..2] do
+        for y2 in [-2..2] do
+            for z2 in [-2..2] do
+                g2 := Concatenation([x2,y2,z2],v2);
+                if Prodg1g2Pow(g2,g2)= g2*0 then
+                    Append(overcomplete_g,[[g2]]);
+                    for v1 in PGind do
+                        for x1 in [-2..2] do
+                            for y1 in [-2..2] do
+                                for z1 in [-2..2] do
+                                    g1 := Concatenation([x1,y1,z1],v1);
+                                    if Prodg1g2Pow(g2,g1) = Prodg1g2Pow(g1,g2) then
+                                        Append(overcomplete_g,[[g1,g2]]);
+                                    fi;
+                                od;
+                            od;
+                        od;
+                    od;
+                fi;
+            od;
+        od;
+    od;
+od;
+                
+                                            
+
+Mat:= List(overcomplete_g,glist->TopoInvdeg3(glist,Base3Lett));
+
+Print(RankMatrix(Mat*Z(2)),"=", Length(Base3Lett),"\n");
+Print("above should equal\n");
 
 return true;
 end;
