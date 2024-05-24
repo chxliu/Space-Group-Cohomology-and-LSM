@@ -531,7 +531,7 @@ spacedim:=arg[2];
 fi;
 
 
-IT := arg[1];  #Group number in International Table for Crystallography
+IT := arg[1];  #Group number in International Table for Crystallography (ITC)
 
 Print("===========================================\n");
 #Print("Begin Group No. ", IT, ":\n");
@@ -2087,13 +2087,13 @@ local
     PGGen, PGGen33, PGMat33, PGMatinv, PGind,
     o0,o1,o2,o3,o4,o5,
     G,Gp,R,CB,
-    MatToPow,GapToPow,Fbarhomotopyindinv,Prodg1g2Pow,
+    MatToPow,GapToPow,Fbarhomotopyindinv,Invofg,Prodg1g2Pow,
     Homotopydeg1,Homotopydeg2,Homotopydeg3,Homotopydeg4,
     func,funcs,receive,FuncVal,GF2ToZ,TopoInvdeg3,
     Gen1, Gen2, Gen3, Gen4, GensGAP, GensDim1to4, GensDeg1to4,
     BasesLett, Base1Lett, Base2Lett, Base3Lett, Base4Lett,
-    g1,g2,overcomplete_g,Mat,
-    v1,v2,x1,y1,z1,x2,y2,z2,
+    g1,g2,g3,overcomplete_g,Mat,mat1,mat2,vec,sol,
+    v1,v2,v3,x1,y1,z1,x2,y2,z2,x3,y3,z3,
     i,j,k,p,x,y;
 
 #####################################################################
@@ -2115,15 +2115,24 @@ GapToPow:=function(i)            #given the index i s.t. mat:=R!.elts[i], output
 return MatToPow(TransposedMat(PreImage(Gp,R!.elts[i])));
 end;
 #####################################################################
+Invofg:=function(v)
+local vpg, transmat;
+
+transmat := [[1,0,0,v[1]],[0,1,0,v[2]],[0,0,1,v[3]],[0,0,0,1]];
+vpg := List([4..(Length(v))],x->v[x]);
+
+return MatToPow((transmat * PGMatinv[Position(PGind,vpg)]^(-1))^(-1));
+end;
+#####################################################################
 Prodg1g2Pow:=function(v1,v2)
 local vpg1, vpg2, transmat1, transmat2, prod;
 
 transmat1 := [[1,0,0,v1[1]],[0,1,0,v1[2]],[0,0,1,v1[3]],[0,0,0,1]];
 transmat2 := [[1,0,0,v2[1]],[0,1,0,v2[2]],[0,0,1,v2[3]],[0,0,0,1]];
 vpg1 := List([4..(Length(v1))],x->v1[x]);
-vpg2 := List([4..(Length(v2))],x->v1[x]);
+vpg2 := List([4..(Length(v2))],x->v2[x]);
 
-prod := PGMatinv[Position(PGind,vpg1)]^(-1) * PGMatinv[Position(PGind,vpg2)]^(-1);
+prod := transmat1 * PGMatinv[Position(PGind,vpg1)]^(-1) * transmat2 * PGMatinv[Position(PGind,vpg2)]^(-1);
 
 return MatToPow(prod);
 end;
@@ -2148,7 +2157,7 @@ od;
 return v0;
 end;
 #####################################################################
-FuncVal:=function(lett,v)
+FuncVal:=function(lett,v)                #Given a monomial of degree 1, 2, or 3, and argument (for the degree 3 monomial, the argument is either g1,g1,g1 or g1, g2, g2 or g1, g2, g3), evaluate the cocycle.
 local ct,deg,i,ival,j,jval,k,val,lett1;
 deg := GensDeg1to4*lett;
 
@@ -2177,9 +2186,9 @@ elif deg = 2 then                        #if evaluating a 2-cocycle
         val := funcs[1][i](v[1]) * funcs[2][j](v[2]);
     fi;
 elif deg = 3 then                        #if evaluating a 3-cocycle
-    if i > GensDim1to4[1]+GensDim1to4[2] then
+    if i > GensDim1to4[1]+GensDim1to4[2] then                              #if a degree-3 generator
         val := funcs[3][i-GensDim1to4[1]-GensDim1to4[2]](v[1],v[2],v[3]);
-    else
+    else                                                                   #if not a degree-3 gen., then must be a cup prod.
         lett1[i] := lett1[i] - 1;
         for j in [1..Length(lett)] do
             if lett1[j] > 0 then
@@ -2187,9 +2196,9 @@ elif deg = 3 then                        #if evaluating a 3-cocycle
                 break;
             fi;
         od;
-        if j > GensDim1to4[1] then
+        if j > GensDim1to4[1] then                                         #if a degree-1 gen. cup a degree-2 gen.
             val := funcs[1][i](v[1]) * funcs[2][j-GensDim1to4[1]](v[2],v[3]);
-        else
+        else                                                               #if not, then must be cup of three degree-1 gens.
             lett1[j] := lett1[j] - 1;
             k := Position(lett1,1);
             val := funcs[1][i](v[1]) * funcs[1][j](v[2]) * funcs[1][k](v[3]);
@@ -2204,8 +2213,8 @@ end;
 TopoInvdeg3:=function(arg) #usage: TopoInvdeg3(list_of_group_elements,list_of_letters,[matrices giving linear combination of letters])
 local gs,letters,solrels, vallist;
 
-gs := arg[1];
-letters := arg[2];
+gs := arg[1];               #List of group elements [g1] or [g1,g2] or [g1,g2,g3] at which the cocycles are evaluated
+letters := arg[2];          #List of letters representing the monomials
 
 
 if Length(arg) = 2 then
@@ -2219,19 +2228,31 @@ fi;
 
 if Length(gs) = 1 then
     if Prodg1g2Pow(gs[1],gs[1]) = gs[1]*0 then
-        vallist := List(letters,x->FuncVal(x,[gs[1],gs[1],gs[1]]));
+        vallist := List(letters,x->FuncVal(x,[gs[1],gs[1],gs[1]]));                                    #Topo inv varphi1
     else
         Print("varphi(g,g,g) is not a topological invariant!!!!\n");
     fi;
 elif Length(gs) = 2 then
-    if (Prodg1g2Pow(gs[2],gs[2]) = gs[2]*0) and (Prodg1g2Pow(gs[2],gs[2]) = Prodg1g2Pow(gs[2],gs[1])) then
+    if (Prodg1g2Pow(gs[2],gs[2]) = gs[2]*0) and (Prodg1g2Pow(gs[1],gs[2]) = Prodg1g2Pow(gs[2],gs[1])) then #Topo inv varphi2
         vallist := List(letters,x->FuncVal(x,[gs[1],gs[2],gs[2]])+FuncVal(x,[gs[2],gs[1],gs[2]])+FuncVal(x,[gs[2],gs[2],gs[1]]));
     else
         Print("varphi(g1,g2,g2) is not a topological invariant!!!!\n");
+        Print(gs[1],gs[2],"\n");
     fi;
 
 elif Length(gs) = 3 then
-    vallist := List(letters,x->FuncVal(x,[gs[1],gs[2],gs[3]])+FuncVal(x,[gs[1],gs[3],gs[2]])+FuncVal(x,[gs[2],gs[1],gs[3]])+FuncVal(x,[gs[2],gs[3],gs[1]])+FuncVal(x,[gs[3],gs[1],gs[2]])+FuncVal(x,[gs[3],gs[2],gs[1]]));
+
+    if (Prodg1g2Pow(gs[1],gs[2]) = Prodg1g2Pow(gs[2],gs[1])) and (Prodg1g2Pow(gs[1],gs[3]) = Prodg1g2Pow(gs[3],gs[1])) and (Prodg1g2Pow(gs[2],gs[3]) = Prodg1g2Pow(gs[3],gs[2])) then     #Topo inv varphi3
+        
+        vallist := List(letters,x->FuncVal(x,[gs[1],gs[2],gs[3]])+FuncVal(x,[gs[1],gs[3],gs[2]])+FuncVal(x,[gs[2],gs[1],gs[3]])+FuncVal(x,[gs[2],gs[3],gs[1]])+FuncVal(x,[gs[3],gs[1],gs[2]])+FuncVal(x,[gs[3],gs[2],gs[1]]));
+    
+    elif ((Prodg1g2Pow(gs[2],gs[1]) = Prodg1g2Pow(Invofg(gs[1]),gs[2])) and (Prodg1g2Pow(gs[1],gs[3]) = Prodg1g2Pow(gs[3],gs[1])) and (Prodg1g2Pow(gs[2],gs[3]) = Prodg1g2Pow(gs[3],gs[2]))) then     #Topo inv tildevarphi
+        
+        vallist := List(letters,x->FuncVal(x,[gs[3],Prodg1g2Pow(gs[1],gs[2]),Prodg1g2Pow(gs[1],Invofg(gs[2]))])+FuncVal(x,[gs[3],gs[1],gs[2]])+FuncVal(x,[gs[3],gs[1],Invofg(gs[2])])+FuncVal(x,[gs[3],gs[2],Invofg(gs[2])])+FuncVal(x,[Prodg1g2Pow(gs[1],gs[2]),gs[3],Prodg1g2Pow(gs[1],Invofg(gs[2]))])+FuncVal(x,[gs[1],gs[3],gs[2]])+FuncVal(x,[gs[1],gs[3],Invofg(gs[2])])+FuncVal(x,[gs[2],gs[3],Invofg(gs[2])])+FuncVal(x,[Prodg1g2Pow(gs[1],gs[2]),Prodg1g2Pow(gs[1],Invofg(gs[2])),gs[3]])+FuncVal(x,[gs[1],gs[2],gs[3]])+FuncVal(x,[gs[1],Invofg(gs[2]),gs[3]])+FuncVal(x,[gs[2],Invofg(gs[2]),gs[3]]));
+    
+    else
+        Print("varphi(g1,g2,g3) is not a topological invariant!!!!\n");
+    fi;
 else
     Print("Number of group elements is not between 1 and 3!!\n");
 fi;
@@ -2257,7 +2278,145 @@ PGind := [];
 #Read("~/Downloads/Space_Group_Cocycles.gi");
 
 
-if IT=47 then
+if IT=1 then
+    PGGen:=[];
+    funcs:=[[Axin1,Ayin1,Azin1],[],[]];
+elif IT=2 then
+    PGGen:=[P2];
+    funcs:=[[Aiin2,Axin2,Ayin2,Azin2],[],[]];
+elif IT=3 then
+    PGGen:=[C23];
+    funcs:=[[Acin3,Axin3,Ayin3,Azin3],[],[]];
+elif IT=4 then
+    PGGen:=[C24];
+    funcs:=[[Acin4,Axin4,Azin4],[],[]];
+elif IT=5 then
+    PGGen:=[C25];
+    funcs:=[[Acin5,Axyin5,Azin5],[Bxyin5],[]];
+elif IT=6 then
+    PGGen:=[M6];
+    funcs:=[[Amin6,Axin6,Ayin6,Azin6],[],[]];
+elif IT=7 then
+    PGGen:=[M7];
+    funcs:=[[Amin7,Axin7,Ayin7],[],[]];
+elif IT=8 then
+    PGGen:=[M8];
+    funcs:=[[Amin8,Axyin8,Azin8],[Bxyin8],[]];
+elif IT=9 then
+    PGGen:=[M9];
+    funcs:=[[Amin9,Axyin9],[Bxyin9,Bzxyin9],[]];
+elif IT=10 then
+    PGGen:=[C210,P10];
+    funcs:=[[Acin10,Aiin10,Axin10,Ayin10,Azin10],[],[]];
+elif IT=11 then
+    PGGen:=[C211,P11];
+    funcs:=[[Acin11,Aiin11,Axin11,Azin11],[],[]];
+elif IT=12 then
+    PGGen:=[C212,P12];
+    funcs:=[[Acin12,Aiin12,Axyin12,Azin12],[Bxyin12],[]];
+elif IT=13 then
+    PGGen:=[C213,P13];
+    funcs:=[[Acin13,Aiin13,Axin13,Ayin13],[],[]];
+elif IT=14 then
+    PGGen:=[C214,P14];
+    funcs:=[[Acin14,Aiin14,Axin14],[Bphiin14],[]];
+elif IT=15 then
+    PGGen:=[C215,P15];
+    funcs:=[[Acin15,Aiin15,Axyin15],[Bxyin15,Bzxyin15],[]];
+elif IT=16 then
+    PGGen:=[C216,C2p16];
+    funcs:=[[Acin16,Acpin16,Axin16,Ayin16,Azin16],[],[]];
+elif IT=17 then
+    PGGen:=[C217,C2p17];
+    funcs:=[[Acin17,Acpin17,Axin17,Ayin17],[],[]];
+elif IT=18 then
+    PGGen:=[C218,C2p18];
+    funcs:=[[Acin18,Acpin18,Azin18],[Bphiin18],[]];
+elif IT=19 then
+    PGGen:=[C219,C2p19];
+    funcs:=[[Acin19,Acpin19],[Bphi1in19,Bphi2in19],[]];
+elif IT=20 then
+    PGGen:=[C220,C2p20];
+    funcs:=[[Acin20,Acpin20,Axyin20],[Bxyin20],[]];
+elif IT=21 then
+    PGGen:=[C221,C2p21];
+    funcs:=[[Acin21,Acpin21,Axyin21,Azin21],[Bxyin21],[]];
+elif IT=22 then
+    PGGen:=[C222,C2p22];
+    funcs:=[[Acin22,Acpin22,Axyin22,Axzin22],[],[Cgamma1in22,Cgamma2in22]];
+elif IT=23 then
+    PGGen:=[C223,C2p23];
+    funcs:=[[Acin23,Acpin23,Axyzin23],[Bphiin23,Bxyzin23,Byxzin23],[Cxyzin23]];
+elif IT=24 then
+    PGGen:=[C224,C2p24];
+    funcs:=[[Acin24,Acpin24,Axyzin24],[Byxzin24,Bzxyin24],[]];
+elif IT=25 then
+    PGGen:=[C225,M25];
+    funcs:=[[Acin25,Amin25,Axin25,Ayin25,Azin25],[],[]];
+elif IT=26 then
+    PGGen:=[C226,M26];
+    funcs:=[[Acin26,Amin26,Axin26,Ayin26],[],[]];
+elif IT=27 then
+    PGGen:=[C227,M27];
+    funcs:=[[Acin27,Amin27,Axin27,Ayin27],[],[]];
+elif IT=28 then
+    PGGen:=[C228,M28];
+    funcs:=[[Acin28,Amin28,Ayin28,Azin28],[],[]];
+elif IT=29 then
+    PGGen:=[C229,M29];
+    funcs:=[[Acin29,Amin29,Ayin29],[],[]];
+elif IT=30 then
+    PGGen:=[C230,M30];
+    funcs:=[[Acin30,Amin30,Axin30],[Bphiin30],[]];
+elif IT=31 then
+    PGGen:=[C231,M31];
+    funcs:=[[Acin31,Amin31,Ayin31],[Bphiin31],[]];
+elif IT=32 then
+    PGGen:=[C232,M32];
+    funcs:=[[Acin32,Amin32,Azin32],[Bphiin32],[]];
+elif IT=33 then
+    PGGen:=[C233,M33];
+    funcs:=[[Acin33,Amin33],[Bphi1in33,Bphi2in33],[]];
+elif IT=34 then
+    PGGen:=[C234,M34];
+    funcs:=[[Acin34,Amin34,Axyzin34],[],[]];
+elif IT=35 then
+    PGGen:=[C235,M35];
+    funcs:=[[Acin35,Amin35,Axyin35,Azin35],[Bxyin35],[]];
+elif IT=36 then
+    PGGen:=[C236,M36];
+    funcs:=[[Acin36,Amin36,Axyin36],[Bxyin36],[]];
+elif IT=37 then
+    PGGen:=[C237,M37];
+    funcs:=[[Acin37,Amin37,Axyin37],[Bxyin37,Bzxyin37],[]];
+elif IT=38 then
+    PGGen:=[C238,M38];
+    funcs:=[[Acin38,Amin38,Axin38,Ayzin38],[Bxyin38],[]];
+elif IT=39 then
+    PGGen:=[C239,M39];
+    funcs:=[[Acin39,Amin39,Axin39,Ayzin39],[],[]];
+elif IT=40 then
+    PGGen:=[C240,M40];
+    funcs:=[[Acin40,Amin40,Ayzin40],[Bxyin40,Bzxyin40],[]];
+elif IT=41 then
+    PGGen:=[C241,M41];
+    funcs:=[[Acin41,Amin41,Ayzin41],[],[Cin41]];
+elif IT=42 then
+    PGGen:=[C242,M42];
+    funcs:=[[Acin42,Amin42,Axzin42,Ayzin42],[],[Cin42]];
+elif IT=43 then
+    PGGen:=[C243,M43];
+    funcs:=[[Acin43,Amin43],[Bxyxzyzin43],[Cin43]];
+elif IT=44 then
+    PGGen:=[C244,M44];
+    funcs:=[[Acin44,Amin44,Axyzin44],[Bphiin44,Bxyzin44,Byxzin44],[Cxyzin44]];
+elif IT=45 then
+    PGGen:=[C245,M45];
+    funcs:=[[Acin45,Amin45,Axyzin45],[Bzxyin45],[]];
+elif IT=46 then
+    PGGen:=[C246,M46];
+    funcs:=[[Acin46,Amin46,Axyzin46],[Byxzin46,Bzxyin46],[]];
+elif IT=47 then
     PGGen:=[C247,C2p47,P47];
     funcs:=[[Aiin47,Acpin47,Acin47,Axin47,Ayin47,Azin47],[],[]];
 elif IT=48 then
@@ -2496,7 +2655,7 @@ elif IT=125 then
     funcs:=[[Aiin125,Amin125,Acpin125,Azin125],[Bdeltain125,Bcxyin125],[]];
 elif IT=126 then
     PGGen:=[C2126,C2p126,M126,P126];
-    funcs:=[[],[],[]];
+    funcs:=[[Aiin126,Acpin126,Amin126,Axyin126,Azin126],[Bdeltain126,Bcmxyin126,Bcmxyzin126],[CGAPin126]];
 elif IT=127 then
     PGGen:=[C2127,C2p127,M127,P127];
     funcs:=[[Aiin127,Amin127,Acpin127,Azin127],[Bdeltain127,Bphiin127],[CGAPin127]];
@@ -2529,7 +2688,7 @@ elif IT=136 then
     funcs:=[[Aiin136,Amin136,Acpin136],[Bdeltain136,Bcxyin136,Bpxyzin136,Bmzin136],[CGAP1in136,CGAP2in136]];
 elif IT=137 then
     PGGen:=[C2137,C2p137,M137,P137];
-    funcs:=[[],[],[]];
+    funcs:=[[Aiin137,Acpin137,Amin137,Axyin137,Azin137],[Bdeltain137,Bcxyin137,Bczin137],[CGAPin137]];
 elif IT=138 then
     PGGen:=[C2138,C2p138,M138,P138];
     funcs:=[[Aiin138,Amin138,Acpin138],[Bdeltain138,Bmzin138,Bcxyin138,Bpxyzin138],[]];
@@ -2551,7 +2710,11 @@ fi;
 
 PGGen33 := List([1..Length(PGGen)],k->List([1..3],i->List([1..3],j->PGGen[k][i,j])));
 
-if Length(PGGen) = 1 then
+if Length(PGGen) = 0 then
+    Append(PGind,[[]]);
+    PGMat33:=[[[1,0,0],[0,1,0],[0,0,1]]];
+    PGMatinv:=[[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]];
+elif Length(PGGen) = 1 then
     for o1 in [0..(Order(PGGen33[1])-1)] do
         Append(PGind,[[o1]]);
         Append(PGMat33,[PGGen33[1]^o1]);
@@ -2614,6 +2777,7 @@ Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatr
     
 R:=ResolutionAlmostCrystalGroup(Image(Gp),7);
 
+
 Homotopydeg1:=List([1..R!.dimension(1)],x->List(R!.boundary(1,x),y->[y[2]]));
 Homotopydeg2:=List([1..R!.dimension(2)],x->Concatenation(List(R!.boundary(2,x),y->Fbarhomotopyindinv(y[2],Homotopydeg1[AbsInt(y[1])]))));
 Homotopydeg3:=List([1..R!.dimension(3)],x->Concatenation(List(R!.boundary(3,x),y->Fbarhomotopyindinv(y[2],Homotopydeg2[AbsInt(y[1])]))));
@@ -2623,6 +2787,10 @@ CB:=[];
 for p in [1..3] do
 CB[p]:=CR_Mod2CocyclesAndCoboundaries(R,p,true);
 od;
+
+#Print(IT,":  \n");
+#Print(CB[1].cocyclesBasis);
+#Print("\n");
 
 
 Gen1:=[];
@@ -2663,9 +2831,6 @@ if (IT in [108, 109, 120, 130, 136, 140, 142, 197, 204, 230]) = true then
     Gen4 := GensGAP[4];
 fi;
 
-#Print("Degree-4 generator:", GensGAP[4],"\n");
-#Print("Degree-5 generator:", GensGAP[5],"\n");
-#Print("Degree-6 generator:", GensGAP[6],"\n");
 
 
 BasesLett := Mod2RingGensAndRels(IT,3,R,[Gen1,Gen2,Gen3,Gen4]);
@@ -2679,39 +2844,114 @@ Base3Lett := BasesLett[3];
 #Base4Lett := BasesLett[4];
 
 
-overcomplete_g:=[];
 
+#Print("Degree-4 generator:", GensGAP[4],"\n");
+#Print("Degree-5 generator:", GensGAP[5],"\n");
+#Print("Degree-6 generator:", GensGAP[6],"\n");
+
+
+#Print all the elements of the mod-2 cohomology at degree 3:
+#Print("List of degree-3 elements: \n");
+#PrintMonomialString(Base3Lett,GensDim1to4,",",GENNAMES[IT]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+if 1 = 0 then
+
+overcomplete_g:=[];
+Mat:=[];
+
+#First: record all the LSM TIs, which have been given in Space_Group_Cocycles.gi
+#
+
+
+for x in LSM_TI[IT] do
+    Append(Mat,[TopoInvdeg3(x[2],Base3Lett)]);
+    Append(overcomplete_g,[x[2]]);
+od;
+
+Print("LSM topo invariants just added. Now the rank is: ", RankMatrix(Mat*Z(2)),"\n");
+
+Print(Mat);
+
+
+#Second: find all the non-LSM TIs, which are of one of the following four types:
+#
 for v2 in PGind do
     for x2 in [-2..2] do
         for y2 in [-2..2] do
             for z2 in [-2..2] do
                 g2 := Concatenation([x2,y2,z2],v2);
-                if Prodg1g2Pow(g2,g2)= g2*0 then
-                    Append(overcomplete_g,[[g2]]);
-                    for v1 in PGind do
-                        for x1 in [-2..2] do
-                            for y1 in [-2..2] do
-                                for z1 in [-2..2] do
-                                    g1 := Concatenation([x1,y1,z1],v1);
-                                    if Prodg1g2Pow(g2,g1) = Prodg1g2Pow(g1,g2) then
-                                        Append(overcomplete_g,[[g1,g2]]);
-                                    fi;
+                mat2 := [[1,0,0,x2],[0,1,0,y2],[0,0,1,z2],[0,0,0,1]] * PGMatinv[Position(PGind,v2)]^(-1);
+                if (mat2^2 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) then
+                    if Trace(mat2)=0 then                    #C2 rotation
+                        vec := TopoInvdeg3([g2],Base3Lett);
+                        sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+                        if sol = fail then             #then we find a new non-LSM topo inv associated with C2 rotation
+                            Append(Mat,[vec]);
+                            Append(overcomplete_g,[[g2]]);
+                        fi;
+                    elif Trace(mat2)=2 then                   #Mirror
+                        vec := TopoInvdeg3([g2],Base3Lett);
+                        sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+                        if sol = fail then             #then we find a new non-LSM topo inv associated with mirror
+                            Append(Mat,[vec]);
+                            Append(overcomplete_g,[[g2]]);
+                        fi;
+                        for v1 in PGind do
+                            for x1 in [-2..2] do
+                                for y1 in [-2..2] do
+                                    for z1 in [-2..2] do
+                                        g1 := Concatenation([x1,y1,z1],v1);
+                                        if ((g1 = (g1*0)) = false) and Prodg1g2Pow(g2,g1) = Prodg1g2Pow(g1,g2) then
+                                            vec := TopoInvdeg3([g1,g2],Base3Lett);
+                                            sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+                                            if sol = fail then       #then we find a new non-LSM topo inv associated with commuting couples g1 and g2, where g2 is a mirror
+                                                Append(Mat,[vec]);
+                                                Append(overcomplete_g,[[g1,g2]]);
+                                            fi;
+                                        fi;
+                                    od;
                                 od;
                             od;
                         od;
-                    od;
+                    fi;
+                elif (mat2^4 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) and (Trace(mat2)=2) then         #C4 rotation
+                    vec := TopoInvdeg3([g2,Prodg1g2Pow(g2,g2)],Base3Lett);
+                    sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+                    if sol = fail then       #then we find a new non-LSM topo inv associated with commuting couples C4 and C4^2
+                        Append(Mat,[vec]);
+                        Append(overcomplete_g,[[g2,Prodg1g2Pow(g2,g2)]]);
+                    fi;
                 fi;
             od;
         od;
     od;
 od;
-                
-                                            
 
-Mat:= List(overcomplete_g,glist->TopoInvdeg3(glist,Base3Lett));
 
-Print(RankMatrix(Mat*Z(2)),"=", Length(Base3Lett),"\n");
-Print("above should equal\n");
+#Print(List(Mat*Z(2),x->GF2ToZ(x)));
+
+
+
+if RankMatrix(Mat*Z(2)) = Length(Base3Lett) then
+    Print("Full Rank achieved: ", RankMatrix(Mat*Z(2)),"=", Length(Base3Lett),".\n");
+
+else
+    Print("Full Rank NOT achieved: ", RankMatrix(Mat*Z(2)),"!=", Length(Base3Lett),".\n");
+fi;
+
+fi;
 
 return true;
 end;
