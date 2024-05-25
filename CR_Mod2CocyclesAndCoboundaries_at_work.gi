@@ -1,3 +1,5 @@
+LoadPackage("HAP");
+
 Read("~/Downloads/Space_Group_Cocycles.gi");
 
 
@@ -54,18 +56,22 @@ end;
 #####################################################################
 
 PrintMonomialString:=function(arg)
-local poly,vecs,GensDim,sep,gennames;
+local poly,vecs,GensDim,sep,gennames,space;
 
 vecs := arg[1];
 GensDim := arg[2];
 sep := arg[3];
 gennames := [];
 if Length(arg) >=4 then
-gennames := arg[4];
+    gennames := arg[4];
+fi;
+space:="  ";
+if Length(arg) >=5 then
+    space := arg[5];
 fi;
 
 poly:=List(vecs,x->Letter2Monomial(x,GensDim,gennames));
-Print(JoinStringsWithSeparator(poly,sep),"  ");
+Print(JoinStringsWithSeparator(poly,sep),space);
 return 0;
 end;
 
@@ -2087,15 +2093,32 @@ local
     PGGen, PGGen33, PGMat33, PGMatinv, PGind,
     o0,o1,o2,o3,o4,o5,
     G,Gp,R,CB,
-    MatToPow,GapToPow,Fbarhomotopyindinv,Invofg,Prodg1g2Pow,
+    MatToPow,GapToPow,Fbarhomotopyindinv,Invofg,Prodg1g2Pow,IndToElem,
     Homotopydeg1,Homotopydeg2,Homotopydeg3,Homotopydeg4,
     func,funcs,receive,FuncVal,GF2ToZ,TopoInvdeg3,
     Gen1, Gen2, Gen3, Gen4, GensGAP, GensDim1to4, GensDeg1to4,
-    BasesLett, Base1Lett, Base2Lett, Base3Lett, Base4Lett,
-    g1,g2,g3,overcomplete_g,Mat,mat1,mat2,vec,sol,
+    BasesLett, Base1Lett, Base2Lett, Base3Lett, Base4Lett, LSMLett,
+    g1,g2,g3,overcomplete_g,Mat,mat1,mat2,vec,sol,LSMMat,
     v1,v2,v3,x1,y1,z1,x2,y2,z2,x3,y3,z3,
     i,j,k,p,x,y;
 
+#####################################################################
+IndToElem:=function(lst,Lst)         #given lst of 0&1's, extract the elements in Lst corresponding to 1's
+local i,l,out;
+
+if (Length(lst) = Length(Lst)) = false then
+    Print("IndToElem:  Input is wrong!!\n");
+else
+    l:=Length(lst);
+    out := [];
+    for i in [1..l] do
+        if lst[i] = 1 then
+            Append(out,[Lst[i]]);
+        fi;
+    od;
+fi;
+return out;
+end;
 #####################################################################
 MatToPow:=function(mat)            #given 4x4 matrix, output power
 local i, mat33, trans;
@@ -2108,7 +2131,6 @@ trans:=mat*PGMatinv[i];
 
 return Concatenation(List([1..3],x->trans[x,4]),PGind[i]);
 end;
-
 #####################################################################
 GapToPow:=function(i)            #given the index i s.t. mat:=R!.elts[i], output the power
 
@@ -2246,18 +2268,41 @@ elif Length(gs) = 3 then
         
         vallist := List(letters,x->FuncVal(x,[gs[1],gs[2],gs[3]])+FuncVal(x,[gs[1],gs[3],gs[2]])+FuncVal(x,[gs[2],gs[1],gs[3]])+FuncVal(x,[gs[2],gs[3],gs[1]])+FuncVal(x,[gs[3],gs[1],gs[2]])+FuncVal(x,[gs[3],gs[2],gs[1]]));
     
-    elif ((Prodg1g2Pow(gs[2],gs[1]) = Prodg1g2Pow(Invofg(gs[1]),gs[2])) and (Prodg1g2Pow(gs[1],gs[3]) = Prodg1g2Pow(gs[3],gs[1])) and (Prodg1g2Pow(gs[2],gs[3]) = Prodg1g2Pow(gs[3],gs[2]))) then     #Topo inv tildevarphi
+    elif ((Prodg1g2Pow(gs[2],gs[1]) = Prodg1g2Pow(Invofg(gs[1]),gs[2])) and (Prodg1g2Pow(gs[1],gs[3]) = Prodg1g2Pow(gs[3],gs[1])) and (Prodg1g2Pow(gs[2],gs[3]) = Prodg1g2Pow(gs[3],gs[2]))) then     #Topo inv tildevarphi for No. 29,33
         
         vallist := List(letters,x->FuncVal(x,[gs[3],Prodg1g2Pow(gs[1],gs[2]),Prodg1g2Pow(gs[1],Invofg(gs[2]))])+FuncVal(x,[gs[3],gs[1],gs[2]])+FuncVal(x,[gs[3],gs[1],Invofg(gs[2])])+FuncVal(x,[gs[3],gs[2],Invofg(gs[2])])+FuncVal(x,[Prodg1g2Pow(gs[1],gs[2]),gs[3],Prodg1g2Pow(gs[1],Invofg(gs[2]))])+FuncVal(x,[gs[1],gs[3],gs[2]])+FuncVal(x,[gs[1],gs[3],Invofg(gs[2])])+FuncVal(x,[gs[2],gs[3],Invofg(gs[2])])+FuncVal(x,[Prodg1g2Pow(gs[1],gs[2]),Prodg1g2Pow(gs[1],Invofg(gs[2])),gs[3]])+FuncVal(x,[gs[1],gs[2],gs[3]])+FuncVal(x,[gs[1],Invofg(gs[2]),gs[3]])+FuncVal(x,[gs[2],Invofg(gs[2]),gs[3]]));
 
-    elif ((Prodg1g2Pow(gs[3],gs[2]) = Prodg1g2Pow(Invofg(gs[1]),gs[3])) and (Prodg1g2Pow(gs[3],gs[1]) = Prodg1g2Pow(gs[2],gs[3])) and (Prodg1g2Pow(gs[1],gs[2]) = Prodg1g2Pow(gs[2],gs[1]))) then     #Topo inv hatvarphi
+    elif ((Prodg1g2Pow(gs[3],gs[2]) = Prodg1g2Pow(Invofg(gs[1]),gs[3])) and (Prodg1g2Pow(gs[3],gs[1]) = Prodg1g2Pow(gs[2],gs[3])) and (Prodg1g2Pow(gs[1],gs[2]) = Prodg1g2Pow(gs[2],gs[1]))) then     #Topo inv hatvarphi for No. 76 & 78
         
-        vallist := List(letters,x->FuncVal(x,g[1],g[2],Productg1g2Pow(Invofg(g[1]),g[3]))+FuncVal(x,g[2],g[1],Productg1g2Pow(Invofg(g[1]),g[3]))+FuncVal(x,g[1],Productg1g2Pow(Invofg(g[1]),g[3]),g[1])+FuncVal(x,g[2],g[3],g[2])+FuncVal(x,g[3],g[1],g[2])+FuncVal(x,g[3],g[2],g[1]));
+        vallist := List(letters,x->FuncVal(x,[gs[1],gs[2],Prodg1g2Pow(Invofg(gs[1]),gs[3])])+FuncVal(x,[gs[2],gs[1],Prodg1g2Pow(Invofg(gs[1]),gs[3])])+FuncVal(x,[gs[1],Prodg1g2Pow(Invofg(gs[1]),gs[3]),gs[1]])+FuncVal(x,[gs[2],gs[3],gs[2]])+FuncVal(x,[gs[3],gs[1],gs[2]])+FuncVal(x,[gs[3],gs[2],gs[1]]));
+
+    elif ((Prodg1g2Pow(gs[3],gs[1]) = Prodg1g2Pow(Invofg(gs[1]),gs[3])) and (Prodg1g2Pow(gs[3],gs[2]) = Prodg1g2Pow(Invofg(gs[2]),gs[3])) and (Prodg1g2Pow(gs[1],gs[2]) = Prodg1g2Pow(gs[2],gs[1]))) then     #Topo inv hatvarphi for No. 4
+        
+        vallist := List(letters,x->FuncVal(x,[gs[1],gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])])+FuncVal(x,[gs[2],gs[1],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])])+FuncVal(x,[gs[1],Prodg1g2Pow(Invofg(gs[1]),gs[3]),gs[2]])+FuncVal(x,[gs[2],Prodg1g2Pow(Invofg(gs[2]),gs[3]),gs[1]])+FuncVal(x,[gs[3],gs[1],gs[2]])+FuncVal(x,[gs[3],gs[2],gs[1]]));
+
+    elif ((Prodg1g2Pow(gs[3],gs[1]) = Prodg1g2Pow(Invofg(gs[2]),gs[3])) and (Prodg1g2Pow(gs[3],gs[2]) = Prodg1g2Pow(Invofg(gs[1]),gs[3])) and (Prodg1g2Pow(gs[1],gs[2]) = Prodg1g2Pow(gs[2],gs[1]))) then     #Topo inv hatvarphi for No. 9
+        
+        vallist := List(letters,x->FuncVal(x,[gs[1],gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])])+FuncVal(x,[gs[2],gs[1],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])])+FuncVal(x,[gs[1],Prodg1g2Pow(Invofg(gs[1]),gs[3]),gs[1]])+FuncVal(x,[gs[2],Prodg1g2Pow(Invofg(gs[2]),gs[3]),gs[2]])+FuncVal(x,[gs[3],gs[1],gs[2]])+FuncVal(x,[gs[3],gs[2],gs[1]]));
     else
         Print("varphi(g1,g2,g3) is not a topological invariant!!!!\n");
     fi;
+
+elif Length(gs) = 4 then
+    if (Prodg1g2Pow(gs[1],gs[2]) = Prodg1g2Pow(gs[2],gs[1])) and (Prodg1g2Pow(gs[3],gs[1]) = Prodg1g2Pow(Invofg(gs[1]),gs[3])) and (Prodg1g2Pow(gs[2],gs[3]) = Prodg1g2Pow(gs[3],gs[2])) and (Prodg1g2Pow(gs[1],gs[4]) = Prodg1g2Pow(gs[4],gs[1])) and (Prodg1g2Pow(gs[4],gs[2]) = Prodg1g2Pow(Invofg(gs[2]),gs[4])) and (Prodg1g2Pow(gs[3],gs[3]) = gs[2]) and (Prodg1g2Pow(gs[4],gs[4]) = gs[1]) then     #Topo inv varphi3 for No. 19
+        
+        vallist := List(letters,x->FuncVal(x,[gs[2],gs[1],Invofg(gs[1])]) + FuncVal(x,[gs[1],gs[2],Invofg(gs[1])]) + FuncVal(x,[gs[1],Invofg(gs[1]),gs[2]]) + FuncVal(x,[gs[1],gs[2],Invofg(gs[2])])+ FuncVal(x,[gs[2],gs[1],Invofg(gs[2])]) + FuncVal(x,[gs[2],Invofg(gs[2]),gs[1]]) + FuncVal(x,[gs[1],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3]),Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])]) + FuncVal(x,[Prodg1g2Pow(Invofg(gs[2]),gs[3]),gs[1],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])]) + FuncVal(x,[Prodg1g2Pow(Invofg(gs[2]),gs[3]),Prodg1g2Pow(Invofg(gs[2]),gs[3]),gs[1]]) + FuncVal(x,[gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3]),Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])]) + FuncVal(x,[Prodg1g2Pow(Invofg(gs[1]),gs[3]),gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])]) + FuncVal(x,[Prodg1g2Pow(Invofg(gs[1]),gs[3]),Prodg1g2Pow(Invofg(gs[1]),gs[3]),gs[2]]));
+    
+    elif (Prodg1g2Pow(gs[1],gs[2]) = Prodg1g2Pow(gs[2],gs[1])) and (Prodg1g2Pow(gs[3],gs[1]) = Prodg1g2Pow(Invofg(gs[1]),gs[3])) and (Prodg1g2Pow(gs[3],gs[2]) = Prodg1g2Pow(Invofg(gs[2]),gs[3])) and (Prodg1g2Pow(gs[1],gs[4]) = Prodg1g2Pow(gs[4],gs[1])) and (Prodg1g2Pow(gs[4],gs[2]) = Prodg1g2Pow(Invofg(gs[2]),gs[4])) and (Prodg1g2Pow(gs[4],gs[4]) = gs[1]) and (Prodg1g2Pow(gs[4],gs[3]) = Prodg1g2Pow(Prodg1g2Pow(gs[1],gs[2]),Prodg1g2Pow(gs[3],gs[4]))) then     #Topo inv varphi3 for No. 29
+
+        vallist := List(letters,x->FuncVal(x,[gs[2],gs[1],Invofg(gs[1])])+FuncVal(x,[gs[1],gs[2],Invofg(gs[1])])+FuncVal(x,[gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[4]),Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[4])])+FuncVal(x,[Prodg1g2Pow(Invofg(gs[1]),gs[4]),gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[4])])+FuncVal(x,[gs[1],Invofg(gs[1]),gs[2]])+FuncVal(x,[Prodg1g2Pow(Invofg(gs[1]),gs[4]),Prodg1g2Pow(Invofg(gs[1]),gs[4]),gs[2]])+FuncVal(x,[gs[2],gs[1],Prodg1g2Pow(gs[3],gs[4])])+FuncVal(x,[gs[1],gs[2],Prodg1g2Pow(gs[3],gs[4])])+FuncVal(x,[gs[1],Prodg1g2Pow(gs[3],gs[4]),gs[2]])+FuncVal(x,[gs[3],Prodg1g2Pow(Invofg(gs[1]),gs[4]),gs[2]])+FuncVal(x,[Prodg1g2Pow(Invofg(gs[1]),gs[4]),gs[3],gs[2]])+FuncVal(x,[gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[4]),Prodg1g2Pow(Invofg(gs[2]),gs[3])])+FuncVal(x,[Prodg1g2Pow(Invofg(gs[1]),gs[4]),gs[2],Prodg1g2Pow(Invofg(gs[2]),gs[3])])+FuncVal(x,[gs[2],Prodg1g2Pow(Invofg(gs[2]),gs[3]),Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[4])])+FuncVal(x,[gs[3],gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[4])]));
+    
+    elif (Prodg1g2Pow(gs[1],gs[2]) = Prodg1g2Pow(gs[2],gs[1])) and (Prodg1g2Pow(gs[3],gs[1]) = Prodg1g2Pow(Invofg(gs[1]),gs[3])) and (Prodg1g2Pow(gs[3],gs[2]) = Prodg1g2Pow(Invofg(gs[2]),gs[3])) and (Prodg1g2Pow(gs[1],gs[4]) = Prodg1g2Pow(gs[4],gs[1])) and (Prodg1g2Pow(gs[4],gs[2]) = Prodg1g2Pow(Invofg(gs[2]),gs[4])) and (Prodg1g2Pow(gs[4],gs[4]) = gs[1]) and (Prodg1g2Pow(gs[4],gs[3]) = Prodg1g2Pow(gs[1],Prodg1g2Pow(gs[3],gs[4]))) then     #Topo inv varphi3 for No. 33
+        
+        vallist :=
+        List(letters,x->FuncVal(x,[gs[2],gs[1],Invofg(gs[1])])+FuncVal(x,[gs[1],gs[2],Invofg(gs[1])])+FuncVal(x,[gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[4]),Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[4])])+FuncVal(x,[Prodg1g2Pow(Invofg(gs[1]),gs[4]),gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[4])])+FuncVal(x,[gs[1],Invofg(gs[1]),gs[2]])+FuncVal(x,[Prodg1g2Pow(Invofg(gs[1]),gs[4]),Prodg1g2Pow(Invofg(gs[1]),gs[4]),gs[2]])+FuncVal(x,[gs[2],gs[1],Prodg1g2Pow(gs[3],gs[4])])+FuncVal(x,[gs[1],gs[2],Prodg1g2Pow(gs[3],gs[4])])+FuncVal(x,[gs[2],Prodg1g2Pow(gs[3],gs[4]),gs[2]])+FuncVal(x,[gs[1],Prodg1g2Pow(gs[3],gs[4]),gs[2]])+FuncVal(x,[gs[3],Prodg1g2Pow(Invofg(gs[1]),gs[4]),gs[2]])+FuncVal(x,[Prodg1g2Pow(Invofg(gs[1]),gs[4]),gs[3],gs[2]])+FuncVal(x,[gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[4]),Prodg1g2Pow(Invofg(gs[2]),gs[3])])+FuncVal(x,[Prodg1g2Pow(Invofg(gs[1]),gs[4]),gs[2],Prodg1g2Pow(Invofg(gs[2]),gs[3])])+FuncVal(x,[gs[2],Prodg1g2Pow(Invofg(gs[2]),gs[3]),Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[4])])+FuncVal(x,[gs[3],gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[4])]));
+    fi;
 else
-    Print("Number of group elements is not between 1 and 3!!\n");
+    Print("Wrong in checking topological invariant: Number of group elements is not between 1 and 4!!\n");
 fi;
 return GF2ToZ((solrels*vallist)*Z(2));
 end;
@@ -2847,7 +2892,6 @@ Base3Lett := BasesLett[3];
 #Base4Lett := BasesLett[4];
 
 
-
 #Print("Degree-4 generator:", GensGAP[4],"\n");
 #Print("Degree-5 generator:", GensGAP[5],"\n");
 #Print("Degree-6 generator:", GensGAP[6],"\n");
@@ -2863,26 +2907,27 @@ Base3Lett := BasesLett[3];
 
 
 
-
-
 overcomplete_g:=[];
 Mat:=[];
 
+
+
+
 #First: record all the LSM TIs, which have been given in Space_Group_Cocycles.gi
 #
-
-
+#
 for x in IWP[IT] do
     Append(Mat,[TopoInvdeg3(x[2],Base3Lett)]);
     Append(overcomplete_g,[x[2]]);
 od;
 
-Print("LSM topo invariants just added. Now the rank is: ", RankMatrix(Mat*Z(2)),"\n");
+#Print("LSM topo invariants just added. Now the rank is: ", RankMatrix(Mat*Z(2)),"\n");
+#Print(List(LSMMat.vectors,x->GF2ToZ(x)),"\n");
 
-Print(Mat);
 
 
 #Second: find all the non-LSM TIs, which are of one of the following four types:
+#
 #
 for v2 in PGind do
     for x2 in [-2..2] do
@@ -2941,11 +2986,17 @@ od;
 
 
 
-if RankMatrix(Mat*Z(2)) = Length(Base3Lett) then
-    Print("Full Rank achieved: ", RankMatrix(Mat*Z(2)),"=", Length(Base3Lett),".\n");
+if RankMatrix(Mat*Z(2)) = Length(Base3Lett) and RankMatrix(Mat*Z(2)) = Length(Mat) then
+    
+    Print("Full Rank achieved: ", RankMatrix(Mat*Z(2)),"=", Length(Base3Lett)," (LSM Rank = ",Length(IWP[IT]), ").\n");
+    LSMMat := List(TransposedMat(Inverse(Mat*Z(2))),x->GF2ToZ(x));
+    LSMLett := List([1..Length(IWP[IT])],x->LSMMat[x]);
+    Print("LSM:\n");
+    List(LSMLett,x->PrintMonomialString(IndToElem(x,Base3Lett),GensDim1to4,"+",GENNAMES[IT],"\n"));
 
 else
-    Print("Full Rank NOT achieved: ", RankMatrix(Mat*Z(2)),"!=", Length(Base3Lett),".\n");
+    Print("Full Rank NOT achieved: ", RankMatrix(Mat*Z(2)),"!=", Length(Base3Lett), "or", RankMatrix(Mat*Z(2)),"!=", Length(Mat),".\n");
+    Print(Mat*Z(2),"\n");
 fi;
 
 
