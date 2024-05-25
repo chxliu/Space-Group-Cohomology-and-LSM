@@ -2249,7 +2249,10 @@ elif Length(gs) = 3 then
     elif ((Prodg1g2Pow(gs[2],gs[1]) = Prodg1g2Pow(Invofg(gs[1]),gs[2])) and (Prodg1g2Pow(gs[1],gs[3]) = Prodg1g2Pow(gs[3],gs[1])) and (Prodg1g2Pow(gs[2],gs[3]) = Prodg1g2Pow(gs[3],gs[2]))) then     #Topo inv tildevarphi
         
         vallist := List(letters,x->FuncVal(x,[gs[3],Prodg1g2Pow(gs[1],gs[2]),Prodg1g2Pow(gs[1],Invofg(gs[2]))])+FuncVal(x,[gs[3],gs[1],gs[2]])+FuncVal(x,[gs[3],gs[1],Invofg(gs[2])])+FuncVal(x,[gs[3],gs[2],Invofg(gs[2])])+FuncVal(x,[Prodg1g2Pow(gs[1],gs[2]),gs[3],Prodg1g2Pow(gs[1],Invofg(gs[2]))])+FuncVal(x,[gs[1],gs[3],gs[2]])+FuncVal(x,[gs[1],gs[3],Invofg(gs[2])])+FuncVal(x,[gs[2],gs[3],Invofg(gs[2])])+FuncVal(x,[Prodg1g2Pow(gs[1],gs[2]),Prodg1g2Pow(gs[1],Invofg(gs[2])),gs[3]])+FuncVal(x,[gs[1],gs[2],gs[3]])+FuncVal(x,[gs[1],Invofg(gs[2]),gs[3]])+FuncVal(x,[gs[2],Invofg(gs[2]),gs[3]]));
-    
+
+    elif ((Prodg1g2Pow(gs[3],gs[2]) = Prodg1g2Pow(Invofg(gs[1]),gs[3])) and (Prodg1g2Pow(gs[3],gs[1]) = Prodg1g2Pow(gs[2],gs[3])) and (Prodg1g2Pow(gs[1],gs[2]) = Prodg1g2Pow(gs[2],gs[1]))) then     #Topo inv hatvarphi
+        
+        vallist := List(letters,x->FuncVal(x,g[1],g[2],Productg1g2Pow(Invofg(g[1]),g[3]))+FuncVal(x,g[2],g[1],Productg1g2Pow(Invofg(g[1]),g[3]))+FuncVal(x,g[1],Productg1g2Pow(Invofg(g[1]),g[3]),g[1])+FuncVal(x,g[2],g[3],g[2])+FuncVal(x,g[3],g[1],g[2])+FuncVal(x,g[3],g[2],g[1]));
     else
         Print("varphi(g1,g2,g3) is not a topological invariant!!!!\n");
     fi;
@@ -2595,7 +2598,7 @@ elif IT=105 then
     funcs:=[[Ampin105,Amin105,Axyin105],[Bdeltain105,Bczin105,Bxyin105,Bzxyin105],[]];
 elif IT=106 then
     PGGen:=[C2106,Mp106,M106];
-    funcs:=[[Ampin106,Amin106],[Bdeltain106,B2in106,B3in106],[C1in106,C2in106]];
+    funcs:=[[Ampin106,Amin106],[Bdeltain106,Bphi1in106,Bphi2in106],[C1in106,C2in106]];
 elif IT=107 then
     PGGen:=[C2107,Mp107,M107];
     funcs:=[[Ampin107,Amin107,Axyzin107],[Bdeltain107,Bphiin107,Bxyzin107],[CGAPin107]];
@@ -2628,7 +2631,7 @@ elif IT=116 then
     funcs:=[[Acpin116,Amin116,Axyin116],[Bdeltain116,Bxyin116,Bcpzin116],[]];
 elif IT=117 then
     PGGen:=[C2117,C2p117,M117];
-    funcs:=[[Acpin117,Amin117,Azin117],[Bdeltain117,B2in117],[CGAPin117]];
+    funcs:=[[Acpin117,Amin117,Azin117],[Bdeltain117,Bphiin117],[CGAPin117]];
 elif IT=118 then
     PGGen:=[C2118,C2p118,M118];
     funcs:=[[Acpin118,Amin118,Axyzin118],[Bdeltain118],[CGAPin118]];
@@ -2637,7 +2640,7 @@ elif IT=119 then
     funcs:=[[Acpin119,Amin119,Axyzin119],[Bdeltain119,Bphiin119,Bzxyin119],[C1in119,C2in119]];
 elif IT=120 then
     PGGen:=[C2120,C2p120,M120];
-    funcs:=[[Acpin120,Amin120,Axyzin120],[Bdeltain120,B2in120],[]];
+    funcs:=[[Acpin120,Amin120,Axyzin120],[Bdeltain120,Bzxyin120],[]];
 elif IT=121 then
     PGGen:=[C2121,C2p121,M121];
     funcs:=[[Acpin121,Amin121,Axyzin121],[Bdeltain121,Bxyzin121,Bphiin121],[CGAPin121]];
@@ -2655,7 +2658,7 @@ elif IT=125 then
     funcs:=[[Aiin125,Amin125,Acpin125,Azin125],[Bdeltain125,Bcxyin125],[]];
 elif IT=126 then
     PGGen:=[C2126,C2p126,M126,P126];
-    funcs:=[[Aiin126,Acpin126,Amin126,Axyin126,Azin126],[Bdeltain126,Bcmxyin126,Bcmxyzin126],[CGAPin126]];
+    funcs:=[[Aiin126,Acpin126,Amin126],[Bdeltain126,Bcmxyin126,Bcmxyzin126],[CGAPin126]];
 elif IT=127 then
     PGGen:=[C2127,C2p127,M127,P127];
     funcs:=[[Aiin127,Amin127,Acpin127,Azin127],[Bdeltain127,Bphiin127],[CGAPin127]];
@@ -2688,7 +2691,7 @@ elif IT=136 then
     funcs:=[[Aiin136,Amin136,Acpin136],[Bdeltain136,Bcxyin136,Bpxyzin136,Bmzin136],[CGAP1in136,CGAP2in136]];
 elif IT=137 then
     PGGen:=[C2137,C2p137,M137,P137];
-    funcs:=[[Aiin137,Acpin137,Amin137,Axyin137,Azin137],[Bdeltain137,Bcxyin137,Bczin137],[CGAPin137]];
+    funcs:=[[Aiin137,Acpin137,Amin137],[Bdeltain137,Bcxyin137,Bczin137],[CGAPin137]];
 elif IT=138 then
     PGGen:=[C2138,C2p138,M138,P138];
     funcs:=[[Aiin138,Amin138,Acpin138],[Bdeltain138,Bmzin138,Bcxyin138,Bpxyzin138],[]];
@@ -2862,12 +2865,6 @@ Base3Lett := BasesLett[3];
 
 
 
-
-
-
-
-if 1 = 0 then
-
 overcomplete_g:=[];
 Mat:=[];
 
@@ -2875,7 +2872,7 @@ Mat:=[];
 #
 
 
-for x in LSM_TI[IT] do
+for x in IWP[IT] do
     Append(Mat,[TopoInvdeg3(x[2],Base3Lett)]);
     Append(overcomplete_g,[x[2]]);
 od;
@@ -2951,7 +2948,7 @@ else
     Print("Full Rank NOT achieved: ", RankMatrix(Mat*Z(2)),"!=", Length(Base3Lett),".\n");
 fi;
 
-fi;
+
 
 return true;
 end;
