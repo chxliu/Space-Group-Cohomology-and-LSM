@@ -3,6 +3,41 @@ LoadPackage("HAP");
 Read("~/Downloads/Space_Group_Cocycles.gi");
 
 
+#Functions in this module:
+#
+#GF2ToZ
+#Letter2Monomial
+#PrintMonomialString
+#CR_Mod2CocyclesAndCoboundaries
+#Mod2CupProduct
+#Mod2RingGenerators
+#Mod2RingGensAndRels
+#PointGroupTranslationExtension
+#SpaceGroupCohomologyRingGapInterface
+
+
+
+#####################################################################
+#####################################################################
+
+GF2ToZ:=function(v)
+local v0,k;
+
+v0:=[];
+for k in [1..Length(v)] do
+    if v[k] = 0*Z(2) then
+    v0[k]:=0;
+    else
+        v0[k]:=1;
+    fi;
+od;
+
+return v0;
+end;
+
+#####################################################################
+######################################################################
+
 
 #####################################################################
 #####################################################################
@@ -91,7 +126,6 @@ local
 	#Smith, SmithRecord, TorsionCoefficients,
 	ColMat, InvColMat,
 	RemoveRowsMat, InsertRowsList,
-    GF2ToZ,
 	CycleToClass, ClassToCycle,
 	i, j, k, x, sum;
 
@@ -106,21 +140,7 @@ if n <0 then return false; fi;
 if n=0 then return [0]; fi;
 
 #####################################################################
-GF2ToZ:=function(v)
-local v0,k;
 
-v0:=[];
-for k in [1..Length(v)] do
-    if v[k] = 0*Z(2) then
-    v0[k]:=0;
-    else
-        v0[k]:=1;
-    fi;
-od;
-
-return v0;
-end;
-#####################################################################
 
 
 	################CONSTRUCT BOUNDARY MATRICES M1 AND M2########
@@ -349,7 +369,7 @@ local
         Gens, GensBasis, GensBasis1ton, Cups, Cupped, cupped, CuppedBasis, spacedim,
         uCocycle, vCocycle, uvCocycle, ww, uChainMap,
         sol, CB, CohomologyBasis, TR,
-        BasisP, BasisQ, GF2ToZ,
+        BasisP, BasisQ,
         i, j, p, q, u, v, ln, iu, iv, w, x, sw;
 
 #This function computes, for a given n, the generators at degree 1,2,...,n.
@@ -395,21 +415,7 @@ od;
 return Basis;
 end;
 #####################################################################
-GF2ToZ:=function(v)
-local v0,k;
 
-v0:=[];
-for k in [1..Length(v)] do
-    if v[k] = 0*Z(2) then
-    v0[k]:=0;
-    else
-        v0[k]:=1;
-    fi;
-od;
-
-return v0;
-end;
-#####################################################################
 
 
 CB:=[];
@@ -515,7 +521,7 @@ local
         Lett1, Lett2, mono, IO,
         uCocycle, vCocycle, uvCocycle, uChainMap, ww,
         sol, solrel, cc, CB, CohomologyBasis, TR,
-        BasisP, BasisQ, SmithRecord, GF2ToZ, IToPosition,
+        BasisP, BasisQ, SmithRecord, IToPosition,
         #NonNegativeVec,
         i,p,q,r,s,t,u,v,w,x, ln, rk, rk1, ip,iq,ir,is,it,iu,iv, sw;
 
@@ -603,21 +609,6 @@ od;
 return Basis;
 end;
 #####################################################################
-GF2ToZ:=function(v)
-local v0,k;
-
-v0:=[];
-for k in [1..Length(v)] do
-    if v[k] = 0*Z(2) then
-    v0[k]:=0;
-    else
-        v0[k]:=1;
-    fi;
-od;
-
-return v0;
-end;
-######################################################################
 IToPosition:=function(v)
 local v0,k;
 
@@ -2079,6 +2070,89 @@ end;
 
 
 
+#####################################################################
+#####################################################################
+
+PointGroupTranslationExtension:=function(arg)
+local
+    Gs,arithmeticNo,ZZZ,Gpt,R,
+    T1,T2,T3,elem,eleml,conjT1,conjT2,conjT3,
+    i,j,k,l,rep,rep1,flag;
+    
+#Z1:=Group([()]);
+#Z2:=Group([(1,2)]);
+#Z2Z2:=Group([(1,2),(3,4)]);
+#Z2Z2Z2:=Group([(1,2),(3,4),(5,6)]);
+#Z4:=Group([(1,2),(1,2,3,4)]);
+#Z4Z2:=Group([(1,2),(1,2,3,4),(5,6)]);
+#Dih4:=Group([(1,3)(2,4),(1,3)(5,6),(1,4)(2,3)(5,6)]);
+#Dih4Z2:=Group([(1,3)(2,4),(1,3)(5,6),(1,4)(2,3)(5,6),(7,8)]);
+#Z3:=Group([(1,2,3)]);
+#Z3Z2:=Group([(1,2,3),(4,5)]);
+#Dih3:=Group([(1,2,3),(2,3)(4,5)]);
+#Dih3Z2:=Group([(1,2,3),(2,3)(4,5),(6,7)]);
+#Z3Z2Z2:=Group([(1,2,3),(4,5),(6,7)]);
+#Dih3Z2Z2:=Group([(1,2,3),(6,7),(2,3)(4,5),(8,9)]);
+#A4:=Group([(1,2)(3,4),(1,3)(2,4),(1,2,3)]);
+#A4Z2:=Group([(1,2)(3,4),(1,3)(2,4),(1,2,3),(5,6)]);
+#S4:=Group([(1,2)(3,4),(1,3)(2,4),(1,2,3),(1,2)]);
+#S4Z2:=Group([(1,2)(3,4),(1,3)(2,4),(1,2,3),(1,2),(5,6)]);
+
+Gs:=[Group([(1,2)]),Group([(1,2),(3,4)]),Group([(1,2),(3,4),(5,6)]),Group([(1,3)(2,4),(1,2,3,4)]),Group([(1,3)(2,4),(1,2,3,4),(5,6)]),Group([(1,3)(2,4),(1,3)(5,6),(1,4)(2,3)(5,6)]),Group([(1,3)(2,4),(1,3)(5,6),(1,4)(2,3)(5,6),(7,8)]),Group([(1,2,3)]),Group([(1,2,3),(4,5)]),Group([(1,2,3),(2,3)(4,5)]),Group([(1,2,3),(2,3)(4,5),(6,7)]),Group([(1,2,3),(4,5),(6,7)]),Group([(1,2,3),(6,7),(2,3)(4,5),(8,9)]),Group([(1,2)(3,4),(1,3)(2,4),(1,2,3)]),Group([(1,2)(3,4),(1,3)(2,4),(1,2,3),(5,6)]),Group([(1,2)(3,4),(1,3)(2,4),(1,2,3),(1,2)]),Group([(1,2)(3,4),(1,3)(2,4),(1,2,3),(1,2),(5,6)])];
+
+arithmeticNo:=[[[2],[3,4],[5],[6,7],[8,9]],[[10,11,13,14],[12,15],[16,17,18,19],[20,21],[22],[23,24],[25,26,27,28,29,30,31,32,33,34],[35,36,37],[38,39,40,41],[42,43],[44,45,46]],[[47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62],[63,64,65,66,67,68],[69,70],[71,72,73,74]],[[75,76,77,78],[79,80],[81],[82]],[[83,84,85,86],[87,88]],[[89,90,91,92,93,94,95,96],[97,98],[99,100,101,102,103,104,105,106],[107,108,109,110],[111,112,113,114],[115,116,117,118],[119,120],[121,122]],[[123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138],[139,140,141,142]],[[143,144,145],[146]],[[147],[148],[168,169,170,171,172,173],[174]],[[149],[150,151,152,153,154],[155],[156],[157,158,159],[160,161]],[[162,163],[164,165],[166,167],[177,178,179,180,181,182],[183,184,185,186],[187,188],[189,190]],[[175,176]],[[191,192,193,194]],[[195],[196],[197,198,199]],[[200,201],[202,203],[204,205,206]],[[207,208],[209,210],[211,212,213,214],[215],[216],[217,218,219,220]],[[221,222,223,224],[225,226,227,228],[229,230]]];
+
+ZZZ:=GL(3,Integers);;
+
+T1:=[[1,0,0,1],[0,1,0,0],[0,0,1,0],[0,0,0,1]]; #standard translation T1
+T2:=[[1,0,0,0],[0,1,0,1],[0,0,1,0],[0,0,0,1]]; #standard translation T2
+T3:=[[1,0,0,0],[0,1,0,0],[0,0,1,1],[0,0,0,1]]; #standard translation T3
+
+Print("Group Extension Information for the 73 Arithmetic Classes Carrying Representation rho:\n");
+Print("H^2_rho(PG,Z^3):\n");
+
+for i in [1..7] do
+    Gpt:=Gs[i];
+    R:=ResolutionFiniteGroup(Gpt,4);
+    for j in [1..Length(arithmeticNo[i])] do
+        flag := arithmeticNo[i][j][1];
+        
+        for k in arithmeticNo[i][j] do
+            for l in [1..Length(PGGens230[k])] do
+                elem := List([1..3],x->List([1..3],y->PGGens230[flag][l][x][y]));
+                eleml := List([1..3],x->List([1..3],y->PGGens230[k][l][x][y]));
+                if (elem = eleml) = false then
+                    Print("point group generators not chosen consistently with others in the same arithmetic class!\n");
+                fi;
+            od;
+        od;
+        
+        rep := [];
+        for elem in PGGens230[flag] do
+            conjT1 := elem * T1 * elem^(-1);
+            conjT2 := elem * T2 * elem^(-1);
+            conjT3 := elem * T3 * elem^(-1);
+            Append(rep,[[[conjT1[1,4],conjT2[1,4],conjT3[1,4]],[conjT1[2,4],conjT2[2,4],conjT3[2,4]],[conjT1[3,4],conjT2[3,4],conjT3[3,4]]]]);
+        od;
+        
+        Homo := GroupHomomorphismByImages(Gpt,ZZZ,GeneratorsOfGroup(Gpt),rep);
+        C:=HomToIntegralModule(R,Homo);
+        if Length(arithmeticNo[i][j]) = 1 then
+            Print("No. ", arithmeticNo[i][j][1],": ", Cohomology(C,2),"  ");
+        elif List([1..Length(arithmeticNo[i][j])],x->arithmeticNo[i][j][x]) = List([1..Length(arithmeticNo[i][j])],x->arithmeticNo[i][j][1]+x-1) then
+            Print("No. ", arithmeticNo[i][j][1],"-", arithmeticNo[i][j][Length(arithmeticNo[i][j])],": ", Cohomology(C,2),"  ");
+        else
+            Print("No. ", JoinStringsWithSeparator(List([1..Length(arithmeticNo[i][j])],x->String(arithmeticNo[i][j][x])),"&"),": ", Cohomology(C,2),"  ");
+        fi;
+    od;
+    Print("\n");
+od;
+
+return true;
+end;
+#####################################################################
+#####################################################################
+
 
 
 
@@ -2095,7 +2169,7 @@ local
     G,Gp,R,CB,
     MatToPow,GapToPow,Fbarhomotopyindinv,Invofg,Prodg1g2Pow,IndToElem,
     Homotopydeg1,Homotopydeg2,Homotopydeg3,Homotopydeg4,
-    func,funcs,receive,FuncVal,GF2ToZ,TopoInvdeg3,
+    func,funcs,receive,FuncVal,TopoInvdeg3,
     Gen1, Gen2, Gen3, Gen4, GensGAP, GensDim1to4, GensDeg1to4,
     BasesLett, Base1Lett, Base2Lett, Base3Lett, Base4Lett, LSMLett,
     g1,g2,g3,overcomplete_g,Mat,mat1,mat2,vec,sol,LSMMat,
@@ -2162,21 +2236,6 @@ end;
 Fbarhomotopyindinv:=function(i,lst)            #This is the function Fbarhomotopyindinv in Mathematica
 
 return List(lst,x->Concatenation(x,[i]));
-end;
-#####################################################################
-GF2ToZ:=function(v)
-local v0,k;
-
-v0:=[];
-for k in [1..Length(v)] do
-    if v[k] = 0*Z(2) then
-    v0[k]:=0;
-    else
-        v0[k]:=1;
-    fi;
-od;
-
-return v0;
 end;
 #####################################################################
 FuncVal:=function(lett,v)                #Given a monomial of degree 1, 2, or 3, and argument (for the degree 3 monomial, the argument is either g1,g1,g1 or g1, g2, g2 or g1, g2, g3), evaluate the cocycle.
@@ -2326,432 +2385,9 @@ PGind := [];
 #Read("~/Downloads/Space_Group_Cocycles.gi");
 
 
-if IT=1 then
-    PGGen:=[];
-    funcs:=[[Axin1,Ayin1,Azin1],[],[]];
-elif IT=2 then
-    PGGen:=[P2];
-    funcs:=[[Aiin2,Axin2,Ayin2,Azin2],[],[]];
-elif IT=3 then
-    PGGen:=[C23];
-    funcs:=[[Acin3,Axin3,Ayin3,Azin3],[],[]];
-elif IT=4 then
-    PGGen:=[C24];
-    funcs:=[[Acin4,Axin4,Azin4],[],[]];
-elif IT=5 then
-    PGGen:=[C25];
-    funcs:=[[Acin5,Axyin5,Azin5],[Bxyin5],[]];
-elif IT=6 then
-    PGGen:=[M6];
-    funcs:=[[Amin6,Axin6,Ayin6,Azin6],[],[]];
-elif IT=7 then
-    PGGen:=[M7];
-    funcs:=[[Amin7,Axin7,Ayin7],[],[]];
-elif IT=8 then
-    PGGen:=[M8];
-    funcs:=[[Amin8,Axyin8,Azin8],[Bxyin8],[]];
-elif IT=9 then
-    PGGen:=[M9];
-    funcs:=[[Amin9,Axyin9],[Bxyin9,Bzxyin9],[]];
-elif IT=10 then
-    PGGen:=[C210,P10];
-    funcs:=[[Acin10,Aiin10,Axin10,Ayin10,Azin10],[],[]];
-elif IT=11 then
-    PGGen:=[C211,P11];
-    funcs:=[[Acin11,Aiin11,Axin11,Azin11],[],[]];
-elif IT=12 then
-    PGGen:=[C212,P12];
-    funcs:=[[Acin12,Aiin12,Axyin12,Azin12],[Bxyin12],[]];
-elif IT=13 then
-    PGGen:=[C213,P13];
-    funcs:=[[Acin13,Aiin13,Axin13,Ayin13],[],[]];
-elif IT=14 then
-    PGGen:=[C214,P14];
-    funcs:=[[Acin14,Aiin14,Axin14],[Bphiin14],[]];
-elif IT=15 then
-    PGGen:=[C215,P15];
-    funcs:=[[Acin15,Aiin15,Axyin15],[Bxyin15,Bzxyin15],[]];
-elif IT=16 then
-    PGGen:=[C216,C2p16];
-    funcs:=[[Acin16,Acpin16,Axin16,Ayin16,Azin16],[],[]];
-elif IT=17 then
-    PGGen:=[C217,C2p17];
-    funcs:=[[Acin17,Acpin17,Axin17,Ayin17],[],[]];
-elif IT=18 then
-    PGGen:=[C218,C2p18];
-    funcs:=[[Acin18,Acpin18,Azin18],[Bphiin18],[]];
-elif IT=19 then
-    PGGen:=[C219,C2p19];
-    funcs:=[[Acin19,Acpin19],[Bphi1in19,Bphi2in19],[]];
-elif IT=20 then
-    PGGen:=[C220,C2p20];
-    funcs:=[[Acin20,Acpin20,Axyin20],[Bxyin20],[]];
-elif IT=21 then
-    PGGen:=[C221,C2p21];
-    funcs:=[[Acin21,Acpin21,Axyin21,Azin21],[Bxyin21],[]];
-elif IT=22 then
-    PGGen:=[C222,C2p22];
-    funcs:=[[Acin22,Acpin22,Axyin22,Axzin22],[],[Cgamma1in22,Cgamma2in22]];
-elif IT=23 then
-    PGGen:=[C223,C2p23];
-    funcs:=[[Acin23,Acpin23,Axyzin23],[Bphiin23,Bxyzin23,Byxzin23],[Cxyzin23]];
-elif IT=24 then
-    PGGen:=[C224,C2p24];
-    funcs:=[[Acin24,Acpin24,Axyzin24],[Byxzin24,Bzxyin24],[]];
-elif IT=25 then
-    PGGen:=[C225,M25];
-    funcs:=[[Acin25,Amin25,Axin25,Ayin25,Azin25],[],[]];
-elif IT=26 then
-    PGGen:=[C226,M26];
-    funcs:=[[Acin26,Amin26,Axin26,Ayin26],[],[]];
-elif IT=27 then
-    PGGen:=[C227,M27];
-    funcs:=[[Acin27,Amin27,Axin27,Ayin27],[],[]];
-elif IT=28 then
-    PGGen:=[C228,M28];
-    funcs:=[[Acin28,Amin28,Ayin28,Azin28],[],[]];
-elif IT=29 then
-    PGGen:=[C229,M29];
-    funcs:=[[Acin29,Amin29,Ayin29],[],[]];
-elif IT=30 then
-    PGGen:=[C230,M30];
-    funcs:=[[Acin30,Amin30,Axin30],[Bphiin30],[]];
-elif IT=31 then
-    PGGen:=[C231,M31];
-    funcs:=[[Acin31,Amin31,Ayin31],[Bphiin31],[]];
-elif IT=32 then
-    PGGen:=[C232,M32];
-    funcs:=[[Acin32,Amin32,Azin32],[Bphiin32],[]];
-elif IT=33 then
-    PGGen:=[C233,M33];
-    funcs:=[[Acin33,Amin33],[Bphi1in33,Bphi2in33],[]];
-elif IT=34 then
-    PGGen:=[C234,M34];
-    funcs:=[[Acin34,Amin34,Axyzin34],[],[]];
-elif IT=35 then
-    PGGen:=[C235,M35];
-    funcs:=[[Acin35,Amin35,Axyin35,Azin35],[Bxyin35],[]];
-elif IT=36 then
-    PGGen:=[C236,M36];
-    funcs:=[[Acin36,Amin36,Axyin36],[Bxyin36],[]];
-elif IT=37 then
-    PGGen:=[C237,M37];
-    funcs:=[[Acin37,Amin37,Axyin37],[Bxyin37,Bzxyin37],[]];
-elif IT=38 then
-    PGGen:=[C238,M38];
-    funcs:=[[Acin38,Amin38,Axin38,Ayzin38],[Bxyin38],[]];
-elif IT=39 then
-    PGGen:=[C239,M39];
-    funcs:=[[Acin39,Amin39,Axin39,Ayzin39],[],[]];
-elif IT=40 then
-    PGGen:=[C240,M40];
-    funcs:=[[Acin40,Amin40,Ayzin40],[Bxyin40,Bzxyin40],[]];
-elif IT=41 then
-    PGGen:=[C241,M41];
-    funcs:=[[Acin41,Amin41,Ayzin41],[],[Cin41]];
-elif IT=42 then
-    PGGen:=[C242,M42];
-    funcs:=[[Acin42,Amin42,Axzin42,Ayzin42],[],[Cin42]];
-elif IT=43 then
-    PGGen:=[C243,M43];
-    funcs:=[[Acin43,Amin43],[Bxyxzyzin43],[Cin43]];
-elif IT=44 then
-    PGGen:=[C244,M44];
-    funcs:=[[Acin44,Amin44,Axyzin44],[Bphiin44,Bxyzin44,Byxzin44],[Cxyzin44]];
-elif IT=45 then
-    PGGen:=[C245,M45];
-    funcs:=[[Acin45,Amin45,Axyzin45],[Bzxyin45],[]];
-elif IT=46 then
-    PGGen:=[C246,M46];
-    funcs:=[[Acin46,Amin46,Axyzin46],[Byxzin46,Bzxyin46],[]];
-elif IT=47 then
-    PGGen:=[C247,C2p47,P47];
-    funcs:=[[Aiin47,Acpin47,Acin47,Axin47,Ayin47,Azin47],[],[]];
-elif IT=48 then
-    PGGen:=[C248,C2p48,P48];
-    funcs:=[[Aiin48,Acpin48,Acin48,Axyzin48],[],[]];
-elif IT=49 then
-    PGGen:=[C249,C2p49,P49];
-    funcs:=[[Aiin49,Acpin49,Acin49,Axin49,Ayin49],[],[]];
-elif IT=50 then
-    PGGen:=[C250,C2p50,P50];
-    funcs:=[[Aiin50,Acpin50,Acin50,Azin50],[Bphiin50],[]];
-elif IT=51 then
-    PGGen:=[C251,C2p51,P51];
-    funcs:=[[Aiin51,Acpin51,Acin51,Ayin51,Azin51],[],[]];
-elif IT=52 then
-    PGGen:=[C252,C2p52,P52];
-    funcs:=[[Aiin52,Acpin52,Acin52],[Bphi1in52,Bphi2in52],[]];
-elif IT=53 then
-    PGGen:=[C253,C2p53,P53];
-    funcs:=[[Aiin53,Acpin53,Acin53,Ayin53],[Bphiin53],[]];
-elif IT=54 then
-    PGGen:=[C254,C2p54,P54];
-    funcs:=[[Aiin54,Acpin54,Acin54,Ayin54],[],[]];
-elif IT=55 then
-    PGGen:=[C255,C2p55,P55];
-    funcs:=[[Aiin55,Acpin55,Acin55,Azin55],[Bphiin55],[]];
-elif IT=56 then
-    PGGen:=[C256,C2p56,P56];
-    funcs:=[[Aiin56,Acpin56,Acin56],[Bphi1in56,Bphi2in56],[]];
-elif IT=57 then
-    PGGen:=[C257,C2p57,P57];
-    funcs:=[[Aiin57,Acpin57,Acin57,Axin57],[],[]];
-elif IT=58 then
-    PGGen:=[C258,C2p58,P58];
-    funcs:=[[Aiin58,Acpin58,Acin58],[Bphi1in58,Bphi2in58,Bphi3in58],[Cin58]];
-elif IT=59 then
-    PGGen:=[C259,C2p59,P59];
-    funcs:=[[Aiin59,Acpin59,Acin59,Azin59],[Bphiin59],[]];
-elif IT=60 then
-    PGGen:=[C260,C2p60,P60];
-    funcs:=[[Aiin60,Acpin60,Acin60],[Bphiin60],[]];
-elif IT=61 then
-    PGGen:=[C261,C2p61,P61];
-    funcs:=[[Aiin61,Acpin61,Acin61],[],[Cin61]];
-elif IT=62 then
-    PGGen:=[C262,C2p62,P62];
-    funcs:=[[Aiin62,Acpin62,Acin62],[Bphi1in62,Bphi2in62],[]];
-elif IT=63 then
-    PGGen:=[C263,C2p63,P63];
-    funcs:=[[Aiin63,Acpin63,Acin63,Axyin63],[Bxyin63],[]];
-elif IT=64 then
-    PGGen:=[C264,C2p64,P64];
-    funcs:=[[Aiin64,Acpin64,Acin64,Axyin64],[],[Cin64]];
-elif IT=65 then
-    PGGen:=[C265,C2p65,P65];
-    funcs:=[[Aiin65,Acpin65,Acin65,Axyin65,Azin65],[Bxyin65],[]];
-elif IT=66 then
-    PGGen:=[C266,C2p66,P66];
-    funcs:=[[Aiin66,Acpin66,Acin66,Axyin66],[Bxyin66,Bzxyin66],[]];
-elif IT=67 then
-    PGGen:=[C267,C2p67,P67];
-    funcs:=[[Aiin67,Acpin67,Acin67,Axyin67,Azin67],[],[]];
-elif IT=68 then
-    PGGen:=[C268,C2p68,P68];
-    funcs:=[[Aiin68,Acpin68,Acin68,Axyin68],[],[Cin68]];
-elif IT=69 then
-    PGGen:=[C269,C2p69,P69];
-    funcs:=[[Aiin69,Acpin69,Acin69,Axzin69,Ayzin69],[],[Cin69]];
-elif IT=70 then
-    PGGen:=[C270,C2p70,P70];
-    funcs:=[[Aiin70,Acpin70,Acin70],[Bxyxzyzin70],[Cin70]];
-elif IT=71 then
-    PGGen:=[C271,C2p71,P71];
-    funcs:=[[Aiin71,Acpin71,Acin71,Axyzin71],[Bphiin71,Bxyzin71,Byxzin71],[Cxyzin71]];
-elif IT=72 then
-    PGGen:=[C272,C2p72,P72];
-    funcs:=[[Aiin72,Acpin72,Acin72,Axyzin72],[Bzxyin72],[]];
-elif IT=73 then
-    PGGen:=[C273,C2p73,P73];
-    funcs:=[[Aiin73,Acpin73,Acin73,Axyzin73],[],[]];
-elif IT=74 then
-    PGGen:=[C274,C2p74,P74];
-    funcs:=[[Aiin74,Acpin74,Acin74,Axyzin74],[Byxzin74,Bzxyin74],[]];
-elif IT=75 then
-    PGGen:=[C275,C475];
-    funcs:=[[Aqin75,Axyin75,Azin75],[Bdeltain75,Bxyin75],[]];
-elif IT=76 then
-    PGGen:=[C276,C476];
-    funcs:=[[Aqin76,Axyin76],[Bxyin76],[]];
-elif IT=77 then
-    PGGen:=[C277,C477];
-    funcs:=[[Aqin77,Axyin77,Azin77],[Bxyin77],[]];
-elif IT=78 then
-    PGGen:=[C278,C478];
-    funcs:=[[Aqin78,Axyin78],[Bxyin78],[]];
-elif IT=79 then
-    PGGen:=[C279,C479];
-    funcs:=[[Aqin79,Axyzin79],[Bdeltain79,B2in79,B3in79],[C1in79,C2in79]];
-elif IT=80 then
-    PGGen:=[C280,C480];
-    funcs:=[[Aqin80,Axyzin80],[Bxyzin80],[CGAPin80]];
-elif IT=81 then
-    PGGen:=[C281,C481];
-    funcs:=[[Aqin81,Axyin81,Azin81],[Bdeltain81,Bxyin81],[]];
-elif IT=82 then
-    PGGen:=[C282,C482];
-    funcs:=[[Aqin82,Axyzin82],[Bdeltain82,B2in82,Bzxyin82],[C1in82,C2in82]];
-elif IT=83 then
-    PGGen:=[C283,C483,P83];
-    funcs:=[[Aiin83,Aqin83,Axyin83,Azin83],[Bdeltain83,Bxyin83],[]];
-elif IT=84 then
-    PGGen:=[C284,C484,P84];
-    funcs:=[[Aiin84,Aqin84,Axyin84],[Bdeltain84,Bczin84,Bxyin84,Bzxyin84],[]];
-elif IT=85 then
-    PGGen:=[C285,C485,P85];
-    funcs:=[[Aiin85,Aqin85,Azin85],[Bdeltain85,Bcxyin85],[]];
-elif IT=86 then
-    PGGen:=[C286,C486,P86];
-    funcs:=[[Aiin86,Aqin86,Axyzin86],[Bdeltain86],[]];
-elif IT=87 then
-    PGGen:=[C287,C487,P87];
-    funcs:=[[Aiin87,Aqin87,Axyzin87],[Bdeltain87,Bphiin87,Bxyzin87],[CGAPin87]];
-elif IT=88 then
-    PGGen:=[C288,C488,P88];
-    funcs:=[[Aiin88,Aqin88],[Bdeltain88,Bxyzin88],[Cin88]];
-elif IT=89 then
-    PGGen:=[C289,C2p89,C2pp89];
-    funcs:=[[Acpin89,Acppin89,Axyin89,Azin89],[Bdeltain89,Bxyin89],[]];
-elif IT=90 then
-    PGGen:=[C290,C2p90,C2pp90];
-    funcs:=[[Acpin90,Acppin90,Azin90],[Bdeltain90,Bphiin90],[CGAPin90]];
-elif IT=91 then
-    PGGen:=[C291,C2p91,C2pp91];
-    funcs:=[[Acpin91,Acppin91,Axyin91],[Bxyin91],[]];
-elif IT=92 then
-    PGGen:=[C292,C2p92,C2pp92];
-    funcs:=[[Acpin92,Acppin92],[Bphiin92],[CGAPin92]];
-elif IT=93 then
-    PGGen:=[C293,C2p93,C2pp93];
-    funcs:=[[Acpin93,Acppin93,Axyin93,Azin93],[Bxyin93],[]];
-elif IT=94 then
-    PGGen:=[C294,C2p94,C2pp94];
-    funcs:=[[Acpin94,Acppin94,Azin94],[Bphiin94],[CGAPin94]];
-elif IT=95 then
-    PGGen:=[C295,C2p95,C2pp95];
-    funcs:=[[Acpin95,Acppin95,Axyin95],[Bxyin95],[]];
-elif IT=96 then
-    PGGen:=[C296,C2p96,C2pp96];
-    funcs:=[[Acpin96,Acppin96],[Bphiin96],[CGAPin96]];
-elif IT=97 then
-    PGGen:=[C297,C2p97,C2pp97];
-    funcs:=[[Acpin97,Acppin97,Axyzin97],[Bdeltain97,B2in97,B3in97],[C1in97,C2in97]];
-elif IT=98 then
-    PGGen:=[C298,C2p98,C2pp98];
-    funcs:=[[Acpin98,Acppin98,Axyzin98],[Bxyzin98],[CGAPin98]];
-elif IT=99 then
-    PGGen:=[C299,Mp99,M99];
-    funcs:=[[Ampin99,Amin99,Axyin99,Azin99],[Bdeltain99,Bxyin99],[]];
-elif IT=100 then
-    PGGen:=[C2100,Mp100,M100];
-    funcs:=[[Ampin100,Amin100,Azin100],[Bdeltain100,Bphiin100],[CGAPin100]];
-elif IT=101 then
-    PGGen:=[C2101,Mp101,M101];
-    funcs:=[[Ampin101,Amin101,Axyin101],[Bdeltain101,Bmzin101,Bxyin101],[]];
-elif IT=102 then
-    PGGen:=[C2102,Mp102,M102];
-    funcs:=[[Ampin102,Amin102,Axyzin102],[Bdeltain102],[CGAPin102]];
-elif IT=103 then
-    PGGen:=[C2103,Mp103,M103];
-    funcs:=[[Ampin103,Amin103,Axyin103],[Bdeltain103,Bxyin103],[]];
-elif IT=104 then
-    PGGen:=[C2104,Mp104,M104];
-    funcs:=[[Ampin104,Amin104],[Bdeltain104,Bcxyin104,Bcxyzin104],[C1GAPin104,C2GAPin104]];
-elif IT=105 then
-    PGGen:=[C2105,Mp105,M105];
-    funcs:=[[Ampin105,Amin105,Axyin105],[Bdeltain105,Bczin105,Bxyin105,Bzxyin105],[]];
-elif IT=106 then
-    PGGen:=[C2106,Mp106,M106];
-    funcs:=[[Ampin106,Amin106],[Bdeltain106,Bphi1in106,Bphi2in106],[C1in106,C2in106]];
-elif IT=107 then
-    PGGen:=[C2107,Mp107,M107];
-    funcs:=[[Ampin107,Amin107,Axyzin107],[Bdeltain107,Bphiin107,Bxyzin107],[CGAPin107]];
-elif IT=108 then
-    PGGen:=[C2108,Mp108,M108];
-    funcs:=[[Ampin108,Amin108,Axyzin108],[Bdeltain108,Bxyzin108],[]];
-elif IT=109 then
-    PGGen:=[C2109,Mp109,M109];
-    funcs:=[[Ampin109,Amin109],[Bdeltain109,B2in109],[C1in109,C2in109]];
-elif IT=110 then
-    PGGen:=[C2110,Mp110,M110];
-    funcs:=[[Ampin110,Amin110],[Bdeltain110],[CGAPin110]];
-elif IT=111 then
-    PGGen:=[C2111,C2p111,M111];
-    funcs:=[[Acpin111,Amin111,Axyin111,Azin111],[Bdeltain111,Bxyin111],[]];
-elif IT=112 then
-    PGGen:=[C2112,C2p112,M112];
-    funcs:=[[Acpin112,Amin112,Axyin112],[Bdeltain112,Bxyin112,Bczin112,Bzxyin112],[]];
-elif IT=113 then
-    PGGen:=[C2113,C2p113,M113];
-    funcs:=[[Acpin113,Amin113,Azin113],[Bdeltain113,Bphiin113],[Cin113]];
-elif IT=114 then
-    PGGen:=[C2114,C2p114,M114];
-    funcs:=[[Acpin114,Amin114],[Bdeltain114,Bcxyin114,Bcxyzin114],[C1in114,C2in114]];
-elif IT=115 then
-    PGGen:=[C2115,C2p115,M115];
-    funcs:=[[Acpin115,Amin115,Axyin115,Azin115],[Bdeltain115,Bxyin115],[]];
-elif IT=116 then
-    PGGen:=[C2116,C2p116,M116];
-    funcs:=[[Acpin116,Amin116,Axyin116],[Bdeltain116,Bxyin116,Bcpzin116],[]];
-elif IT=117 then
-    PGGen:=[C2117,C2p117,M117];
-    funcs:=[[Acpin117,Amin117,Azin117],[Bdeltain117,Bphiin117],[CGAPin117]];
-elif IT=118 then
-    PGGen:=[C2118,C2p118,M118];
-    funcs:=[[Acpin118,Amin118,Axyzin118],[Bdeltain118],[CGAPin118]];
-elif IT=119 then
-    PGGen:=[C2119,C2p119,M119];
-    funcs:=[[Acpin119,Amin119,Axyzin119],[Bdeltain119,Bphiin119,Bzxyin119],[C1in119,C2in119]];
-elif IT=120 then
-    PGGen:=[C2120,C2p120,M120];
-    funcs:=[[Acpin120,Amin120,Axyzin120],[Bdeltain120,Bzxyin120],[]];
-elif IT=121 then
-    PGGen:=[C2121,C2p121,M121];
-    funcs:=[[Acpin121,Amin121,Axyzin121],[Bdeltain121,Bxyzin121,Bphiin121],[CGAPin121]];
-elif IT=122 then
-    PGGen:=[C2122,C2p122,M122];
-    funcs:=[[Acpin122,Amin122],[Bdeltain122,Bxyzin122],[Cin122]];
-elif IT=123 then
-    PGGen:=[C2123,C2p123,M123,P123];
-    funcs:=[[Aiin123,Amin123,Acpin123,Axyin123,Azin123],[Bdeltain123,Bxyin123],[]];
-elif IT=124 then
-    PGGen:=[C2124,C2p124,M124,P124];
-    funcs:=[[Aiin124,Amin124,Acpin124,Axyin124],[Bdeltain124,Bxyin124],[]];
-elif IT=125 then
-    PGGen:=[C2125,C2p125,M125,P125];
-    funcs:=[[Aiin125,Amin125,Acpin125,Azin125],[Bdeltain125,Bcxyin125],[]];
-elif IT=126 then
-    PGGen:=[C2126,C2p126,M126,P126];
-    funcs:=[[Aiin126,Acpin126,Amin126],[Bdeltain126,Bcmxyin126,Bcmxyzin126],[CGAPin126]];
-elif IT=127 then
-    PGGen:=[C2127,C2p127,M127,P127];
-    funcs:=[[Aiin127,Amin127,Acpin127,Azin127],[Bdeltain127,Bphiin127],[CGAPin127]];
-elif IT=128 then
-    PGGen:=[C2128,C2p128,M128,P128];
-    funcs:=[[Aiin128,Amin128,Acpin128],[Bdeltain128,Bcxyin128,Bcxyzin128],[C1GAPin128,C2GAPin128]];
-elif IT=129 then
-    PGGen:=[C2129,C2p129,M129,P129];
-    funcs:=[[Aiin129,Amin129,Acpin129,Azin129],[Bdeltain129,Bcxyin129],[]];
-elif IT=130 then
-    PGGen:=[C2130,C2p130,M130,P130];
-    funcs:=[[Aiin130,Amin130,Acpin130],[Bdeltain130,Bcxyin130],[]];
-elif IT=131 then
-    PGGen:=[C2131,C2p131,M131,P131];
-    funcs:=[[Aiin131,Amin131,Acpin131,Axyin131],[Bdeltain131,Bczin131,Bxyin131,Bzxyin131],[]];
-elif IT=132 then
-    PGGen:=[C2132,C2p132,M132,P132];
-    funcs:=[[Aiin132,Amin132,Acpin132,Axyin132],[Bdeltain132,Bmzin132,Bxyin132],[]];
-elif IT=133 then
-    PGGen:=[C2133,C2p133,M133,P133];
-    funcs:=[[],[],[]];
-elif IT=134 then
-    PGGen:=[C2134,C2p134,M134,P134];
-    funcs:=[[Aiin134,Amin134,Acpin134,Axyzin134],[Bdeltain134],[]];
-elif IT=135 then
-    PGGen:=[C2135,C2p135,M135,P135];
-    funcs:=[[Aiin135,Amin135,Acpin135],[Bdeltain135,Bcxyin135,Bczin135],[CGAPin135]];
-elif IT=136 then
-    PGGen:=[C2136,C2p136,M136,P136];
-    funcs:=[[Aiin136,Amin136,Acpin136],[Bdeltain136,Bcxyin136,Bpxyzin136,Bmzin136],[CGAP1in136,CGAP2in136]];
-elif IT=137 then
-    PGGen:=[C2137,C2p137,M137,P137];
-    funcs:=[[Aiin137,Acpin137,Amin137],[Bdeltain137,Bcxyin137,Bczin137],[CGAPin137]];
-elif IT=138 then
-    PGGen:=[C2138,C2p138,M138,P138];
-    funcs:=[[Aiin138,Amin138,Acpin138],[Bdeltain138,Bmzin138,Bcxyin138,Bpxyzin138],[]];
-elif IT=139 then
-    PGGen:=[C2139,C2p139,M139,P139];
-    funcs:=[[Aiin139,Amin139,Acpin139,Axyzin139],[Bdeltain139,Bphiin139,Bxyzin139],[CGAPin139]];
-elif IT=140 then
-    PGGen:=[C2140,C2p140,M140,P140];
-    funcs:=[[Aiin140,Amin140,Acpin140,Axyzin140],[Bdeltain140,Bzxyin140],[]];
-elif IT=141 then
-    PGGen:=[C2141,C2p141,M141,P141];
-    funcs:=[[],[],[]];
-elif IT=142 then
-    PGGen:=[C2142,C2p142,M142,P142];
-    funcs:=[[Aiin142,Amin142,Acpin142],[Bdeltain142],[]];
+if 1<=IT and IT<=142 then
+    PGGen:=PGGens230[IT];
+    funcs:=funcs230[IT];
 else
     Print("Space Group IT not found!!!!", "\n");
 fi;
