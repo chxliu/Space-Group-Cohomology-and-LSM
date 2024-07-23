@@ -2495,7 +2495,7 @@ od;
 Gen4:=[];
 
 
-GensGAP:=Mod2RingGenerators(R,4,3);
+GensGAP:=Mod2RingGenerators(R,4,3); #GensGAP: Generators of the mod-2 cohomology ring at degree 1-4 that are worked out by GAP; GensGAP is to be compared with those worked out from explicit cochain expressions (Gen1,Gen2,Gen3).
 
 #Print("Matching generators for space group No. ", IT, "\n");
 
