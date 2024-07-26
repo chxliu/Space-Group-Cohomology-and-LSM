@@ -2195,7 +2195,7 @@ fi;
 return out;
 end;
 #####################################################################
-MatToPow:=function(mat)            #given 4x4 matrix, output power
+MatToPow:=function(mat)            #given 4x4 matrix, output the list of powers of group generators
 local i, mat33, trans;
 
 mat33:=List([1..3],i->List([1..3],j->mat[i,j]));
@@ -2207,7 +2207,7 @@ trans:=mat*PGMatinv[i];
 return Concatenation(List([1..3],x->trans[x,4]),PGind[i]);
 end;
 #####################################################################
-GapToPow:=function(i)            #given the index i s.t. mat:=R!.elts[i], output the power
+GapToPow:=function(i)            #given the index i s.t. mat:=R!.elts[i], output the list of powers of group generators
 
 return MatToPow(TransposedMat(PreImage(Gp,R!.elts[i])));
 end;
@@ -2386,9 +2386,12 @@ PGind := [];
 #Read("~/Downloads/Space_Group_Cocycles.gi");
 
 
-if 1<=IT and IT<=142 then
+if 1<=IT and IT<=194 then
     PGGen:=PGGens230[IT];
     funcs:=funcs230[IT];
+elif 195<=IT and IT<=230 then
+    PGGen:=PGGens230[IT];
+    funcs:=[[],[],[]];
 else
     Print("Space Group IT not found!!!!", "\n");
 fi;
@@ -2518,6 +2521,7 @@ fi;
 
 
 
+
 BasesLett := Mod2RingGensAndRels(IT,3,R,[Gen1,Gen2,Gen3,Gen4]);
 
 GensDim1to4 := [Length(Gen1),Length(Gen2),Length(Gen3),Length(Gen4)];
@@ -2541,100 +2545,102 @@ Base3Lett := BasesLett[3];
 
 
 
+############################### BELOW ARE LSM RELATED CODES ###############################
+
+
+##Now as we are conbstructing codes for 142-230 we temporarily commented out this part. To uncomment, just move the first "#" in each line below.
+
+#overcomplete_g:=[];
+#Mat:=[];
 
 
 
-overcomplete_g:=[];
-Mat:=[];
+
+##First: record all the LSM TIs, which have been given in Space_Group_Cocycles.gi
+##
+##
+#for x in IWP[IT] do
+#    Append(Mat,[TopoInvdeg3(x[2],Base3Lett)]);
+#    Append(overcomplete_g,[x[2]]);
+#od;
+
+##Print("LSM topo invariants just added. Now the rank is: ", RankMatrix(Mat*Z(2)),"\n");
+##Print(List(LSMMat.vectors,x->GF2ToZ(x)),"\n");
 
 
 
+##Second: find all the non-LSM TIs, which are of one of the following four types:
+##
+##
+#for v2 in PGind do
+#    for x2 in [-2..2] do
+#        for y2 in [-2..2] do
+#            for z2 in [-2..2] do
+#                g2 := Concatenation([x2,y2,z2],v2);
+#                mat2 := [[1,0,0,x2],[0,1,0,y2],[0,0,1,z2],[0,0,0,1]] * PGMatinv[Position(PGind,v2)]^(-1);
+#                if (mat2^2 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) then
+#                    if Trace(mat2)=0 then                    #C2 rotation
+#                        vec := TopoInvdeg3([g2],Base3Lett);
+#                        sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+#                        if sol = fail then             #then we find a new non-LSM topo inv associated with C2 rotation
+#                            Append(Mat,[vec]);
+#                            Append(overcomplete_g,[[g2]]);
+#                        fi;
+#                    elif Trace(mat2)=2 then                   #Mirror
+#                        vec := TopoInvdeg3([g2],Base3Lett);
+#                        sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+#                        if sol = fail then             #then we find a new non-LSM topo inv associated with mirror
+#                            Append(Mat,[vec]);
+#                            Append(overcomplete_g,[[g2]]);
+#                        fi;
+#                        for v1 in PGind do
+#                            for x1 in [-2..2] do
+#                                for y1 in [-2..2] do
+#                                    for z1 in [-2..2] do
+#                                        g1 := Concatenation([x1,y1,z1],v1);
+#                                        if ((g1 = (g1*0)) = false) and Prodg1g2Pow(g2,g1) = Prodg1g2Pow(g1,g2) then
+#                                            vec := TopoInvdeg3([g1,g2],Base3Lett);
+#                                            sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+#                                            if sol = fail then       #then we find a new non-LSM topo inv associated with commuting couples g1 and g2, where g2 is a mirror
+#                                                Append(Mat,[vec]);
+#                                                Append(overcomplete_g,[[g1,g2]]);
+#                                            fi;
+#                                        fi;
+#                                    od;
+#                                od;
+#                            od;
+#                        od;
+#                    fi;
+#                elif (mat2^4 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) and (Trace(mat2)=2) then         #C4 rotation
+#                    vec := TopoInvdeg3([g2,Prodg1g2Pow(g2,g2)],Base3Lett);
+#                    sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+#                    if sol = fail then       #then we find a new non-LSM topo inv associated with commuting couples C4 and C4^2
+#                        Append(Mat,[vec]);
+#                        Append(overcomplete_g,[[g2,Prodg1g2Pow(g2,g2)]]);
+#                    fi;
+#                fi;
+#            od;
+#        od;
+#    od;
+#od;
 
-#First: record all the LSM TIs, which have been given in Space_Group_Cocycles.gi
+
+##Print(List(Mat*Z(2),x->GF2ToZ(x)));
+
+
+
+#if RankMatrix(Mat*Z(2)) = Length(Base3Lett) and RankMatrix(Mat*Z(2)) = Length(Mat) then
 #
+#    Print("Full Rank achieved: ", RankMatrix(Mat*Z(2)),"=", Length(Base3Lett)," (LSM Rank = ",Length(IWP[IT]), ").\n");
+#    LSMMat := List(TransposedMat(Inverse(Mat*Z(2))),x->GF2ToZ(x));
+#    LSMLett := List([1..Length(IWP[IT])],x->LSMMat[x]);
+#    Print("LSM:\n");
+#    List(LSMLett,x->PrintMonomialString(IndToElem(x,Base3Lett),GensDim1to4,"+",GENNAMES[IT],"\n"));
 #
-for x in IWP[IT] do
-    Append(Mat,[TopoInvdeg3(x[2],Base3Lett)]);
-    Append(overcomplete_g,[x[2]]);
-od;
-
-#Print("LSM topo invariants just added. Now the rank is: ", RankMatrix(Mat*Z(2)),"\n");
-#Print(List(LSMMat.vectors,x->GF2ToZ(x)),"\n");
-
-
-
-#Second: find all the non-LSM TIs, which are of one of the following four types:
-#
-#
-for v2 in PGind do
-    for x2 in [-2..2] do
-        for y2 in [-2..2] do
-            for z2 in [-2..2] do
-                g2 := Concatenation([x2,y2,z2],v2);
-                mat2 := [[1,0,0,x2],[0,1,0,y2],[0,0,1,z2],[0,0,0,1]] * PGMatinv[Position(PGind,v2)]^(-1);
-                if (mat2^2 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) then
-                    if Trace(mat2)=0 then                    #C2 rotation
-                        vec := TopoInvdeg3([g2],Base3Lett);
-                        sol :=SolutionMat(Mat*Z(2),vec*Z(2));
-                        if sol = fail then             #then we find a new non-LSM topo inv associated with C2 rotation
-                            Append(Mat,[vec]);
-                            Append(overcomplete_g,[[g2]]);
-                        fi;
-                    elif Trace(mat2)=2 then                   #Mirror
-                        vec := TopoInvdeg3([g2],Base3Lett);
-                        sol :=SolutionMat(Mat*Z(2),vec*Z(2));
-                        if sol = fail then             #then we find a new non-LSM topo inv associated with mirror
-                            Append(Mat,[vec]);
-                            Append(overcomplete_g,[[g2]]);
-                        fi;
-                        for v1 in PGind do
-                            for x1 in [-2..2] do
-                                for y1 in [-2..2] do
-                                    for z1 in [-2..2] do
-                                        g1 := Concatenation([x1,y1,z1],v1);
-                                        if ((g1 = (g1*0)) = false) and Prodg1g2Pow(g2,g1) = Prodg1g2Pow(g1,g2) then
-                                            vec := TopoInvdeg3([g1,g2],Base3Lett);
-                                            sol :=SolutionMat(Mat*Z(2),vec*Z(2));
-                                            if sol = fail then       #then we find a new non-LSM topo inv associated with commuting couples g1 and g2, where g2 is a mirror
-                                                Append(Mat,[vec]);
-                                                Append(overcomplete_g,[[g1,g2]]);
-                                            fi;
-                                        fi;
-                                    od;
-                                od;
-                            od;
-                        od;
-                    fi;
-                elif (mat2^4 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) and (Trace(mat2)=2) then         #C4 rotation
-                    vec := TopoInvdeg3([g2,Prodg1g2Pow(g2,g2)],Base3Lett);
-                    sol :=SolutionMat(Mat*Z(2),vec*Z(2));
-                    if sol = fail then       #then we find a new non-LSM topo inv associated with commuting couples C4 and C4^2
-                        Append(Mat,[vec]);
-                        Append(overcomplete_g,[[g2,Prodg1g2Pow(g2,g2)]]);
-                    fi;
-                fi;
-            od;
-        od;
-    od;
-od;
-
-
-#Print(List(Mat*Z(2),x->GF2ToZ(x)));
-
-
-
-if RankMatrix(Mat*Z(2)) = Length(Base3Lett) and RankMatrix(Mat*Z(2)) = Length(Mat) then
-    
-    Print("Full Rank achieved: ", RankMatrix(Mat*Z(2)),"=", Length(Base3Lett)," (LSM Rank = ",Length(IWP[IT]), ").\n");
-    LSMMat := List(TransposedMat(Inverse(Mat*Z(2))),x->GF2ToZ(x));
-    LSMLett := List([1..Length(IWP[IT])],x->LSMMat[x]);
-    Print("LSM:\n");
-    List(LSMLett,x->PrintMonomialString(IndToElem(x,Base3Lett),GensDim1to4,"+",GENNAMES[IT],"\n"));
-
-else
-    Print("Full Rank NOT achieved: ", RankMatrix(Mat*Z(2)),"!=", Length(Base3Lett), "or", RankMatrix(Mat*Z(2)),"!=", Length(Mat),".\n");
-    Print(Mat*Z(2),"\n");
-fi;
+#else
+#    Print("Full Rank NOT achieved: ", RankMatrix(Mat*Z(2)),"!=", Length(Base3Lett), "or", RankMatrix(Mat*Z(2)),"!=", Length(Mat),".\n");
+#    Print(Mat*Z(2),"\n");
+#fi;
 
 
 
