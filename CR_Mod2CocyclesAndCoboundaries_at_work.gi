@@ -1083,7 +1083,7 @@ od;
 #
 #Step-1 finished: degree-3 cup with degree-1-gen
 
-
+#Print("after first round (3-cup-1) the dimension of the basis is: ",Length(CupBase4Lett), "\n");
 
 #if CupBase4 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
 #    if (CupTemp = []) = false then
@@ -2328,7 +2328,7 @@ elif Length(gs) = 3 then
         
         vallist := List(letters,x->FuncVal(x,[gs[1],gs[2],gs[3]])+FuncVal(x,[gs[1],gs[3],gs[2]])+FuncVal(x,[gs[2],gs[1],gs[3]])+FuncVal(x,[gs[2],gs[3],gs[1]])+FuncVal(x,[gs[3],gs[1],gs[2]])+FuncVal(x,[gs[3],gs[2],gs[1]]));
     
-    elif ((Prodg1g2Pow(gs[2],gs[1]) = Prodg1g2Pow(Invofg(gs[1]),gs[2])) and (Prodg1g2Pow(gs[1],gs[3]) = Prodg1g2Pow(gs[3],gs[1])) and (Prodg1g2Pow(gs[2],gs[3]) = Prodg1g2Pow(gs[3],gs[2]))) then     #Topo inv tildevarphi for No. 29,33
+    elif ((Prodg1g2Pow(gs[2],gs[1]) = Prodg1g2Pow(Invofg(gs[1]),gs[2])) and (Prodg1g2Pow(gs[1],gs[3]) = Prodg1g2Pow(gs[3],gs[1])) and (Prodg1g2Pow(gs[2],gs[3]) = Prodg1g2Pow(gs[3],gs[2]))) then     #Topo inv tildevarphi for No. 7,26,36,39,46,57,62
         
         vallist := List(letters,x->FuncVal(x,[gs[3],Prodg1g2Pow(gs[1],gs[2]),Prodg1g2Pow(gs[1],Invofg(gs[2]))])+FuncVal(x,[gs[3],gs[1],gs[2]])+FuncVal(x,[gs[3],gs[1],Invofg(gs[2])])+FuncVal(x,[gs[3],gs[2],Invofg(gs[2])])+FuncVal(x,[Prodg1g2Pow(gs[1],gs[2]),gs[3],Prodg1g2Pow(gs[1],Invofg(gs[2]))])+FuncVal(x,[gs[1],gs[3],gs[2]])+FuncVal(x,[gs[1],gs[3],Invofg(gs[2])])+FuncVal(x,[gs[2],gs[3],Invofg(gs[2])])+FuncVal(x,[Prodg1g2Pow(gs[1],gs[2]),Prodg1g2Pow(gs[1],Invofg(gs[2])),gs[3]])+FuncVal(x,[gs[1],gs[2],gs[3]])+FuncVal(x,[gs[1],Invofg(gs[2]),gs[3]])+FuncVal(x,[gs[2],Invofg(gs[2]),gs[3]]));
 
@@ -2462,8 +2462,15 @@ fi;
 G:= Group(Concatenation([T1,T2,T3],PGGen));
 Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
 #Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
-    
+
+
+
+#Below constructs the resolution for the group:
+
 R:=ResolutionAlmostCrystalGroup(Image(Gp),7);
+
+#Resolutino for the group now constructed.
+
 
 
 Homotopydeg1:=List([1..R!.dimension(1)],x->List(R!.boundary(1,x),y->[y[2]]));
@@ -2477,8 +2484,10 @@ CB[p]:=CR_Mod2CocyclesAndCoboundaries(R,p,true);
 od;
 
 #Print(IT,":  \n");
+#Print(List([1..4],x->Cohomology(HomToIntegersModP(R,2),x),"\n");
 #Print(CB[1].cocyclesBasis);
 #Print("\n");
+
 
 
 Gen1:=[];
@@ -2503,12 +2512,15 @@ GensGAP:=Mod2RingGenerators(R,4,3); #GensGAP: Generators of the mod-2 cohomology
 
 #Print("Matching generators for space group No. ", IT, "\n");
 
+#Print("basis given by gap is:", GensGAP, "\n");
+#Print("basis given by func is:", [Gen1,Gen2,Gen3], "\n");
+
 if (Length(Gen1) = Length(GensGAP[1])) = false then
-    Print("Number of Degree-1 generator does not match!!!:", Length(Gen1),"!=",Length(GensGAP[1]),"\n");
+    Print("Number of Degree-1 generators does not match!!!:", Length(Gen1),"!=",Length(GensGAP[1]),"\n");
 elif (Length(Gen2) = Length(GensGAP[2])) = false then
-    Print("Number of Degree-2 generator does not match!!!:", Length(Gen2),"!=",Length(GensGAP[2]),"\n");
+    Print("Number of Degree-2 generators does not match!!!:", Length(Gen2),"!=",Length(GensGAP[2]),"\n");
 elif (Length(Gen3) = Length(GensGAP[3])) = false then
-    Print("Number of Degree-3 generator does not match!!!:", Length(Gen3),"!=",Length(GensGAP[3]),"\n");
+    Print("Number of Degree-3 generators does not match!!!:", Length(Gen3),"!=",Length(GensGAP[3]),"\n");
 else
     #Print("Generators at degree 1,2,3 matched.","\n");
     Print("\n");
@@ -2548,99 +2560,98 @@ Base3Lett := BasesLett[3];
 ############################### BELOW ARE LSM RELATED CODES ###############################
 
 
-##Now as we are conbstructing codes for 142-230 we temporarily commented out this part. To uncomment, just move the first "#" in each line below.
+#Now as we are conbstructing codes for 142-230 we temporarily commented out this part. To uncomment, just move the first "#" in each line below.
 
-#overcomplete_g:=[];
-#Mat:=[];
-
-
-
-
-##First: record all the LSM TIs, which have been given in Space_Group_Cocycles.gi
-##
-##
-#for x in IWP[IT] do
-#    Append(Mat,[TopoInvdeg3(x[2],Base3Lett)]);
-#    Append(overcomplete_g,[x[2]]);
-#od;
-
-##Print("LSM topo invariants just added. Now the rank is: ", RankMatrix(Mat*Z(2)),"\n");
-##Print(List(LSMMat.vectors,x->GF2ToZ(x)),"\n");
+overcomplete_g:=[];
+Mat:=[];
 
 
 
-##Second: find all the non-LSM TIs, which are of one of the following four types:
-##
-##
-#for v2 in PGind do
-#    for x2 in [-2..2] do
-#        for y2 in [-2..2] do
-#            for z2 in [-2..2] do
-#                g2 := Concatenation([x2,y2,z2],v2);
-#                mat2 := [[1,0,0,x2],[0,1,0,y2],[0,0,1,z2],[0,0,0,1]] * PGMatinv[Position(PGind,v2)]^(-1);
-#                if (mat2^2 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) then
-#                    if Trace(mat2)=0 then                    #C2 rotation
-#                        vec := TopoInvdeg3([g2],Base3Lett);
-#                        sol :=SolutionMat(Mat*Z(2),vec*Z(2));
-#                        if sol = fail then             #then we find a new non-LSM topo inv associated with C2 rotation
-#                            Append(Mat,[vec]);
-#                            Append(overcomplete_g,[[g2]]);
-#                        fi;
-#                    elif Trace(mat2)=2 then                   #Mirror
-#                        vec := TopoInvdeg3([g2],Base3Lett);
-#                        sol :=SolutionMat(Mat*Z(2),vec*Z(2));
-#                        if sol = fail then             #then we find a new non-LSM topo inv associated with mirror
-#                            Append(Mat,[vec]);
-#                            Append(overcomplete_g,[[g2]]);
-#                        fi;
-#                        for v1 in PGind do
-#                            for x1 in [-2..2] do
-#                                for y1 in [-2..2] do
-#                                    for z1 in [-2..2] do
-#                                        g1 := Concatenation([x1,y1,z1],v1);
-#                                        if ((g1 = (g1*0)) = false) and Prodg1g2Pow(g2,g1) = Prodg1g2Pow(g1,g2) then
-#                                            vec := TopoInvdeg3([g1,g2],Base3Lett);
-#                                            sol :=SolutionMat(Mat*Z(2),vec*Z(2));
-#                                            if sol = fail then       #then we find a new non-LSM topo inv associated with commuting couples g1 and g2, where g2 is a mirror
-#                                                Append(Mat,[vec]);
-#                                                Append(overcomplete_g,[[g1,g2]]);
-#                                            fi;
-#                                        fi;
-#                                    od;
-#                                od;
-#                            od;
-#                        od;
-#                    fi;
-#                elif (mat2^4 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) and (Trace(mat2)=2) then         #C4 rotation
-#                    vec := TopoInvdeg3([g2,Prodg1g2Pow(g2,g2)],Base3Lett);
-#                    sol :=SolutionMat(Mat*Z(2),vec*Z(2));
-#                    if sol = fail then       #then we find a new non-LSM topo inv associated with commuting couples C4 and C4^2
-#                        Append(Mat,[vec]);
-#                        Append(overcomplete_g,[[g2,Prodg1g2Pow(g2,g2)]]);
-#                    fi;
-#                fi;
-#            od;
-#        od;
-#    od;
-#od;
-
-
-##Print(List(Mat*Z(2),x->GF2ToZ(x)));
-
-
-
-#if RankMatrix(Mat*Z(2)) = Length(Base3Lett) and RankMatrix(Mat*Z(2)) = Length(Mat) then
+#First: record all the LSM TIs, which have been given in Space_Group_Cocycles.gi
 #
-#    Print("Full Rank achieved: ", RankMatrix(Mat*Z(2)),"=", Length(Base3Lett)," (LSM Rank = ",Length(IWP[IT]), ").\n");
-#    LSMMat := List(TransposedMat(Inverse(Mat*Z(2))),x->GF2ToZ(x));
-#    LSMLett := List([1..Length(IWP[IT])],x->LSMMat[x]);
-#    Print("LSM:\n");
-#    List(LSMLett,x->PrintMonomialString(IndToElem(x,Base3Lett),GensDim1to4,"+",GENNAMES[IT],"\n"));
 #
-#else
-#    Print("Full Rank NOT achieved: ", RankMatrix(Mat*Z(2)),"!=", Length(Base3Lett), "or", RankMatrix(Mat*Z(2)),"!=", Length(Mat),".\n");
-#    Print(Mat*Z(2),"\n");
-#fi;
+for x in IWP[IT] do
+    Append(Mat,[TopoInvdeg3(x[2],Base3Lett)]);
+    Append(overcomplete_g,[x[2]]);
+od;
+
+#Print("LSM topo invariants just added. Now the rank is: ", RankMatrix(Mat*Z(2)),"\n");
+#Print(List(LSMMat.vectors,x->GF2ToZ(x)),"\n");
+
+
+
+#Second: find all the non-LSM TIs, which are of one of the following four types:
+#
+#
+for v2 in PGind do
+    for x2 in [-2..2] do
+        for y2 in [-2..2] do
+            for z2 in [-2..2] do
+                g2 := Concatenation([x2,y2,z2],v2);
+                mat2 := [[1,0,0,x2],[0,1,0,y2],[0,0,1,z2],[0,0,0,1]] * PGMatinv[Position(PGind,v2)]^(-1);
+                if (mat2^2 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) then
+                    if Trace(mat2)=0 then                    #C2 rotation
+                        vec := TopoInvdeg3([g2],Base3Lett);
+                        sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+                        if sol = fail then             #then we find a new non-LSM topo inv associated with C2 rotation
+                            Append(Mat,[vec]);
+                            Append(overcomplete_g,[[g2]]);
+                        fi;
+                    elif Trace(mat2)=2 then                   #Mirror
+                        vec := TopoInvdeg3([g2],Base3Lett);
+                        sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+                        if sol = fail then             #then we find a new non-LSM topo inv associated with mirror
+                            Append(Mat,[vec]);
+                            Append(overcomplete_g,[[g2]]);
+                        fi;
+                        for v1 in PGind do
+                            for x1 in [-2..2] do
+                                for y1 in [-2..2] do
+                                    for z1 in [-2..2] do
+                                        g1 := Concatenation([x1,y1,z1],v1);
+                                        if ((g1 = (g1*0)) = false) and Prodg1g2Pow(g2,g1) = Prodg1g2Pow(g1,g2) then
+                                            vec := TopoInvdeg3([g1,g2],Base3Lett);
+                                            sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+                                            if sol = fail then       #then we find a new non-LSM topo inv associated with commuting couples g1 and g2, where g2 is a mirror
+                                                Append(Mat,[vec]);
+                                                Append(overcomplete_g,[[g1,g2]]);
+                                            fi;
+                                        fi;
+                                    od;
+                                od;
+                            od;
+                        od;
+                    fi;
+                elif (mat2^4 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) and (Trace(mat2)=2) then         #C4 rotation
+                    vec := TopoInvdeg3([g2,Prodg1g2Pow(g2,g2)],Base3Lett);
+                    sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+                    if sol = fail then       #then we find a new non-LSM topo inv associated with commuting couples C4 and C4^2
+                        Append(Mat,[vec]);
+                        Append(overcomplete_g,[[g2,Prodg1g2Pow(g2,g2)]]);
+                    fi;
+                fi;
+            od;
+        od;
+    od;
+od;
+
+
+#Print(List(Mat*Z(2),x->GF2ToZ(x)));
+
+
+
+if RankMatrix(Mat*Z(2)) = Length(Base3Lett) and RankMatrix(Mat*Z(2)) = Length(Mat) then
+
+    Print("Full Rank achieved: ", RankMatrix(Mat*Z(2)),"=", Length(Base3Lett)," (LSM Rank = ",Length(IWP[IT]), ").\n");
+    LSMMat := List(TransposedMat(Inverse(Mat*Z(2))),x->GF2ToZ(x));
+    LSMLett := List([1..Length(IWP[IT])],x->LSMMat[x]);
+    Print("LSM:\n");
+    List(LSMLett,x->PrintMonomialString(IndToElem(x,Base3Lett),GensDim1to4,"+",GENNAMES[IT],"\n"));
+
+else
+    Print("Full Rank NOT achieved: ", RankMatrix(Mat*Z(2)),"!=", Length(Base3Lett), "or", RankMatrix(Mat*Z(2)),"!=", Length(Mat),".\n");
+    Print(Mat*Z(2),"\n");
+fi;
 
 
 
