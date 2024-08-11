@@ -15,7 +15,7 @@ def sg203productg1g2(tuple1, tuple2):
 
 def RandXYZ(XYZtuple3):
     x1,y1,z1,x2,y2,z2,x3,y3,z3 = XYZtuple3
-    return np.array([1,x1,y1,z1,x2,y2,z2,x3,y3,z3,1/2*x1*(1+x1),1/2*y1*(1+y1),1/2*z1*(1+z1),1/2*x2*(1+x2),1/2*y2*(1+y2),1/2*z2*(1+z2),1/2*x3*(1+x3),1/2*y3*(1+y3),1/2*z3*(1+z3),x1*y1,x1*z1,x1*x2,x1*y2,x1*z2,x1*x3,x1*y3,x1*z3,y1*z1,x2*y1,y1*y2,y1*z2,x3*y1,y1*y3,y1*z3,x2*z1,y2*z1,z1*z2,x3*z1,y3*z1,z1*z3,x2*y2,x2*z2,x2*x3,x2*y3,x2*z3,y2*z2,x3*y2,y2*y3,y2*z3,x3*z2,y3*z2,z2*z3,x3*y3,x3*z3,y3*z3],dtype=int)
+    return np.array([1,x1,y1,z1,x2,y2,z2,x3,y3,z3,(x1*(1+x1))//2,(y1*(1+y1))//2,(z1*(1+z1))//2,(x2*(1+x2))//2,(y2*(1+y2))//2,(z2*(1+z2))//2,(x3*(1+x3))//2,(y3*(1+y3))//2,(z3*(1+z3))//2,x1*y1,x1*z1,x1*x2,x1*y2,x1*z2,x1*x3,x1*y3,x1*z3,y1*z1,x2*y1,y1*y2,y1*z2,x3*y1,y1*y3,y1*z3,x2*z1,y2*z1,z1*z2,x3*z1,y3*z1,z1*z3,x2*y2,x2*z2,x2*x3,x2*y3,x2*z3,y2*z2,x3*y2,y2*y3,y2*z3,x3*z2,y3*z2,z2*z3,x3*y3,x3*z3,y3*z3],dtype=int)
 
 def RandPT(PTtuple3):
     c1,c2,c3,cp1,cp2,cp3,t1,t2,t3,p1,p2,p3 = PTtuple3
