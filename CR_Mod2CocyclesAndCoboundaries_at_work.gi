@@ -481,11 +481,16 @@ for j in [2..n] do        # Then deal with degree-j generators for j=2,3,...,n
 
     od;
 
+    
     if Cups = [] then        #This is when cohomology dim = 0
         GensBasis1ton[j]:= [];
     else
-        CuppedBasis := List(BaseMat(Cupped),ShallowCopy);
-        Gens := BaseSteinitzVectors(Cups*Z(2),CuppedBasis)!.factorspace;
+        if Cupped = [] then
+            Gens := Cups*Z(2);
+        else
+            CuppedBasis := List(BaseMat(Cupped),ShallowCopy);
+            Gens := BaseSteinitzVectors(Cups*Z(2),CuppedBasis)!.factorspace;
+        fi;
 
         GensBasis :=[];
 
@@ -550,7 +555,7 @@ Print("===========================================\n");
 
 if IT = 219 then
     Print("Caution: the group being calculated (No. 219) has two degree-6 generators!\n");
-    Print("These degree-6 generators have not been included in the current code, ");
+    Print("These degree-6 generators have not been included in the current code. \n");
     Print("Current program only outputs relations at degree <=6. Higher (>6) degree relations must be calculated manually.\n");
 fi;
 if IT = 226 or IT = 228 then
@@ -644,7 +649,6 @@ GensLett:=CohomologyBasis(List([1..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Lengt
 Gen0 := List([1..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))],i->0);
 
 TR:=HomToIntegersModP(R,2);            #Apply the Hom functor.
-
 
 CB:=[];
 for p in [1..n] do
@@ -740,9 +744,21 @@ for u in Gen1 do
     iu := iu+1;
 od;
 
-Append(CupBase2,Gen2);
+#Append(CupBase2,Gen2);
 for iu in [(1+Length(Gen1))..(Length(Gen1)+Length(Gen2))] do
-    Append(CupBase2Lett,[GensLett[iu]]);
+    if CupBase2 = [] then
+        Append(CupBase2,[Gen2[iu-Length(Gen1)]]);
+        Append(CupBase2Lett,[GensLett[iu]]);
+    else
+        sol :=SolutionMat(CupBase2*Z(2),Gen2[iu-Length(Gen1)]*Z(2));
+        if sol = fail then
+            Append(CupBase2,[Gen2[iu-Length(Gen1)]]);
+            Append(CupBase2Lett,[GensLett[iu]]);
+        else
+            Print("Error: containing fake degree-2 generator(s)!!\n");
+        fi;
+    fi;
+    #Append(CupBase2Lett,[GensLett[iu]]);
 od;
 
 
@@ -789,7 +805,11 @@ for p in Concatenation([Gen0],GensLett) do
         od;
     od;
 od;
+
 RelRedLen := iu;
+
+RelReduceMat := [List([1..RelRedLen],x->0)];         #This makes sure that RelReduceMat is not an empty matrix
+
 for u in CupBase1Lett do
     for v in CupRel2Lett do
         RelReduceVec := List([1..RelRedLen],x->0);
@@ -865,7 +885,7 @@ for u in CupBase2 do
             ####
             RelReduceVec := List([1..RelRedLen],x->0); #check whether this relation is reducible from lower ones
             for w in solrel do
-                #Print(w,"\n");
+            
                 solrelred := Position(RelReduceLett,w);
                             
                 if solrelred = fail then      #if this relation contains new terms then we find a new relation
@@ -889,6 +909,7 @@ for u in CupBase2 do
         ####
         #### End: determine whether u-cup-v gives a new relation
         
+        
         iv := iv+1;
     od;
     iu := iu+1;
@@ -898,10 +919,24 @@ od;
 #Finished: degree-2 cup with degree-1-gen
 
 
-Append(CupBase3,Gen3);
+#Append(CupBase3,Gen3);
 for iu in [(1+Length(Gen1)+Length(Gen2))..(Length(Gen1)+Length(Gen2)+Length(Gen3))] do
-    Append(CupBase3Lett,[GensLett[iu]]);
+    if CupBase3 = [] then
+        Append(CupBase3,[Gen3[iu-(Length(Gen1)+Length(Gen2))]]);
+        Append(CupBase3Lett,[GensLett[iu]]);
+    else
+        sol :=SolutionMat(CupBase3*Z(2),Gen3[iu-(Length(Gen1)+Length(Gen2))]*Z(2));
+        if sol = fail then
+            Append(CupBase3,[Gen3[iu-(Length(Gen1)+Length(Gen2))]]);
+            Append(CupBase3Lett,[GensLett[iu]]);
+        else
+            Print("Error: containing fake degree-3 generator(s)!!\n");
+        fi;
+    fi;
+    #Append(CupBase3Lett,[GensLett[iu]]);
 od;
+
+
 
 #if CupBase3 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
 #    if (CupTemp = []) = false then
@@ -965,14 +1000,20 @@ for p in Concatenation([Gen0],GensLett) do
         od;
     od;
 od;
+
 RelRedLen := iu;
+
+RelReduceMat := [List([1..RelRedLen],x->0)];         #This makes sure that RelReduceMat is not an empty matrix
+
 for u in CupBase1Lett do
     for v in CupRel3Lett do
         RelReduceVec := List([1..RelRedLen],x->0);
         for w in v do
             RelReduceVec[Position(RelReduceLett,u+w)] := 1;
         od;
+        #Print("RelReduceVec:",RelReduceVec,"\n");
         Append(RelReduceMat,[RelReduceVec]);
+        #Print("RelReduceMat:",RelReduceMat,"\n");
     od;
 od;
 for p in Concatenation([Gen0],GensLett) do
@@ -1150,11 +1191,22 @@ od;
 #
 #Step-2 finished: degree-2-gen cup with degree-2-gen
 
-Append(CupBase4,Gen4);
+#Append(CupBase4,Gen4);
 for iu in [(1+Length(Gen1)+Length(Gen2)+Length(Gen3))..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4))] do
-    Append(CupBase4Lett,[GensLett[iu]]);
+    if CupBase4 = [] then
+        Append(CupBase4,[Gen4[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3))]]);
+        Append(CupBase4Lett,[GensLett[iu]]);
+    else
+        sol :=SolutionMat(CupBase4*Z(2),Gen4[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3))]*Z(2));
+        if sol = fail then
+            Append(CupBase4,[Gen4[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3))]]);
+            Append(CupBase4Lett,[GensLett[iu]]);
+        else
+            Print("Error: containing fake degree-4 generator(s)!!\n");
+        fi;
+    fi;
+    #Append(CupBase4Lett,[GensLett[iu]]);
 od;
-
 
 
 
@@ -1209,6 +1261,8 @@ for ip in [1..(Sum(GenDim1to4)+1)] do
 od;
 
 RelRedLen := iu;
+
+RelReduceMat := [List([1..RelRedLen],x->0)];         #This makes sure that RelReduceMat is not an empty matrix
 
 for u in CupBase1Lett do
     for v in CupRel4Lett do
@@ -1493,9 +1547,21 @@ od;
 #Step-2 finished: degree-3-gen cup with degree-2-gen
 
 
-Append(CupBase5,Gen5);
+#Append(CupBase5,Gen5);
 for iu in [(1+Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4))..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))] do
-    Append(CupBase5Lett,[GensLett[iu]]);
+    if CupBase5 = [] then
+        Append(CupBase5,[Gen5[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4))]]);
+        Append(CupBase5Lett,[GensLett[iu]]);
+    else
+        sol :=SolutionMat(CupBase5*Z(2),Gen5[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4))]*Z(2));
+        if sol = fail then
+            Append(CupBase5,[Gen5[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4))]]);
+            Append(CupBase5Lett,[GensLett[iu]]);
+        else
+            Print("Error: containing fake degree-5 generator(s)!!\n");
+        fi;
+    fi;
+    #Append(CupBase5Lett,[GensLett[iu]]);
 od;
 
 
@@ -1575,6 +1641,9 @@ for ip in [1..(Sum(GenDim1to4)+1)] do
 od;
 
 RelRedLen := iv;
+
+RelReduceMat := [List([1..RelRedLen],x->0)];         #This makes sure that RelReduceMat is not an empty matrix
+
 
 for u in CupBase1Lett do
     for v in CupRel5Lett do
@@ -1968,6 +2037,18 @@ od;
 
 #Append(CupBase6,Gen6);
 #for iu in [(1+Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5)+Length(Gen6))] do
+#    if CupBase6 = [] then
+#        Append(CupBase6,[Gen6[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))]]);
+#        Append(CupBase6Lett,[GensLett[iu]]);
+#    else
+#        sol :=SolutionMat(CupBase6*Z(2),Gen6[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))]*Z(2));
+#        if sol = fail then
+#            Append(CupBase6,[Gen6[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))]]);
+#            Append(CupBase6Lett,[GensLett[iu]]);
+#        else
+#            Print("Error: containing fake degree-6 generator(s)!!\n");
+#        fi;
+#    fi;
 #    Append(CupBase6Lett,[GensLett[iu]]);
 #od;
 
@@ -2173,7 +2254,7 @@ local
     func,funcs,receive,FuncVal,TopoInvdeg3,
     Gen1, Gen2, Gen3, Gen4, GensGAP, GensDim1to4, GensDeg1to4,
     BasesLett, Base1Lett, Base2Lett, Base3Lett, Base4Lett, LSMLett,
-    g1,g2,g3,overcomplete_g,Mat,mat1,mat2,vec,sol,LSMMat,
+    g1,g2,g3,overcomplete_g,Mat,mat1,mat2,vec,sol,LSMMat,CountLSM,
     v1,v2,v3,x1,y1,z1,x2,y2,z2,x3,y3,z3,
     i,j,k,p,x,y;
 
@@ -2340,7 +2421,7 @@ elif Length(gs) = 3 then
         
         vallist := List(letters,x->FuncVal(x,[gs[1],gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])])+FuncVal(x,[gs[2],gs[1],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])])+FuncVal(x,[gs[1],Prodg1g2Pow(Invofg(gs[1]),gs[3]),gs[2]])+FuncVal(x,[gs[2],Prodg1g2Pow(Invofg(gs[2]),gs[3]),gs[1]])+FuncVal(x,[gs[3],gs[1],gs[2]])+FuncVal(x,[gs[3],gs[2],gs[1]]));
 
-    elif ((Prodg1g2Pow(gs[3],gs[1]) = Prodg1g2Pow(Invofg(gs[2]),gs[3])) and (Prodg1g2Pow(gs[3],gs[2]) = Prodg1g2Pow(Invofg(gs[1]),gs[3])) and (Prodg1g2Pow(gs[1],gs[2]) = Prodg1g2Pow(gs[2],gs[1]))) then     #Topo inv hatvarphi for No. 9
+    elif ((Prodg1g2Pow(gs[3],gs[1]) = Prodg1g2Pow(Invofg(gs[2]),gs[3])) and (Prodg1g2Pow(gs[3],gs[2]) = Prodg1g2Pow(Invofg(gs[1]),gs[3])) and (Prodg1g2Pow(gs[1],gs[2]) = Prodg1g2Pow(gs[2],gs[1]))) then     #Topo inv hatvarphi for No. 9,161
         
         vallist := List(letters,x->FuncVal(x,[gs[1],gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])])+FuncVal(x,[gs[2],gs[1],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])])+FuncVal(x,[gs[1],Prodg1g2Pow(Invofg(gs[1]),gs[3]),gs[1]])+FuncVal(x,[gs[2],Prodg1g2Pow(Invofg(gs[2]),gs[3]),gs[2]])+FuncVal(x,[gs[3],gs[1],gs[2]])+FuncVal(x,[gs[3],gs[2],gs[1]]));
     else
@@ -2386,12 +2467,9 @@ PGind := [];
 #Read("~/Downloads/Space_Group_Cocycles.gi");
 
 
-if 1<=IT and IT<=194 then
+if 1<=IT and IT<=230 then
     PGGen:=PGGens230[IT];
     funcs:=funcs230[IT];
-elif 195<=IT and IT<=230 then
-    PGGen:=PGGens230[IT];
-    funcs:=[[],[],[]];
 else
     Print("Space Group IT not found!!!!", "\n");
 fi;
@@ -2469,7 +2547,7 @@ Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatr
 
 R:=ResolutionAlmostCrystalGroup(Image(Gp),7);
 
-#Resolutino for the group now constructed.
+#Resolution for the group now constructed.
 
 
 
@@ -2510,8 +2588,7 @@ Gen4:=[];
 
 GensGAP:=Mod2RingGenerators(R,4,3); #GensGAP: Generators of the mod-2 cohomology ring at degree 1-4 that are worked out by GAP; GensGAP is to be compared with those worked out from explicit cochain expressions (Gen1,Gen2,Gen3).
 
-#Print("Matching generators for space group No. ", IT, "\n");
-
+Print("Matching generators for space group No. ", IT, "\n");
 #Print("basis given by gap is:", GensGAP, "\n");
 #Print("basis given by func is:", [Gen1,Gen2,Gen3], "\n");
 
@@ -2531,7 +2608,9 @@ if (IT in [108, 109, 120, 130, 136, 140, 142, 197, 204, 230]) = true then
     Gen4 := GensGAP[4];
 fi;
 
-
+#Gen1:=GensGAP[1];
+#Gen2:=GensGAP[2];
+#Gen3:=GensGAP[3];
 
 
 BasesLett := Mod2RingGensAndRels(IT,3,R,[Gen1,Gen2,Gen3,Gen4]);
@@ -2570,12 +2649,16 @@ Mat:=[];
 #First: record all the LSM TIs, which have been given in Space_Group_Cocycles.gi
 #
 #
+CountLSM := [];
 for x in IWP[IT] do
-    Append(Mat,[TopoInvdeg3(x[2],Base3Lett)]);
-    Append(overcomplete_g,[x[2]]);
+    if (x[2] = []) = false then
+        Append(Mat,[TopoInvdeg3(x[2],Base3Lett)]);
+        Append(overcomplete_g,[x[2]]);
+        Append(CountLSM,[x[2]]);
+    fi;
 od;
 
-#Print("LSM topo invariants just added. Now the rank is: ", RankMatrix(Mat*Z(2)),"\n");
+Print("LSM topo invariants just added. Now the rank is: ", RankMatrix(Mat*Z(2)),"\n");
 #Print(List(LSMMat.vectors,x->GF2ToZ(x)),"\n");
 
 
@@ -2640,11 +2723,12 @@ od;
 
 
 
+
 if RankMatrix(Mat*Z(2)) = Length(Base3Lett) and RankMatrix(Mat*Z(2)) = Length(Mat) then
 
-    Print("Full Rank achieved: ", RankMatrix(Mat*Z(2)),"=", Length(Base3Lett)," (LSM Rank = ",Length(IWP[IT]), ").\n");
+    Print("Full Rank achieved: ", RankMatrix(Mat*Z(2)),"=", Length(Base3Lett)," (LSM Rank = ",Length(CountLSM), ").\n");
     LSMMat := List(TransposedMat(Inverse(Mat*Z(2))),x->GF2ToZ(x));
-    LSMLett := List([1..Length(IWP[IT])],x->LSMMat[x]);
+    LSMLett := List([1..Length(CountLSM)],x->LSMMat[x]);
     Print("LSM:\n");
     List(LSMLett,x->PrintMonomialString(IndToElem(x,Base3Lett),GensDim1to4,"+",GENNAMES[IT],"\n"));
 
