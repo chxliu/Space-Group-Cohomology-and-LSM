@@ -31,9 +31,9 @@ def diff3Cocycle(XYZtuple4, PTtuple4, PC3tuple4):
     t1,t2,t3,t4 = PC3tuple4
     
     return ToBeCycMat(np.array([x2,y2,z2,c2,cp2,t2,m2,p2]),np.array([x3,y3,z3,c3,cp3,t3,m3,p3]),np.array([x4,y4,z4,c4,cp4,t4,m4,p4]))+\
-                      ToBeCycMat(np.array([x1,y1,z1,c1,cp1,t1,m1,p1]),np.array([x2,y2,z2,c2,cp2,t2,m2,p2]),sg229productg1g2(np.array([x3,y3,z3,c3,cp3,t3,m3,p3]),np.array([x4,y4,z4,c4,cp4,t4,m4,p4])))+\
-                      ToBeCycMat(np.array([x1,y1,z1,c1,cp1,t1,m1,p1]),sg229productg1g2(np.array([x2,y2,z2,c2,cp2,t2,m2,p2]),np.array([x3,y3,z3,c3,cp3,t3,m3,p3])),np.array([x4,y4,z4,c4,cp4,t4,m4,p4]))+\
-                      ToBeCycMat(sg229productg1g2(np.array([x1,y1,z1,c1,cp1,t1,m1,p1]),np.array([x2,y2,z2,c2,cp2,t2,m2,p2])),np.array([x3,y3,z3,c3,cp3,t3,m3,p3]),np.array([x4,y4,z4,c4,cp4,t4,m4,p4]))+\
+                      ToBeCycMat(np.array([x1,y1,z1,c1,cp1,t1,m1,p1]),np.array([x2,y2,z2,c2,cp2,t2,m2,p2]),sg225productg1g2(np.array([x3,y3,z3,c3,cp3,t3,m3,p3]),np.array([x4,y4,z4,c4,cp4,t4,m4,p4])))+\
+                      ToBeCycMat(np.array([x1,y1,z1,c1,cp1,t1,m1,p1]),sg225productg1g2(np.array([x2,y2,z2,c2,cp2,t2,m2,p2]),np.array([x3,y3,z3,c3,cp3,t3,m3,p3])),np.array([x4,y4,z4,c4,cp4,t4,m4,p4]))+\
+                      ToBeCycMat(sg225productg1g2(np.array([x1,y1,z1,c1,cp1,t1,m1,p1]),np.array([x2,y2,z2,c2,cp2,t2,m2,p2])),np.array([x3,y3,z3,c3,cp3,t3,m3,p3]),np.array([x4,y4,z4,c4,cp4,t4,m4,p4]))+\
                       ToBeCycMat(np.array([x1,y1,z1,c1,cp1,t1,m1,p1]),np.array([x2,y2,z2,c2,cp2,t2,m2,p2]),np.array([x3,y3,z3,c3,cp3,t3,m3,p3]))
 
 def randdiffGen():
