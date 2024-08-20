@@ -509,14 +509,14 @@ end;
 #####################################################################
 #####################################################################
 
-
+                
 
 #####################################################################
 #####################################################################
 
 Mod2RingGensAndRels:=function(arg)
 local
-        R,n,GG,IT,Gen0,Gen1,Gen2,Gen3,Gen4,Gen5,spacedim,GenDim1to4,GenDeg1to4,
+        R,n,GG,IT,Gen0,Gen1,Gen2,Gen3,Gen4,Gen5,Gen6,ss6b,ss6,spacedim,GenDim1to4,GenDeg1to4,
         Gens, GensLett, Cupped, CupRelsLett, CupTemp, CupTempLett,
         CupBase2all,CupBase2,CupBase3,CupBase4,CupBase5,CupBase6,
         CupBase1Lett, CupBase2Lett,CupBase3Lett,CupBase4Lett,CupBase5Lett,CupBase6Lett,
@@ -553,19 +553,6 @@ IT := arg[1];  #Group number in International Table for Crystallography (ITC)
 Print("===========================================\n");
 #Print("Begin Group No. ", IT, ":\n");
 
-if IT = 219 then
-    Print("Caution: the group being calculated (No. 219) has two degree-6 generators!\n");
-    Print("These degree-6 generators have not been included in the current code. \n");
-    Print("Current program only outputs relations at degree <=6. Higher (>6) degree relations must be calculated manually.\n");
-fi;
-if IT = 226 or IT = 228 then
-    Print("Caution: the group being calculated (either No. 226 or No. 228) has a degree-6 generator!\n");
-    Print("This degree-6 generator has not been included in the current code, ");
-    Print("as the length-7 resolution required to get the degree-6 generator exceeds the current memory limit.\n");
-    Print("Current program only outputs relations at degree <=6. Higher (>6) degree relations must be calculated manually.\n");
-fi;
-
-
 
 
 if Length(arg)<=2 then
@@ -592,14 +579,34 @@ Gen1:=Gens[1];
 Gen2:=Gens[2];
 Gen3:=Gens[3];
 Gen4:=Gens[4];
-Gen5:=[]; #based on the a posteriori fact that no space group has degree-5 generators.
+Gen5:=[]; #based on the posteriori fact that no space group has degree-5 generators.
+Gen6:=[];
+
+if IT = 219 or IT = 226 then
+    #Print("Caution: the group being calculated (No. 219 or No. 226) has two degree-6 generators!\n");
+    ss6b :=CR_Mod2CocyclesAndCoboundaries(R,6)!.cocyclesBasis;
+    ss6 :=CR_Mod2CocyclesAndCoboundaries(R,6);
+    #Print([ss6!.cocycleToClass(ss6b[Length(ss6b)-1]),ss6!.cocycleToClass(ss6b[Length(ss6b)])]);
+    Append(Gen6,[ss6!.cocycleToClass(ss6b[Length(ss6b)-1]),ss6!.cocycleToClass(ss6b[Length(ss6b)])]);
+fi;
+if IT = 228 then
+    #Print("Caution: the group being calculated (No. 228) has a degree-6 generator!\n");
+    #Print("as the length-7 resolution required to get the degree-6 generator exceeds the current memory limit.\n");
+    ss6b :=CR_Mod2CocyclesAndCoboundaries(R,6)!.cocyclesBasis;
+    ss6 :=CR_Mod2CocyclesAndCoboundaries(R,6);
+    Append(Gen6,[ss6!.cocycleToClass(ss6b[Length(ss6b)])]);
+fi;
+
 GenDim1to4:=[Length(Gen1),Length(Gen2),Length(Gen3),Length(Gen4)];
 GenDeg1to4:=Concatenation(List([1..Length(Gen1)],x->1),List([1..Length(Gen2)],x->2),List([1..Length(Gen3)],x->3),List([1..Length(Gen4)],x->4));
 
-if Length(Gen4)>0 then
-    Print("Caution: this group contains degree-4 generators!\n");
-    Print("Current program only outputs relations at degree <=6. Higher (>6) degree relations must be calculated manually.\n");
+if Length(Gen4)>0 or Length(Gen6)>0 then
+    #Print("Caution: this group contains degree-4 generators!\n");
+    Print("Containing higher (>6) degree relations -- needs to be calculated manually!! \n");
 fi;
+
+
+
 
 
 #####################################################################
@@ -638,9 +645,6 @@ end;
 #return ps;
 #end;
 ######################################################################
-
-
-
 
 
 GensLett:=CohomologyBasis(List([1..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))],i->1));
@@ -963,8 +967,9 @@ od;
 #Print("\n");
 
 
-#Print("Chosen basis at degree 3:\n");
+#Print("Chosen basis at degree 3: ");
 #PrintMonomialString(CupBase3Lett,GenDim1to4,",");
+#Print("\n");
 
 if Length(CupBase3Lett) = Cohomology(TR,3) then
     Print("");#Print("dim(H^3)=", Cohomology(TR,3),", ");
@@ -2036,32 +2041,33 @@ od;
 #Step-3 finished: degree-3-gen cup with degree-3-gen
 
 #Append(CupBase6,Gen6);
-#for iu in [(1+Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5)+Length(Gen6))] do
-#    if CupBase6 = [] then
-#        Append(CupBase6,[Gen6[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))]]);
-#        Append(CupBase6Lett,[GensLett[iu]]);
-#    else
-#        sol :=SolutionMat(CupBase6*Z(2),Gen6[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))]*Z(2));
-#        if sol = fail then
-#            Append(CupBase6,[Gen6[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))]]);
-#            Append(CupBase6Lett,[GensLett[iu]]);
-#        else
-#            Print("Error: containing fake degree-6 generator(s)!!\n");
-#        fi;
-#    fi;
-#    Append(CupBase6Lett,[GensLett[iu]]);
-#od;
+for iu in [(1+Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5)+Length(Gen6))] do
+    if CupBase6 = [] then
+        Append(CupBase6,[Gen6[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))]]);
+        Append(CupBase6Lett,[GensLett[iu]]);
+    else
+        sol :=SolutionMat(CupBase6*Z(2),Gen6[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))]*Z(2));
+        if sol = fail then
+            Append(CupBase6,[Gen6[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))]]);
+            #Append(CupBase6Lett,[GensLett[iu]]);
+        else
+            Print("Error: containing fake degree-6 generator(s)!!\n");
+        fi;
+    fi;
+    #Append(CupBase6Lett,[GensLett[iu]]);
+od;
 
 
 
 #Print("Chosen basis at degree 6:\n");
 #PrintMonomialString(CupBase6Lett,GenDim1to4,",");
 
-if Length(CupBase6Lett) = Cohomology(TR,6) then
+if Length(CupBase6) = Cohomology(TR,6) then
     Print("");#Print("dim(H^6)=", Cohomology(TR,6),".\n");
 else
-    Print("!!!! No match!!!! dim(Chosen basis) - dim(H^6) = ", Length(CupBase6Lett) - Cohomology(TR,6),"\n");
+    Print("!!!! No match!!!! dim(Chosen basis) - dim(H^6) = ", Length(CupBase6) - Cohomology(TR,6),"\n");
 fi;
+
 
 
 
@@ -2070,7 +2076,16 @@ fi;
 #
 mono:=List(List([1..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4))],x->GensLett[x]),x->Letter2Monomial(x,GenDim1to4,GENNAMES[IT]));
 Print("Mod-2 Cohomology Ring of Group No. ", IT, ":\n");
-Print("Z2[", JoinStringsWithSeparator(mono,","), "]");
+if (IT in [219,226]) then
+    Print("Z2[", JoinStringsWithSeparator(mono,","), ",F1,F2]");
+elif IT = 228 then
+    Print("Z2[", JoinStringsWithSeparator(mono,","), ",F]");
+else
+    Print("Z2[", JoinStringsWithSeparator(mono,","), "]");
+fi;
+
+
+
 mono := 0;
 if Length(CupRel2Lett)+Length(CupRel3Lett)+Length(CupRel4Lett)+Length(CupRel5Lett)+Length(CupRel6Lett)> 0 then
     Print("/<");
@@ -2134,14 +2149,14 @@ if Length(CupRel6Lett) >0 then
     #Print(Length(CupRel6Lett)," at deg 6: ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
     Print("R6:  ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
 fi;
-#
+
 ####   End printing cohomology ring   ####
 #
 
 
-
 #Print("End Group No. ", IT, ".\n");
 Print("===========================================\n");
+
 
 return [CupBase1Lett,CupBase2Lett,CupBase3Lett,CupBase4Lett];
 #rec(GensAtDegN:=List([1..4],x->List([1..Length(Gens[x])],y->Letters[x,y])),RelsAtDegN:=[CupRel2Lett,CupRel3Lett,CupRel4Lett,CupRel5Lett,CupRel6Lett]);
@@ -2230,6 +2245,7 @@ for i in [1..Length(arithmeticNo)] do           #Length(arithmeticNo) == 17
     Print("\n");
 od;
 
+
 return true;
 end;
 #####################################################################
@@ -2249,6 +2265,7 @@ local
     PGGen, PGGen33, PGMat33, PGMatinv, PGind,
     o0,o1,o2,o3,o4,o5,
     G,Gp,R,CB,
+    GenName_standard, Rdim,lst1,lst2,lst3,lst4,lst5,lst6,lst1to4,
     MatToPow,GapToPow,Fbarhomotopyindinv,Invofg,Prodg1g2Pow,IndToElem,
     Homotopydeg1,Homotopydeg2,Homotopydeg3,Homotopydeg4,
     func,funcs,receive,FuncVal,TopoInvdeg3,
@@ -2429,9 +2446,9 @@ elif Length(gs) = 3 then
     fi;
 
 elif Length(gs) = 4 then
-    if (Prodg1g2Pow(gs[1],gs[2]) = Prodg1g2Pow(gs[2],gs[1])) and (Prodg1g2Pow(gs[3],gs[1]) = Prodg1g2Pow(Invofg(gs[1]),gs[3])) and (Prodg1g2Pow(gs[2],gs[3]) = Prodg1g2Pow(gs[3],gs[2])) and (Prodg1g2Pow(gs[1],gs[4]) = Prodg1g2Pow(gs[4],gs[1])) and (Prodg1g2Pow(gs[4],gs[2]) = Prodg1g2Pow(Invofg(gs[2]),gs[4])) and (Prodg1g2Pow(gs[3],gs[3]) = gs[2]) and (Prodg1g2Pow(gs[4],gs[4]) = gs[1]) then     #Topo inv varphi3 for No. 19
+    if (Prodg1g2Pow(gs[1],gs[2]) = Prodg1g2Pow(gs[2],gs[1])) and (Prodg1g2Pow(gs[3],gs[1]) = Prodg1g2Pow(Invofg(gs[1]),gs[3])) and (Prodg1g2Pow(gs[2],gs[3]) = Prodg1g2Pow(gs[3],gs[2])) and (Prodg1g2Pow(gs[1],gs[4]) = Prodg1g2Pow(gs[4],gs[1])) and (Prodg1g2Pow(gs[4],gs[2]) = Prodg1g2Pow(Invofg(gs[2]),gs[4])) and (Prodg1g2Pow(gs[3],gs[3]) = gs[2]) and (Prodg1g2Pow(gs[4],gs[4]) = gs[1]) then     #Topo inv varphi3 for No. 19 and 198
         
-        vallist := List(letters,x->FuncVal(x,[gs[2],gs[1],Invofg(gs[1])]) + FuncVal(x,[gs[1],gs[2],Invofg(gs[1])]) + FuncVal(x,[gs[1],Invofg(gs[1]),gs[2]]) + FuncVal(x,[gs[1],gs[2],Invofg(gs[2])])+ FuncVal(x,[gs[2],gs[1],Invofg(gs[2])]) + FuncVal(x,[gs[2],Invofg(gs[2]),gs[1]]) + FuncVal(x,[gs[1],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3]),Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])]) + FuncVal(x,[Prodg1g2Pow(Invofg(gs[2]),gs[3]),gs[1],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])]) + FuncVal(x,[Prodg1g2Pow(Invofg(gs[2]),gs[3]),Prodg1g2Pow(Invofg(gs[2]),gs[3]),gs[1]]) + FuncVal(x,[gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3]),Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])]) + FuncVal(x,[Prodg1g2Pow(Invofg(gs[1]),gs[3]),gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])]) + FuncVal(x,[Prodg1g2Pow(Invofg(gs[1]),gs[3]),Prodg1g2Pow(Invofg(gs[1]),gs[3]),gs[2]]));
+        vallist := List(letters,x->FuncVal(x,[gs[2],gs[1],Invofg(gs[1])]) + FuncVal(x,[gs[1],gs[2],Invofg(gs[1])]) + FuncVal(x,[gs[1],Invofg(gs[1]),gs[2]]) + FuncVal(x,[gs[1],gs[2],Invofg(gs[2])])+ FuncVal(x,[gs[2],gs[1],Invofg(gs[2])]) + FuncVal(x,[gs[2],Invofg(gs[2]),gs[1]]) + FuncVal(x,[gs[1],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3]),Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])]) + FuncVal(x,[Prodg1g2Pow(Invofg(gs[2]),gs[3]),gs[1],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[3])]) + FuncVal(x,[Prodg1g2Pow(Invofg(gs[2]),gs[3]),Prodg1g2Pow(Invofg(gs[2]),gs[3]),gs[1]]) + FuncVal(x,[gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[4]),Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[4])]) + FuncVal(x,[Prodg1g2Pow(Invofg(gs[1]),gs[4]),gs[2],Prodg1g2Pow(Prodg1g2Pow(Invofg(gs[1]),Invofg(gs[2])),gs[4])]) + FuncVal(x,[Prodg1g2Pow(Invofg(gs[1]),gs[4]),Prodg1g2Pow(Invofg(gs[1]),gs[4]),gs[2]]));
     
     elif (Prodg1g2Pow(gs[1],gs[2]) = Prodg1g2Pow(gs[2],gs[1])) and (Prodg1g2Pow(gs[3],gs[1]) = Prodg1g2Pow(Invofg(gs[1]),gs[3])) and (Prodg1g2Pow(gs[3],gs[2]) = Prodg1g2Pow(Invofg(gs[2]),gs[3])) and (Prodg1g2Pow(gs[1],gs[4]) = Prodg1g2Pow(gs[4],gs[1])) and (Prodg1g2Pow(gs[4],gs[2]) = Prodg1g2Pow(Invofg(gs[2]),gs[4])) and (Prodg1g2Pow(gs[4],gs[4]) = gs[1]) and (Prodg1g2Pow(gs[4],gs[3]) = Prodg1g2Pow(Prodg1g2Pow(gs[1],gs[2]),Prodg1g2Pow(gs[3],gs[4]))) then     #Topo inv varphi3 for No. 29
 
@@ -2546,6 +2563,7 @@ Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatr
 #Below constructs the resolution for the group:
 
 R:=ResolutionAlmostCrystalGroup(Image(Gp),7);
+#R:=ResolutionAlmostCrystalGroup(Image(Gp),5);
 
 #Resolution for the group now constructed.
 
@@ -2557,7 +2575,7 @@ Homotopydeg3:=List([1..R!.dimension(3)],x->Concatenation(List(R!.boundary(3,x),y
 
 
 CB:=[];
-for p in [1..3] do
+for p in [1..4] do
 CB[p]:=CR_Mod2CocyclesAndCoboundaries(R,p,true);
 od;
 
@@ -2588,7 +2606,7 @@ Gen4:=[];
 
 GensGAP:=Mod2RingGenerators(R,4,3); #GensGAP: Generators of the mod-2 cohomology ring at degree 1-4 that are worked out by GAP; GensGAP is to be compared with those worked out from explicit cochain expressions (Gen1,Gen2,Gen3).
 
-Print("Matching generators for space group No. ", IT, "\n");
+#Print("Matching generators for space group No. ", IT, "\n");
 #Print("basis given by gap is:", GensGAP, "\n");
 #Print("basis given by func is:", [Gen1,Gen2,Gen3], "\n");
 
@@ -2613,6 +2631,96 @@ fi;
 #Gen3:=GensGAP[3];
 
 
+################## BELOW ARE CODES RELATED TO NAMING OF COCYCLE GENERATORS ######################
+
+#
+#### Suggested name replacement:####
+#
+
+#Find the highest 1 in the cocycle vector to infer the place in the standard translation-point group LHS spectral sequence,
+#And use this to label the cocycles.
+#2-cocycles at (0,2),(1,1),(2,0) are labeled as B_{translation-type}, B_beta, B_alpha;
+#3-cocycles at (0,3),(1,2),(2,1),(3,0) are labeled by C_{xyz}, C_gamma, C_beta, C_alpha;
+#4-cocycles at (1,3),(2,2),(3,1),(4,0) are labeled by D_delta, D_gamma, D_beta, D_alpha.
+#and so on.
+
+
+if false then
+
+
+Rdim := List([1..4],x->R!.dimension(x));
+lst1 := [Rdim[1]-3];
+lst2 := [Rdim[2]-3-3*lst1[1],Rdim[2]-3];
+lst3 := [Rdim[3]-1-3*(lst1[1]+lst2[1]),Rdim[3]-1-3*lst1[1],Rdim[3]-1];
+lst4 := [Rdim[4]-lst1[1]-3*(lst2[1]+lst3[1]),Rdim[4]-lst1[1]-3*lst2[1],Rdim[4]-lst1[1]];
+#lst5 := [Rdim[5]-lst2[1]-3*(lst3[1]+lst4[1]),Rdim[5]-lst2[1]-3*lst3[1],Rdim[5]-lst2[1]];
+#lst6 := [Rdim[6]-lst3[1]-3*(lst4[1]+lst5[1]),Rdim[6]-lst3[1]-3*lst4[1],Rdim[6]-lst3[1]];
+lst1to4 := [lst1,lst2,lst3,lst4];
+
+GenName_standard := [];
+#GenName_standard := List([1..Length(Gen1)],x->JoinStringsWithSeparator([GENNAMES[IT][x],"in",IT],""));
+
+j := Length(Gen1)+1;
+for i in [2..4] do
+    for o1 in [Gen1,Gen2,Gen3,Gen4][i] do
+        v1 := Positions(CB[i].classToCocycle(o1),1);
+        v2 := v1[Length(v1)];
+        if v2 <=lst1to4[i][1] then
+            Append(GenName_standard,[JoinStringsWithSeparator([["A","B","C","D"][i],"alphain",IT," :=",GENNAMES[IT][j],"in",IT],"")]);
+            #Append(GenName_standard,[JoinStringsWithSeparator([["A","B","C","D"][i],"alphain",IT],"")]);
+        elif v2<=lst1to4[i][2] then
+            Append(GenName_standard,[JoinStringsWithSeparator([["A","B","C","D"][i],"betain",IT," :=",GENNAMES[IT][j],"in",IT],"")]);
+            #Append(GenName_standard,[JoinStringsWithSeparator([["A","B","C","D"][i],"betain",IT],"")]);
+        elif i=2 then
+            o2:=CB[i].classToCocycle(o1);
+            o3 := [o2[Length(o2)-2],o2[Length(o2)-1],o2[Length(o2)]];
+            if o3 = [1,0,0] then
+                Append(GenName_standard,[JoinStringsWithSeparator(["Bxyin", IT, " :=",GENNAMES[IT][j],"in",IT],"")]);
+                #Append(GenName_standard,[JoinStringsWithSeparator(["Bxyin", IT],"")]);
+            elif o3 = [0,0,1] then
+                Append(GenName_standard,[JoinStringsWithSeparator(["Byzin", IT, " :=",GENNAMES[IT][j],"in",IT],"")]);
+                #Append(GenName_standard,[JoinStringsWithSeparator(["Byzin", IT],"")]);
+            elif o3 = [0,1,1] then
+                Append(GenName_standard,[JoinStringsWithSeparator(["Bzxyin", IT, " :=",GENNAMES[IT][j],"in",IT],"")]);
+                #Append(GenName_standard,[JoinStringsWithSeparator(["Bzxyin", IT],"")]);
+            elif o3 = [1,0,1] then
+                Append(GenName_standard,[JoinStringsWithSeparator(["Byxzin", IT, " :=",GENNAMES[IT][j],"in",IT],"")]);
+                #Append(GenName_standard,[JoinStringsWithSeparator(["Byxzin", IT],"")]);
+            elif o3 = [1,1,0] then
+                Append(GenName_standard,[JoinStringsWithSeparator(["Bxyzin", IT, " :=",GENNAMES[IT][j],"in",IT],"")]);
+                #Append(GenName_standard,[JoinStringsWithSeparator(["Bxyzin", IT],"")]);
+            elif o3 = [1,1,1] then
+                Append(GenName_standard,[JoinStringsWithSeparator(["Bxyxzyzin", IT, " :=",GENNAMES[IT][j],"in",IT],"")]);
+                #Append(GenName_standard,[JoinStringsWithSeparator(["Bxyxzyzin", IT],"")]);
+            fi;
+        elif v2<=lst1to4[i][3] then
+            Append(GenName_standard,[JoinStringsWithSeparator([["A","B","C","D"][i],"gammain",IT," :=",GENNAMES[IT][j],"in",IT],"")]);
+            #Append(GenName_standard,[JoinStringsWithSeparator([["A","B","C","D"][i],"gammain",IT],"")]);
+        elif i=3 then
+            Append(GenName_standard,[JoinStringsWithSeparator(["Cxyzin",IT," :=",GENNAMES[IT][j],"in",IT],"")]);
+            #Append(GenName_standard,[JoinStringsWithSeparator(["Cxyzin",IT],"")]);
+        else # v2>lst1to4[i][3] and i>3
+            Append(GenName_standard,[JoinStringsWithSeparator([["A","B","C","D"][i],"deltain",IT," :=",GENNAMES[IT][j],"in",IT],"")]);
+            #Append(GenName_standard,[JoinStringsWithSeparator([["A","B","C","D"][i],"deltain",IT],"")]);
+        fi;
+        j :=j+1;
+    od;
+od;
+
+Print("(*",IT,":*)",GenName_standard);
+
+fi;
+
+#
+####
+#
+################## ABOVE ARE CODES RELATED TO NAMING OF COCYCLE GENERATORS ######################
+
+
+
+
+
+
 BasesLett := Mod2RingGensAndRels(IT,3,R,[Gen1,Gen2,Gen3,Gen4]);
 
 GensDim1to4 := [Length(Gen1),Length(Gen2),Length(Gen3),Length(Gen4)];
@@ -2621,7 +2729,7 @@ GensDeg1to4:=Concatenation(List([1..Length(Gen1)],x->1),List([1..Length(Gen2)],x
 Base1Lett := BasesLett[1];
 Base2Lett := BasesLett[2];
 Base3Lett := BasesLett[3];
-#Base4Lett := BasesLett[4];
+Base4Lett := BasesLett[4];
 
 
 #Print("Degree-4 generator:", GensGAP[4],"\n");
@@ -2639,7 +2747,6 @@ Base3Lett := BasesLett[3];
 ############################### BELOW ARE LSM RELATED CODES ###############################
 
 
-#Now as we are conbstructing codes for 142-230 we temporarily commented out this part. To uncomment, just move the first "#" in each line below.
 
 overcomplete_g:=[];
 Mat:=[];
@@ -2658,7 +2765,7 @@ for x in IWP[IT] do
     fi;
 od;
 
-Print("LSM topo invariants just added. Now the rank is: ", RankMatrix(Mat*Z(2)),"\n");
+#Print("LSM topo invariants just added. Now the rank is: ", RankMatrix(Mat*Z(2)),"\n");
 #Print(List(LSMMat.vectors,x->GF2ToZ(x)),"\n");
 
 
@@ -2680,7 +2787,7 @@ for v2 in PGind do
                             Append(Mat,[vec]);
                             Append(overcomplete_g,[[g2]]);
                         fi;
-                    elif Trace(mat2)=2 then                   #Mirror
+                    elif Trace(mat2)=2 then                  #Mirror
                         vec := TopoInvdeg3([g2],Base3Lett);
                         sol :=SolutionMat(Mat*Z(2),vec*Z(2));
                         if sol = fail then             #then we find a new non-LSM topo inv associated with mirror
@@ -2726,16 +2833,25 @@ od;
 
 if RankMatrix(Mat*Z(2)) = Length(Base3Lett) and RankMatrix(Mat*Z(2)) = Length(Mat) then
 
-    Print("Full Rank achieved: ", RankMatrix(Mat*Z(2)),"=", Length(Base3Lett)," (LSM Rank = ",Length(CountLSM), ").\n");
+    #Print("Full Rank achieved: ", RankMatrix(Mat*Z(2)),"=", Length(Base3Lett)," (LSM Rank = ",Length(CountLSM), ").\n");
     LSMMat := List(TransposedMat(Inverse(Mat*Z(2))),x->GF2ToZ(x));
     LSMLett := List([1..Length(CountLSM)],x->LSMMat[x]);
     Print("LSM:\n");
-    List(LSMLett,x->PrintMonomialString(IndToElem(x,Base3Lett),GensDim1to4,"+",GENNAMES[IT],"\n"));
-
+    j := 1;
+    for i in [1..Length(IWP[IT])] do
+        Print(IWP[IT][i][1]," ");
+        if (IWP[IT][i][2] = []) = false then
+            PrintMonomialString(IndToElem(LSMLett[j],Base3Lett),GensDim1to4,"+",GENNAMES[IT],"\n");
+            j := j+1;
+        else
+            Print("\n");
+        fi;
+    od;
 else
     Print("Full Rank NOT achieved: ", RankMatrix(Mat*Z(2)),"!=", Length(Base3Lett), "or", RankMatrix(Mat*Z(2)),"!=", Length(Mat),".\n");
-    Print(Mat*Z(2),"\n");
+    #Print(Mat*Z(2),"\n");
 fi;
+#Print("===========================================\n");
 
 
 
