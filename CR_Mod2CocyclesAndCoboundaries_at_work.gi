@@ -518,9 +518,9 @@ Mod2RingGensAndRels:=function(arg)
 local
         R,n,GG,IT,Gen0,Gen1,Gen2,Gen3,Gen4,Gen5,Gen6,ss6b,ss6,spacedim,GenDim1to4,GenDeg1to4,
         Gens, GensLett, Cupped, CupRelsLett, CupTemp, CupTempLett,
-        CupBase2all,CupBase2,CupBase3,CupBase4,CupBase5,CupBase6,
-        CupBase1Lett, CupBase2Lett,CupBase3Lett,CupBase4Lett,CupBase5Lett,CupBase6Lett,
-        CupRel2Lett, CupRel3Lett, CupRel4Lett, CupRel5Lett, CupRel6Lett,
+        CupBase2all,CupBase2,CupBase3,CupBase4,CupBase5,CupBase6,CupBase7,CupBase8,
+        CupBase1Lett, CupBase2Lett,CupBase3Lett,CupBase4Lett,CupBase5Lett,CupBase6Lett,CupBase7Lett,CupBase8Lett,
+        CupRel2Lett, CupRel3Lett, CupRel4Lett, CupRel5Lett, CupRel6Lett, CupRel7Lett, CupRel8Lett,
         RelReduceLett, RelReduceMat, RelReduceVec, RelRedLen, solrelred,
         cupped,
         Lett1, Lett2, mono, IO,
@@ -528,7 +528,7 @@ local
         sol, solrel, cc, CB, CohomologyBasis, TR,
         BasisP, BasisQ, SmithRecord, IToPosition,
         #NonNegativeVec,
-        i,p,q,r,s,t,u,v,w,x, ln, rk, rk1, ip,iq,ir,is,it,iu,iv, sw;
+        i,p,q,r,s,t,u,v,w,x,y,z, ln, rk, rk1, ip,iq,ir,is,it,iu,iv,iw,ix,iy,iz,sw;
 
 #Standard input: arg[1] = IT (# of space group), arg[2] = n (relations up to deg(n) is calculated)
 #e.g.: Mod2RingGensAndRels(89);
@@ -537,14 +537,14 @@ local
 #e.g.: Mod2RingGensAndRels(89,3,R89,Gens);
 
 
-n:=6; #This is the highest degree at which the relations are calculated. For now we fix it to be 6.
+
 
 if Length(arg)=1 then
-spacedim:=3;
+    spacedim:=3;
 fi;
 
 if Length(arg)>=2 then
-spacedim:=arg[2];
+    spacedim:=arg[2];
 fi;
 
 
@@ -653,6 +653,12 @@ GensLett:=CohomologyBasis(List([1..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Lengt
 Gen0 := List([1..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5))],i->0);
 
 TR:=HomToIntegersModP(R,2);            #Apply the Hom functor.
+
+if Length(Gen4) = 0 then
+    n:=6; #This is the highest degree at which the relations are calculated. For now we fix it to be 6.
+else
+    n:=8;
+fi;
 
 CB:=[];
 for p in [1..n] do
@@ -2069,7 +2075,1015 @@ else
 fi;
 
 
+####################################################################################
+#The part of the code below only runs when Gen4 is non-empty:
+#
+#
+#
+#The "if" below is the one that starts working on the r=7 and r=8 relations, which is executed only when Gen4 is non-empty!
 
+if Length(Gen4) >0 then
+
+####################### r = 7 ##########################
+
+CupBase7 :=[];
+CupBase7Lett :=[];
+CupRel7Lett := [];
+CupTemp := [];
+CupTempLett := [];
+RelReduceLett := [];
+RelReduceMat  := [];
+
+#### Begin preparation for relation reduction
+####
+iw := 1;
+for ip in [1..(Sum(GenDim1to4)+1)] do
+    p := Concatenation([Gen0],GensLett)[ip];
+    for iq in [ip..(Sum(GenDim1to4)+1)] do
+        q := Concatenation([Gen0],GensLett)[iq];
+        for ir in [iq..(Sum(GenDim1to4)+1)] do
+            r := Concatenation([Gen0],GensLett)[ir];
+            for is in [ir..(Sum(GenDim1to4)+1)] do
+                s := Concatenation([Gen0],GensLett)[is];
+                for it in [is..(Sum(GenDim1to4)+1)] do
+                    t := Concatenation([Gen0],GensLett)[it];
+                    for iu in [it..(Sum(GenDim1to4)+1)]  do
+                        u := Concatenation([Gen0],GensLett)[iu];
+                        for iv in [iu..(Sum(GenDim1to4)+1)]  do
+                            v := Concatenation([Gen0],GensLett)[iv];
+                            if (p+q+r+s+t+u+v)*GenDeg1to4 = 7 then
+                                Append(RelReduceLett,[p+q+r+s+t+u+v]);
+                                iw := iw+1;
+                            fi;
+                        od;
+                    od;
+                od;
+            od;
+        od;
+    od;
+od;
+
+RelRedLen := iw;
+
+RelReduceMat := [List([1..RelRedLen],x->0)];         #This makes sure that RelReduceMat is not an empty matrix
+
+
+for u in CupBase1Lett do
+    for v in CupRel6Lett do
+        RelReduceVec := List([1..RelRedLen],x->0);
+        for w in v do
+            RelReduceVec[Position(RelReduceLett,u+w)] := 1;
+        od;
+        Append(RelReduceMat,[RelReduceVec]);
+    od;
+od;
+
+
+
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        if (p+q)*GenDeg1to4 = 2 then
+            for v in CupRel5Lett do
+                RelReduceVec := List([1..RelRedLen],x->0);
+                for w in v do
+                    RelReduceVec[Position(RelReduceLett,p+q+w)] := 1;
+                od;
+                Append(RelReduceMat,[RelReduceVec]);
+            od;
+        fi;
+    od;
+od;
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        for r in Concatenation([Gen0],GensLett) do
+            if (p+q+r)*GenDeg1to4 = 3 then
+                for v in CupRel4Lett do
+                    RelReduceVec := List([1..RelRedLen],x->0);
+                    for w in v do
+                        RelReduceVec[Position(RelReduceLett,p+q+r+w)] := 1;
+                    od;
+                    Append(RelReduceMat,[RelReduceVec]);
+                od;
+            fi;
+        od;
+    od;
+od;
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        for r in Concatenation([Gen0],GensLett) do
+            for s in Concatenation([Gen0],GensLett) do
+                if (p+q+r+s)*GenDeg1to4 = 4 then
+                    for v in CupRel3Lett do
+                        RelReduceVec := List([1..RelRedLen],x->0);
+                        for w in v do
+                            RelReduceVec[Position(RelReduceLett,p+q+r+s+w)] := 1;
+                        od;
+                        Append(RelReduceMat,[RelReduceVec]);
+                    od;
+                fi;
+            od;
+        od;
+    od;
+od;
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        for r in Concatenation([Gen0],GensLett) do
+            for s in Concatenation([Gen0],GensLett) do
+                for t in Concatenation([Gen0],GensLett) do
+                    if (p+q+r+s+t)*GenDeg1to4 = 5 then
+                        for v in CupRel2Lett do
+                            RelReduceVec := List([1..RelRedLen],x->0);
+                            for w in v do
+                                RelReduceVec[Position(RelReduceLett,p+q+r+s+t+w)] := 1;
+                            od;
+                            Append(RelReduceMat,[RelReduceVec]);
+                        od;
+                    fi;
+                od;
+            od;
+        od;
+    od;
+od;
+
+
+####
+#### End preparation for relation reduction
+
+
+rk:=RankMatrix(RelReduceMat*Z(2));
+
+
+
+#Step-1 begins here: degree-6 cup with degree-1-gen
+#
+#
+iu :=1;
+for u in CupBase6 do
+
+    #### implementing Mod2CupProduct(R,u,v,6,1,CB[6],CB[1],CB[7]) -- part 1: ####
+    ####
+    uCocycle:=CB[6].classToCocycle(u);
+    uChainMap:=CR_ChainMapFromCocycle(R,uCocycle,6,1);
+    ww:=[];
+    for i in [1..(R!.dimension(7))] do
+        Append(ww, [uChainMap([[i,1]])]);
+    od;
+    ####
+    #### implementing Mod2CupProduct(R,u,v,6,1,CB[6],CB[1],CB[7])  -- part 1 ended ####
+
+    iv :=1;
+    for v in Gen1 do
+    
+        #cupped :=Mod2CupProduct(R,u,v,6,1,CB[6],CB[1],CB[7]);      #then calculate u-cup-v
+        
+        #### implementing Mod2CupProduct(R,u,v,6,1,CB[6],CB[1],CB[7]) -- part 2: ####
+        ####
+        vCocycle:=CB[1].classToCocycle(v);
+        uvCocycle:=[];
+        for i in [1..(R!.dimension(7))] do
+            w:=ww[i];
+            sw:=0;
+            for x in w do
+                sw:=sw + vCocycle[AbsoluteValue(x[1])];
+            od;
+            uvCocycle[i]:=sw mod 2;
+        od;
+        cupped := CB[7].cocycleToClass(uvCocycle);
+        ####
+        #### implementing Mod2CupProduct(R,u,v,6,1,CB[6],CB[1],CB[7]) -- part 2 ended ####
+
+        Lett1 := CupBase6Lett[iu] + GensLett[iv];
+
+        
+        #### Start: determine whether u-cup-v goes to the basis
+        ####
+        if cupped = List([1..Cohomology(TR,7)],x->0) then         #if u-cup-v is a coboundary
+            solrel := [Lett1];
+            
+        else
+            if CupBase7 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+                Append(CupBase7,[cupped]);
+                Append(CupBase7Lett,[Lett1]);
+            else
+                sol :=SolutionMat(CupBase7*Z(2),cupped*Z(2));
+                if sol = fail then                  #if u-cup-v is a genuine new cocycle
+                    Append(CupBase7,[cupped]);
+                    Append(CupBase7Lett,[Lett1]);
+                else                                #if u-cup-v is expressable by other cocycles in basis
+                    solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase7Lett[x]));
+                fi;
+            fi;
+        fi;
+        ####
+        #### End:  determine whether u-cup-v goes to the basis
+            
+            
+        #### Start: determine whether u-cup-v gives a new relation
+        ####
+        if (Lett1 in CupBase7Lett) = false then
+                    
+            #### begin checking whether the relation is reducible from lower degree ones
+            ####
+            RelReduceVec := List([1..RelRedLen],x->0); #check whether this relation is reducible from lower ones
+            for w in solrel do
+                #Print(w,"\n");
+                solrelred := Position(RelReduceLett,w);
+                            
+                if solrelred = fail then      #if this relation contains new terms then we find a new relation
+                    break;
+                else
+                    RelReduceVec[solrelred] := 1;
+                fi;
+            od;
+            if (solrelred = fail) = false then
+                rk1:=RankMatrix(Concatenation(RelReduceMat*Z(2),[RelReduceVec]*Z(2)));
+                if (rk = rk1) = false then
+                    solrelred :=fail;
+                fi;
+                #solrelred := SolutionMat(RelReduceMat*Z(2),RelReduceVec*Z(2));
+            fi;
+            ####
+            #### end checking whether the relation is reducible from lower degree ones
+
+            if solrelred = fail then          #if not reducible from lower degree ones, then we have found a new relation
+                Append(CupRelsLett,[Lett1]);  #Record the letter that appears on the LHS of the relation equation
+                Append(CupRel7Lett,[solrel]); #Record the letters that appear in the relation equation. Note that all but the first letters are in the cohomology basis (that we choose).
+                Append(RelReduceMat,[RelReduceVec]);
+                rk := rk1;
+            fi;
+        fi;
+        ####
+        #### End: determine whether u-cup-v gives a new relation
+
+    
+        iv := iv+1;
+    od;
+    iu := iu+1;
+od;
+#
+#
+#Step-1 finished: degree-6 cup with degree-1-gen
+
+
+#Step-2 begins here: (degree-3 cup with degree-2) cup with degree-2-gen
+#
+#
+iu :=1;
+for u in CupBase5 do
+    if List([1..Length(Gen1)],x->CupBase5Lett[iu][x]) = List([1..Length(Gen1)],x->0) then   #if u is of the form Bi-cup-Cj
+        #### implementing Mod2CupProduct(R,u,v,5,2,CB[5],CB[2],CB[7]) -- part 1: ####
+        ####
+        uCocycle:=CB[5].classToCocycle(u);
+        uChainMap:=CR_ChainMapFromCocycle(R,uCocycle,5,2);
+        ww:=[];
+        for i in [1..(R!.dimension(7))] do
+            Append(ww, [uChainMap([[i,1]])]);
+        od;
+        ####
+        #### implementing Mod2CupProduct(R,u,v,5,2,CB[5],CB[2],CB[7])  -- part 1 ended ####
+
+        iv :=1;
+        for v in Gen2 do
+    
+            #cupped :=Mod2CupProduct(R,u,v,5,2,CB[5],CB[2],CB[7]);      #then calculate u-cup-v
+        
+            #### implementing Mod2CupProduct(R,u,v,5,2,CB[5],CB[2],CB[7]) -- part 2: ####
+            ####
+            vCocycle:=CB[2].classToCocycle(v);
+            uvCocycle:=[];
+            for i in [1..(R!.dimension(7))] do
+                w:=ww[i];
+                sw:=0;
+                for x in w do
+                    sw:=sw + vCocycle[AbsoluteValue(x[1])];
+                od;
+                uvCocycle[i]:=sw mod 2;
+            od;
+            cupped := CB[7].cocycleToClass(uvCocycle);
+            ####
+            #### implementing Mod2CupProduct(R,u,v,5,2,CB[5],CB[2],CB[7]) -- part 2 ended ####
+        
+
+            Lett1 := CupBase5Lett[iu] + GensLett[Length(Gen1)+iv];
+
+        
+            #### Start: determine whether u-cup-v goes to the basis
+            ####
+            if cupped = List([1..Cohomology(TR,7)],x->0) then         #if u-cup-v is a coboundary
+                solrel := [Lett1];
+              
+            else
+                if CupBase7 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+                    Append(CupBase7,[cupped]);
+                    Append(CupBase7Lett,[Lett1]);
+                else
+                    sol :=SolutionMat(CupBase7*Z(2),cupped*Z(2));
+                    if sol = fail then                  #if u-cup-v is a genuine new cocycle
+                        Append(CupBase7,[cupped]);
+                        Append(CupBase7Lett,[Lett1]);
+                    else                                #if u-cup-v is expressable by other cocycles in basis
+                        solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase7Lett[x]));
+                    fi;
+                fi;
+            fi;
+            ####
+            #### End:  determine whether u-cup-v goes to the basis
+            
+            
+            #### Start: determine whether u-cup-v gives a new relation
+            ####
+            if (Lett1 in CupBase7Lett) = false then
+               
+                #### begin checking whether the relation is reducible from lower degree ones
+                ####
+                RelReduceVec := List([1..RelRedLen],x->0); #check whether this relation is reducible from lower ones
+                for w in solrel do
+                    #Print(w,"\n");
+                    solrelred := Position(RelReduceLett,w);
+                            
+                    if solrelred = fail then      #if this relation contains new terms then we find a new relation
+                        break;
+                    else
+                        RelReduceVec[solrelred] := 1;
+                    fi;
+                od;
+                if (solrelred = fail) = false then
+                    rk1:=RankMatrix(Concatenation(RelReduceMat*Z(2),[RelReduceVec]*Z(2)));
+                    if (rk = rk1) = false then
+                        solrelred :=fail;
+                    fi;
+                    #solrelred := SolutionMat(RelReduceMat*Z(2),RelReduceVec*Z(2));
+                fi;
+                ####
+                #### end checking whether the relation is reducible from lower degree ones
+
+                if solrelred = fail then          #if not reducible from lower degree ones, then we have found a new     relation
+                    Append(CupRelsLett,[Lett1]);  #Record the letter that appears on the LHS of the relation equation
+                    Append(CupRel7Lett,[solrel]); #Record the letters that appear in the relation equation. Note that all but the first letters are in the cohomology basis (that we choose).
+                    Append(RelReduceMat,[RelReduceVec]);
+                    rk := rk1;
+                fi;
+            fi;
+            ####
+            #### End: determine whether u-cup-v gives a new relation
+        
+            iv := iv+1;
+        od;
+    fi;
+    iu := iu+1;
+od;
+#
+#
+#Step-2 finished: (degree-3 cup with degree-2) cup with degree-2-gen
+
+
+
+
+#if CupBase7 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
+#    if (CupTemp = []) = false then
+#        if (CupTemp[1] = []) = false then  #if cohomology dimension is not zero
+#            Append(CupBase7,[CupTemp[1]]);
+#            Append(CupBase7Lett,[CupTempLett[1]]);
+#        fi;
+#    fi;
+#fi;
+
+
+#if (CupBase7 = []) = false then
+
+#    for cupped in CupTemp do                #check the cocycle-ness of those u-cup-v's that contain patterns in CupRelsLett
+#        sol :=SolutionMat(CupBase7*Z(2),cupped*Z(2));
+#        if sol = fail then                  #if u-cup-v is a genuine new cocycle
+#            Append(CupBase7,[cupped]);
+#            Append(CupBase7Lett,[Lett1]);
+#        fi;
+#    od;
+#fi;
+
+
+
+#Step-3 begins here: degree-4-gen cup with degree-3-gen
+#
+#
+iu :=1;
+for u in Gen4 do
+
+    #### implementing Mod2CupProduct(R,u,v,4,3,CB[4],CB[3],CB[7]) -- part 1: ####
+    ####
+    uCocycle:=CB[4].classToCocycle(u);
+    uChainMap:=CR_ChainMapFromCocycle(R,uCocycle,4,3);
+    ww:=[];
+    for i in [1..(R!.dimension(7))] do
+        Append(ww, [uChainMap([[i,1]])]);
+    od;
+    ####
+    #### implementing Mod2CupProduct(R,u,v,4,3,CB[4],CB[3],CB[7])  -- part 1 ended ####
+
+    iv :=1;
+    for v in Gen3 do
+        if iv>=iu then
+            Lett1 := GensLett[Length(Gen1)+Length(Gen2)+Length(Gen3)+iu] + GensLett[Length(Gen1)+Length(Gen2)+iv];
+            #Of course now u-cup-v does not contain patterns in CupRelsLett:
+            #IO := false;
+            #for Lett2 in CupRelsLett do
+            #    if NonNegativeVec(Lett1-Lett2) then #u-cup-v contains patterns in CupRelsLett
+            #    IO :=true;       #then rewrite IO
+            #    fi;
+            #od;
+        
+            #cupped :=Mod2CupProduct(R,u,v,4,3,CB[4],CB[3],CB[7]);      #then calculate u-cup-v
+            
+            #### implementing Mod2CupProduct(R,u,v,4,3,CB[4],CB[3],CB[7]) -- part 2: ####
+            ####
+            vCocycle:=CB[3].classToCocycle(v);
+            uvCocycle:=[];
+            for i in [1..(R!.dimension(7))] do
+                w:=ww[i];
+                sw:=0;
+                for x in w do
+                    sw:=sw + vCocycle[AbsoluteValue(x[1])];
+                od;
+                uvCocycle[i]:=sw mod 2;
+            od;
+            cupped := CB[7].cocycleToClass(uvCocycle);
+            ####
+            #### implementing Mod2CupProduct(R,u,v,4,3,CB[4],CB[3],CB[7]) -- part 2 ended ####
+        
+            if cupped = List([1..Cohomology(TR,7)],x->0) then         #if u-cup-v is a coboundary
+                Append(CupRelsLett,[Lett1]);
+                Append(CupRel7Lett,[[Lett1]]);
+            elif CupBase7 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
+                Append(CupBase7,[cupped]);
+                Append(CupBase7Lett,[Lett1]);
+            else
+                sol :=SolutionMat(CupBase7*Z(2),cupped*Z(2));
+                if sol = fail then                  #if u-cup-v is a genuine new cocycle
+                    Append(CupBase7,[cupped]);
+                    Append(CupBase7Lett,[Lett1]);
+                else                                #if u-cup-v is expressable by other cocycles in basis
+                    solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase7Lett[x]));
+                    if (Lett1 in CupBase7Lett) = false then
+                        Append(CupRelsLett,[Lett1]);
+                        Append(CupRel7Lett,[solrel]);
+                    fi;
+                fi;
+            fi;
+        fi;
+        iv := iv+1;
+    od;
+    iu := iu+1;
+od;
+#
+#
+#Step-3 finished: degree-4-gen cup with degree-3-gen
+
+#Append(CupBase7,Gen7);
+#Note that there's no Gen7!!
+#for iu in [(1+Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5)+Length(Gen6))..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5)+Length(Gen6)+Length(Gen7))] do
+#    if CupBase7 = [] then
+#        Append(CupBase7,[Gen7[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5)+Length(Gen6))]]);
+#        Append(CupBase7Lett,[GensLett[iu]]);
+#    else
+#        sol :=SolutionMat(CupBase6*Z(2),Gen7[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5)+Length(Gen6))]*Z(2));
+#        if sol = fail then
+#            Append(CupBase7,[Gen7[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5)+Length(Gen6))]]);
+#            #Append(CupBase7Lett,[GensLett[iu]]);
+#        else
+#            Print("Error: containing fake degree-7 generator(s)!!\n");
+#        fi;
+#    fi;
+#    #Append(CupBase7Lett,[GensLett[iu]]);
+#od;
+
+
+
+#Print("Chosen basis at degree 7:\n");
+#PrintMonomialString(CupBase7Lett,GenDim1to4,",");
+
+if Length(CupBase7) = Cohomology(TR,7) then
+    Print("");#Print("dim(H^7)=", Cohomology(TR,7),".\n");
+else
+    Print("!!!! No match!!!! dim(Chosen basis) - dim(H^7) = ", Length(CupBase7) - Cohomology(TR,7),"\n");
+fi;
+
+
+
+####################### r = 8 ##########################
+
+CupBase8 :=[];
+CupBase8Lett :=[];
+CupRel8Lett := [];
+CupTemp := [];
+CupTempLett := [];
+RelReduceLett := [];
+RelReduceMat  := [];
+
+#### Begin preparation for relation reduction
+####
+ix := 1;
+for ip in [1..(Sum(GenDim1to4)+1)] do
+    p := Concatenation([Gen0],GensLett)[ip];
+    for iq in [ip..(Sum(GenDim1to4)+1)] do
+        q := Concatenation([Gen0],GensLett)[iq];
+        for ir in [iq..(Sum(GenDim1to4)+1)] do
+            r := Concatenation([Gen0],GensLett)[ir];
+            for is in [ir..(Sum(GenDim1to4)+1)] do
+                s := Concatenation([Gen0],GensLett)[is];
+                for it in [is..(Sum(GenDim1to4)+1)] do
+                    t := Concatenation([Gen0],GensLett)[it];
+                    for iu in [it..(Sum(GenDim1to4)+1)]  do
+                        u := Concatenation([Gen0],GensLett)[iu];
+                        for iv in [iu..(Sum(GenDim1to4)+1)]  do
+                            v := Concatenation([Gen0],GensLett)[iv];
+                            for iw in [iv..(Sum(GenDim1to4)+1)]  do
+                                w := Concatenation([Gen0],GensLett)[iw];
+                                if (p+q+r+s+t+u+v+w)*GenDeg1to4 = 8 then
+                                    Append(RelReduceLett,[p+q+r+s+t+u+v+w]);
+                                    ix := ix+1;
+                                fi;
+                            od;
+                        od;
+                    od;
+                od;
+            od;
+        od;
+    od;
+od;
+
+RelRedLen := ix;
+
+RelReduceMat := [List([1..RelRedLen],x->0)];         #This makes sure that RelReduceMat is not an empty matrix
+
+
+for u in CupBase1Lett do
+    for v in CupRel7Lett do
+        RelReduceVec := List([1..RelRedLen],x->0);
+        for w in v do
+            RelReduceVec[Position(RelReduceLett,u+w)] := 1;
+        od;
+        Append(RelReduceMat,[RelReduceVec]);
+    od;
+od;
+
+
+
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        if (p+q)*GenDeg1to4 = 2 then
+            for v in CupRel6Lett do
+                RelReduceVec := List([1..RelRedLen],x->0);
+                for w in v do
+                    RelReduceVec[Position(RelReduceLett,p+q+w)] := 1;
+                od;
+                Append(RelReduceMat,[RelReduceVec]);
+            od;
+        fi;
+    od;
+od;
+
+
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        for r in Concatenation([Gen0],GensLett) do
+            if (p+q+r)*GenDeg1to4 = 3 then
+                for v in CupRel5Lett do
+                    RelReduceVec := List([1..RelRedLen],x->0);
+                    for w in v do
+                        RelReduceVec[Position(RelReduceLett,p+q+r+w)] := 1;
+                    od;
+                    Append(RelReduceMat,[RelReduceVec]);
+                od;
+            fi;
+        od;
+    od;
+od;
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        for r in Concatenation([Gen0],GensLett) do
+            for s in Concatenation([Gen0],GensLett) do
+                if (p+q+r+s)*GenDeg1to4 = 4 then
+                    for v in CupRel4Lett do
+                        RelReduceVec := List([1..RelRedLen],x->0);
+                        for w in v do
+                            RelReduceVec[Position(RelReduceLett,p+q+r+s+w)] := 1;
+                        od;
+                        Append(RelReduceMat,[RelReduceVec]);
+                    od;
+                fi;
+            od;
+        od;
+    od;
+od;
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        for r in Concatenation([Gen0],GensLett) do
+            for s in Concatenation([Gen0],GensLett) do
+                for t in Concatenation([Gen0],GensLett) do
+                    if (p+q+r+s+t)*GenDeg1to4 = 5 then
+                        for v in CupRel3Lett do
+                            RelReduceVec := List([1..RelRedLen],x->0);
+                            for w in v do
+                                RelReduceVec[Position(RelReduceLett,p+q+r+s+t+w)] := 1;
+                            od;
+                            Append(RelReduceMat,[RelReduceVec]);
+                        od;
+                    fi;
+                od;
+            od;
+        od;
+    od;
+od;
+for p in Concatenation([Gen0],GensLett) do
+    for q in Concatenation([Gen0],GensLett) do
+        for r in Concatenation([Gen0],GensLett) do
+            for s in Concatenation([Gen0],GensLett) do
+                for t in Concatenation([Gen0],GensLett) do
+                    for u in Concatenation([Gen0],GensLett) do
+                        if (p+q+r+s+t+u)*GenDeg1to4 = 6 then
+                            for v in CupRel2Lett do
+                                RelReduceVec := List([1..RelRedLen],x->0);
+                                for w in v do
+                                    RelReduceVec[Position(RelReduceLett,p+q+r+s+t+u+w)] := 1;
+                                od;
+                                Append(RelReduceMat,[RelReduceVec]);
+                            od;
+                        fi;
+                    od;
+                od;
+            od;
+        od;
+    od;
+od;
+
+
+####
+#### End preparation for relation reduction
+
+
+rk:=RankMatrix(RelReduceMat*Z(2));
+
+
+
+#Step-1 begins here: degree-7 cup with degree-1-gen
+#
+#
+iu :=1;
+for u in CupBase7 do
+
+    #### implementing Mod2CupProduct(R,u,v,7,1,CB[7],CB[1],CB[8]) -- part 1: ####
+    ####
+    uCocycle:=CB[7].classToCocycle(u);
+    uChainMap:=CR_ChainMapFromCocycle(R,uCocycle,7,1);
+    ww:=[];
+    for i in [1..(R!.dimension(8))] do
+        Append(ww, [uChainMap([[i,1]])]);
+    od;
+    ####
+    #### implementing Mod2CupProduct(R,u,v,7,1,CB[7],CB[1],CB[8])  -- part 1 ended ####
+
+    iv :=1;
+    for v in Gen1 do
+    
+        #cupped :=Mod2CupProduct(R,u,v,7,1,CB[7],CB[1],CB[8]);      #then calculate u-cup-v
+        
+        #### implementing Mod2CupProduct(R,u,v,7,1,CB[7],CB[1],CB[8]) -- part 2: ####
+        ####
+        vCocycle:=CB[1].classToCocycle(v);
+        uvCocycle:=[];
+        for i in [1..(R!.dimension(8))] do
+            w:=ww[i];
+            sw:=0;
+            for x in w do
+                sw:=sw + vCocycle[AbsoluteValue(x[1])];
+            od;
+            uvCocycle[i]:=sw mod 2;
+        od;
+        cupped := CB[8].cocycleToClass(uvCocycle);
+        ####
+        #### implementing Mod2CupProduct(R,u,v,7,1,CB[7],CB[1],CB[8]) -- part 2 ended ####
+
+        Lett1 := CupBase7Lett[iu] + GensLett[iv];
+
+        
+        #### Start: determine whether u-cup-v goes to the basis
+        ####
+        if cupped = List([1..Cohomology(TR,8)],x->0) then         #if u-cup-v is a coboundary
+            solrel := [Lett1];
+            
+        else
+            if CupBase8 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+                Append(CupBase8,[cupped]);
+                Append(CupBase8Lett,[Lett1]);
+            else
+                sol :=SolutionMat(CupBase8*Z(2),cupped*Z(2));
+                if sol = fail then                  #if u-cup-v is a genuine new cocycle
+                    Append(CupBase8,[cupped]);
+                    Append(CupBase8Lett,[Lett1]);
+                else                                #if u-cup-v is expressable by other cocycles in basis
+                    solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase8Lett[x]));
+                fi;
+            fi;
+        fi;
+        ####
+        #### End:  determine whether u-cup-v goes to the basis
+            
+            
+        #### Start: determine whether u-cup-v gives a new relation
+        ####
+        if (Lett1 in CupBase8Lett) = false then
+                    
+            #### begin checking whether the relation is reducible from lower degree ones
+            ####
+            RelReduceVec := List([1..RelRedLen],x->0); #check whether this relation is reducible from lower ones
+            for w in solrel do
+                #Print(w,"\n");
+                solrelred := Position(RelReduceLett,w);
+                            
+                if solrelred = fail then      #if this relation contains new terms then we find a new relation
+                    break;
+                else
+                    RelReduceVec[solrelred] := 1;
+                fi;
+            od;
+            if (solrelred = fail) = false then
+                rk1:=RankMatrix(Concatenation(RelReduceMat*Z(2),[RelReduceVec]*Z(2)));
+                if (rk = rk1) = false then
+                    solrelred :=fail;
+                fi;
+                #solrelred := SolutionMat(RelReduceMat*Z(2),RelReduceVec*Z(2));
+            fi;
+            ####
+            #### end checking whether the relation is reducible from lower degree ones
+
+            if solrelred = fail then          #if not reducible from lower degree ones, then we have found a new relation
+                Append(CupRelsLett,[Lett1]);  #Record the letter that appears on the LHS of the relation equation
+                Append(CupRel8Lett,[solrel]); #Record the letters that appear in the relation equation. Note that all but the first letters are in the cohomology basis (that we choose).
+                Append(RelReduceMat,[RelReduceVec]);
+                rk := rk1;
+            fi;
+        fi;
+        ####
+        #### End: determine whether u-cup-v gives a new relation
+
+    
+        iv := iv+1;
+    od;
+    iu := iu+1;
+od;
+#
+#
+#Step-1 finished: degree-7 cup with degree-1-gen
+
+
+#Step-2 begins here: (degree-3 cup with degree-3, or degree-2 cup with degree-2 cup with degree-2) cup with degree-2-gen
+#
+#
+iu :=1;
+for u in CupBase6 do
+    if List([1..Length(Gen1)],x->CupBase6Lett[iu][x]) = List([1..Length(Gen1)],x->0) then   #if u is of the form Ci-cup-Cj or Bi-cup-Bj-cup-Bk
+        #### implementing Mod2CupProduct(R,u,v,6,2,CB[6],CB[2],CB[8]) -- part 1: ####
+        ####
+        uCocycle:=CB[6].classToCocycle(u);
+        uChainMap:=CR_ChainMapFromCocycle(R,uCocycle,6,2);
+        ww:=[];
+        for i in [1..(R!.dimension(8))] do
+            Append(ww, [uChainMap([[i,1]])]);
+        od;
+        ####
+        #### implementing Mod2CupProduct(R,u,v,6,2,CB[6],CB[2],CB[8])  -- part 1 ended ####
+
+        iv :=1;
+        for v in Gen2 do
+    
+            #cupped :=Mod2CupProduct(R,u,v,6,2,CB[6],CB[2],CB[8]);      #then calculate u-cup-v
+        
+            #### implementing Mod2CupProduct(R,u,v,6,2,CB[6],CB[2],CB[8]) -- part 2: ####
+            ####
+            vCocycle:=CB[2].classToCocycle(v);
+            uvCocycle:=[];
+            for i in [1..(R!.dimension(8))] do
+                w:=ww[i];
+                sw:=0;
+                for x in w do
+                    sw:=sw + vCocycle[AbsoluteValue(x[1])];
+                od;
+                uvCocycle[i]:=sw mod 2;
+            od;
+            cupped := CB[8].cocycleToClass(uvCocycle);
+            ####
+            #### implementing Mod2CupProduct(R,u,v,6,2,CB[6],CB[2],CB[8]) -- part 2 ended ####
+        
+
+            Lett1 := CupBase6Lett[iu] + GensLett[Length(Gen1)+iv];
+
+        
+            #### Start: determine whether u-cup-v goes to the basis
+            ####
+            if cupped = List([1..Cohomology(TR,8)],x->0) then         #if u-cup-v is a coboundary
+                solrel := [Lett1];
+              
+            else
+                if CupBase8 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+                    Append(CupBase8,[cupped]);
+                    Append(CupBase8Lett,[Lett1]);
+                else
+                    sol :=SolutionMat(CupBase8*Z(2),cupped*Z(2));
+                    if sol = fail then                  #if u-cup-v is a genuine new cocycle
+                        Append(CupBase8,[cupped]);
+                        Append(CupBase8Lett,[Lett1]);
+                    else                                #if u-cup-v is expressable by other cocycles in basis
+                        solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase8Lett[x]));
+                    fi;
+                fi;
+            fi;
+            ####
+            #### End:  determine whether u-cup-v goes to the basis
+            
+            
+            #### Start: determine whether u-cup-v gives a new relation
+            ####
+            if (Lett1 in CupBase8Lett) = false then
+               
+                #### begin checking whether the relation is reducible from lower degree ones
+                ####
+                RelReduceVec := List([1..RelRedLen],x->0); #check whether this relation is reducible from lower ones
+                for w in solrel do
+                    #Print(w,"\n");
+                    solrelred := Position(RelReduceLett,w);
+                            
+                    if solrelred = fail then      #if this relation contains new terms then we find a new relation
+                        break;
+                    else
+                        RelReduceVec[solrelred] := 1;
+                    fi;
+                od;
+                if (solrelred = fail) = false then
+                    rk1:=RankMatrix(Concatenation(RelReduceMat*Z(2),[RelReduceVec]*Z(2)));
+                    if (rk = rk1) = false then
+                        solrelred :=fail;
+                    fi;
+                    #solrelred := SolutionMat(RelReduceMat*Z(2),RelReduceVec*Z(2));
+                fi;
+                ####
+                #### end checking whether the relation is reducible from lower degree ones
+
+                if solrelred = fail then          #if not reducible from lower degree ones, then we have found a new     relation
+                    Append(CupRelsLett,[Lett1]);  #Record the letter that appears on the LHS of the relation equation
+                    Append(CupRel8Lett,[solrel]); #Record the letters that appear in the relation equation. Note that all but the first letters are in the cohomology basis (that we choose).
+                    Append(RelReduceMat,[RelReduceVec]);
+                    rk := rk1;
+                fi;
+            fi;
+            ####
+            #### End: determine whether u-cup-v gives a new relation
+        
+            iv := iv+1;
+        od;
+    fi;
+    iu := iu+1;
+od;
+#
+#
+#Step-2 finished: (degree-3 cup with degree-3, degree-2 cup with degree-2 cup with degree-2) cup with degree-2-gen
+
+
+
+
+#if CupBase8 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
+#    if (CupTemp = []) = false then
+#        if (CupTemp[1] = []) = false then  #if cohomology dimension is not zero
+#            Append(CupBase8,[CupTemp[1]]);
+#            Append(CupBase8Lett,[CupTempLett[1]]);
+#        fi;
+#    fi;
+#fi;
+
+
+#if (CupBase8 = []) = false then
+
+#    for cupped in CupTemp do                #check the cocycle-ness of those u-cup-v's that contain patterns in CupRelsLett
+#        sol :=SolutionMat(CupBase8*Z(2),cupped*Z(2));
+#        if sol = fail then                  #if u-cup-v is a genuine new cocycle
+#            Append(CupBase8,[cupped]);
+#            Append(CupBase8Lett,[Lett1]);
+#        fi;
+#    od;
+#fi;
+
+
+
+#Step-3 begins here: degree-4-gen cup with degree-4-gen
+#
+#
+iu :=1;
+for u in Gen4 do
+
+    #### implementing Mod2CupProduct(R,u,v,4,4,CB[4],CB[4],CB[8]) -- part 1: ####
+    ####
+    uCocycle:=CB[4].classToCocycle(u);
+    uChainMap:=CR_ChainMapFromCocycle(R,uCocycle,4,4);
+    ww:=[];
+    for i in [1..(R!.dimension(8))] do
+        Append(ww, [uChainMap([[i,1]])]);
+    od;
+    ####
+    #### implementing Mod2CupProduct(R,u,v,4,4,CB[4],CB[4],CB[8])  -- part 1 ended ####
+
+    iv :=1;
+    for v in Gen4 do
+        if iv>=iu then
+            Lett1 := GensLett[Length(Gen1)+Length(Gen2)+Length(Gen3)+iu] + GensLett[Length(Gen1)+Length(Gen2)+Length(Gen3)+iv];
+            #Of course now u-cup-v does not contain patterns in CupRelsLett:
+            #IO := false;
+            #for Lett2 in CupRelsLett do
+            #    if NonNegativeVec(Lett1-Lett2) then #u-cup-v contains patterns in CupRelsLett
+            #    IO :=true;       #then rewrite IO
+            #    fi;
+            #od;
+        
+            #cupped :=Mod2CupProduct(R,u,v,4,4,CB[4],CB[4],CB[8]);      #then calculate u-cup-v
+            
+            #### implementing Mod2CupProduct(R,u,v,4,4,CB[4],CB[4],CB[8]) -- part 2: ####
+            ####
+            vCocycle:=CB[4].classToCocycle(v);
+            uvCocycle:=[];
+            for i in [1..(R!.dimension(8))] do
+                w:=ww[i];
+                sw:=0;
+                for x in w do
+                    sw:=sw + vCocycle[AbsoluteValue(x[1])];
+                od;
+                uvCocycle[i]:=sw mod 2;
+            od;
+            cupped := CB[8].cocycleToClass(uvCocycle);
+            ####
+            #### implementing Mod2CupProduct(R,u,v,4,4,CB[4],CB[4],CB[8]) -- part 2 ended ####
+        
+            if cupped = List([1..Cohomology(TR,8)],x->0) then         #if u-cup-v is a coboundary
+                Append(CupRelsLett,[Lett1]);
+                Append(CupRel8Lett,[[Lett1]]);
+            elif CupBase8 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v
+                Append(CupBase8,[cupped]);
+                Append(CupBase8Lett,[Lett1]);
+            else
+                sol :=SolutionMat(CupBase8*Z(2),cupped*Z(2));
+                if sol = fail then                  #if u-cup-v is a genuine new cocycle
+                    Append(CupBase8,[cupped]);
+                    Append(CupBase8Lett,[Lett1]);
+                else                                #if u-cup-v is expressable by other cocycles in basis
+                    solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase8Lett[x]));
+                    if (Lett1 in CupBase8Lett) = false then
+                        Append(CupRelsLett,[Lett1]);
+                        Append(CupRel8Lett,[solrel]);
+                    fi;
+                fi;
+            fi;
+        fi;
+        iv := iv+1;
+    od;
+    iu := iu+1;
+od;
+#
+#
+#Step-3 finished: degree-4-gen cup with degree-4-gen
+
+#Append(CupBase8,Gen8);
+#Note that there's no Gen8!!
+#for iu in [(1+Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5)+Length(Gen6)+Length(Gen7))..(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5)+Length(Gen6)+Length(Gen7)+Length(Gen8))] do
+#    if CupBase8 = [] then
+#        Append(CupBase8,[Gen8[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5)+Length(Gen6)+Length(Gen7))]]);
+#        Append(CupBase8Lett,[GensLett[iu]]);
+#    else
+#        sol :=SolutionMat(CupBase7*Z(2),Gen8[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5)+Length(Gen6)+Length(Gen7))]*Z(2));
+#        if sol = fail then
+#            Append(CupBase8,[Gen8[iu-(Length(Gen1)+Length(Gen2)+Length(Gen3)+Length(Gen4)+Length(Gen5)+Length(Gen6)+Length(Gen7))]]);
+#            #Append(CupBase8Lett,[GensLett[iu]]);
+#        else
+#            Print("Error: containing fake degree-8 generator(s)!!\n");
+#        fi;
+#    fi;
+#    #Append(CupBase8Lett,[GensLett[iu]]);
+#od;
+
+
+
+#Print("Chosen basis at degree 8:\n");
+#PrintMonomialString(CupBase8Lett,GenDim1to4,",");
+
+if Length(CupBase8) = Cohomology(TR,8) then
+    Print("");#Print("dim(H^8)=", Cohomology(TR,8),".\n");
+else
+    Print("!!!! No match!!!! dim(Chosen basis) - dim(H^8) = ", Length(CupBase8) - Cohomology(TR,8),"\n");
+fi;
+
+
+fi;
+#the above "fi;" is the one that ends working on the r=7 and r=8 relations, which is executed only when Gen4 is non-empty!
+#
+#
+#
+#
+#####################################################################################
 
 #
 ####   Begin printing cohomology ring   ####
@@ -2149,6 +3163,23 @@ if Length(CupRel6Lett) >0 then
     #Print(Length(CupRel6Lett)," at deg 6: ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
     Print("R6:  ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
 fi;
+
+#Begin printing Degree 7 and 8 relations:
+#
+#
+if Length(Gen4) >0 then
+    if Length(CupRel7Lett) >0 then
+        #Print(Length(CupRel7Lett)," at deg 7: ");List(CupRel7Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+        Print("R7:  ");List(CupRel7Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+    fi;
+    if Length(CupRel8Lett) >0 then
+        #Print(Length(CupRel8Lett)," at deg 8: ");List(CupRel8Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+        Print("R8:  ");List(CupRel8Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+    fi;
+fi;
+#
+#
+#End printing Degree 7 and 8 relations:
 
 ####   End printing cohomology ring   ####
 #
@@ -2337,7 +3368,7 @@ Fbarhomotopyindinv:=function(i,lst)            #This is the function Fbarhomotop
 return List(lst,x->Concatenation(x,[i]));
 end;
 #####################################################################
-FuncVal:=function(lett,v)                #Given a monomial of degree 1, 2, or 3, and argument (for the degree 3 monomial, the argument is either g1,g1,g1 or g1, g2, g2 or g1, g2, g3), evaluate the cocycle.
+FuncVal:=function(lett,v)                #Given a monomial of degree 1, 2, or 3, and argument (for the degree 3 monomial, the argument is either g1,g1,g1 or g1,g2,g2 or g1,g2,g3), evaluate the cocycle.
 local ct,deg,i,ival,j,jval,k,val,lett1;
 deg := GensDeg1to4*lett;
 
@@ -2372,7 +3403,7 @@ elif deg = 3 then                        #if evaluating a 3-cocycle
         lett1[i] := lett1[i] - 1;
         for j in [1..Length(lett)] do
             if lett1[j] > 0 then
-                jval := lett1[j];
+                jval := lett1[j];        #label of generator stored in j; power of this generator stored in jval
                 break;
             fi;
         od;
@@ -2561,10 +3592,14 @@ Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatr
 
 
 #Below constructs the resolution for the group:
-
-R:=ResolutionAlmostCrystalGroup(Image(Gp),7);
+#
+if (IT in [108, 109, 120, 130, 136, 140, 142, 197, 204, 230]) = true then
+    R:=ResolutionAlmostCrystalGroup(Image(Gp),9);
+else
+    R:=ResolutionAlmostCrystalGroup(Image(Gp),7);
+fi;
 #R:=ResolutionAlmostCrystalGroup(Image(Gp),5);
-
+#
 #Resolution for the group now constructed.
 
 
@@ -2590,6 +3625,7 @@ Gen1:=[];
 for func in funcs[1] do
     Append(Gen1,[CB[1].cocycleToClass(List([1..R!.dimension(1)],x->RemInt(Sum(List(Homotopydeg1[x],y->func(GapToPow(y[1])))),2)))]);
 od;
+
 
 Gen2:=[];
 for func in funcs[2] do
@@ -2624,6 +3660,11 @@ fi;
 
 if (IT in [108, 109, 120, 130, 136, 140, 142, 197, 204, 230]) = true then
     Gen4 := GensGAP[4];
+    if IT = 108 then
+        Gen4 := [[0, 0, 1, 1, 1, 0, 1]];
+    elif IT = 140 then
+        Gen4 := [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1]];
+    fi;
 fi;
 
 #Gen1:=GensGAP[1];
@@ -2834,9 +3875,11 @@ od;
 if RankMatrix(Mat*Z(2)) = Length(Base3Lett) and RankMatrix(Mat*Z(2)) = Length(Mat) then
 
     #Print("Full Rank achieved: ", RankMatrix(Mat*Z(2)),"=", Length(Base3Lett)," (LSM Rank = ",Length(CountLSM), ").\n");
-    LSMMat := List(TransposedMat(Inverse(Mat*Z(2))),x->GF2ToZ(x));
+    #LSMMat := List(TransposedMat(Inverse(Mat*Z(2))),x->GF2ToZ(x));
+    LSMMat := List(TransposedMat(InverseMatMod(Mat,2)));
     LSMLett := List([1..Length(CountLSM)],x->LSMMat[x]);
     Print("LSM:\n");
+    #Print(Mat);
     j := 1;
     for i in [1..Length(IWP[IT])] do
         Print(IWP[IT][i][1]," ");
@@ -2847,6 +3890,11 @@ if RankMatrix(Mat*Z(2)) = Length(Base3Lett) and RankMatrix(Mat*Z(2)) = Length(Ma
             Print("\n");
         fi;
     od;
+    #for j in [(Length(IWP[IT])+1)..Length(Mat)] do
+    #    PrintMonomialString(IndToElem(LSMMat [j],Base3Lett),GensDim1to4,"+",GENNAMES[IT],"\n");
+    #    Print(overcomplete_g[j],"\n");
+    #od;
+    
 else
     Print("Full Rank NOT achieved: ", RankMatrix(Mat*Z(2)),"!=", Length(Base3Lett), "or", RankMatrix(Mat*Z(2)),"!=", Length(Mat),".\n");
     #Print(Mat*Z(2),"\n");
