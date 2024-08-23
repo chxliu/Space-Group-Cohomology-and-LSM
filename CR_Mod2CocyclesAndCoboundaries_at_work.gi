@@ -1,6 +1,6 @@
 LoadPackage("HAP");
 
-Read("~/Downloads/Space_Group_Cocycles.gi");
+Read("~/myCodes/LSM/Space_Group_Cocycles.gi");
 
 
 #Functions in this module:
