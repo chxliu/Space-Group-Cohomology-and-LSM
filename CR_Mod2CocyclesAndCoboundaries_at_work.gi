@@ -525,7 +525,7 @@ local
         cupped,M1,sum,row,BasisImaged2,cuppedRaw,CupBase6RawCobandCoc,CupBase6Raw,
         Lett1, Lett2, mono, IO,
         uCocycle, vCocycle, uvCocycle, uChainMap, ww,
-        sol, solrel, cc, CB, CohomologyBasis, TR,
+        sol, sol1, solrel, cc, CB, CohomologyBasis, TR,
         BasisP, BasisQ, SmithRecord, IToPosition,
         #NonNegativeVec,
         i,j,p,q,r,s,t,u,v,w,x,y,z, ln, rk, rk1, ip,iq,ir,is,it,iu,iv,iw,ix,iy,iz,sw;
@@ -582,19 +582,19 @@ Gen4:=Gens[4];
 Gen5:=[]; #based on the posteriori fact that no space group has degree-5 generators.
 Gen6:=[];
 
-if IT = 219 or IT = 226 then
-    #Print("Caution: the group being calculated (No. 219 or No. 226) has two degree-6 generators!\n");
+if IT = 219 then
+    #Print("Caution: the group being calculated (No. 219) has two degree-6 generators!\n");
     ss6b :=CR_Mod2CocyclesAndCoboundaries(R,6)!.cocyclesBasis;
     ss6 :=CR_Mod2CocyclesAndCoboundaries(R,6);
     #Print([ss6!.cocycleToClass(ss6b[Length(ss6b)-1]),ss6!.cocycleToClass(ss6b[Length(ss6b)])]);
     Append(Gen6,[ss6!.cocycleToClass(ss6b[Length(ss6b)-1]),ss6!.cocycleToClass(ss6b[Length(ss6b)])]);
 fi;
-if IT = 228 then
-    #Print("Caution: the group being calculated (No. 228) has a degree-6 generator!\n");
-    #Print("as the length-7 resolution required to get the degree-6 generator exceeds the current memory limit.\n");
-    ss6b :=CR_Mod2CocyclesAndCoboundaries(R,6)!.cocyclesBasis;
-    ss6 :=CR_Mod2CocyclesAndCoboundaries(R,6);
-    Append(Gen6,[ss6!.cocycleToClass(ss6b[Length(ss6b)])]);
+if IT = 226 or IT=228 then
+    Print("Caution: the group being calculated (Either No. 226 or No. 228) has degree-6 generator(s)!\n");
+    Print("They cannot be obtained in the current program, as the length-7 resolution required to get the degree-6 generator exceeds the current memory limit.\n");
+    #ss6b :=CR_Mod2CocyclesAndCoboundaries(R,6)!.cocyclesBasis;
+    #ss6 :=CR_Mod2CocyclesAndCoboundaries(R,6);
+    #Append(Gen6,[ss6!.cocycleToClass(ss6b[Length(ss6b)])]);
 fi;
 
 GenDim1to4:=[Length(Gen1),Length(Gen2),Length(Gen3),Length(Gen4)];
@@ -1081,18 +1081,16 @@ for u in CupBase3 do
         if cupped = List([1..Cohomology(TR,4)],x->0) then         #if u-cup-v is a coboundary
             solrel := [Lett1];
             
+        elif CupBase4 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+            Append(CupBase4,[cupped]);
+            Append(CupBase4Lett,[Lett1]);
         else
-            if CupBase4 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+            sol :=SolutionMat(CupBase4*Z(2),cupped*Z(2));
+            if sol = fail then                  #if u-cup-v is a genuine new cocycle
                 Append(CupBase4,[cupped]);
                 Append(CupBase4Lett,[Lett1]);
-            else
-                sol :=SolutionMat(CupBase4*Z(2),cupped*Z(2));
-                if sol = fail then                  #if u-cup-v is a genuine new cocycle
-                    Append(CupBase4,[cupped]);
-                    Append(CupBase4Lett,[Lett1]);
-                else                                #if u-cup-v is expressable by other cocycles in basis
-                    solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase4Lett[x]));
-                fi;
+            else                                #if u-cup-v is expressable by other cocycles in basis
+                solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase4Lett[x]));
             fi;
         fi;
         ####
@@ -1387,18 +1385,16 @@ for u in CupBase4 do
         if cupped = List([1..Cohomology(TR,5)],x->0) then         #if u-cup-v is a coboundary
             solrel := [Lett1];
             
+        elif CupBase5 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+            Append(CupBase5,[cupped]);
+            Append(CupBase5Lett,[Lett1]);
         else
-            if CupBase5 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+            sol :=SolutionMat(CupBase5*Z(2),cupped*Z(2));
+            if sol = fail then                  #if u-cup-v is a genuine new cocycle
                 Append(CupBase5,[cupped]);
                 Append(CupBase5Lett,[Lett1]);
-            else
-                sol :=SolutionMat(CupBase5*Z(2),cupped*Z(2));
-                if sol = fail then                  #if u-cup-v is a genuine new cocycle
-                    Append(CupBase5,[cupped]);
-                    Append(CupBase5Lett,[Lett1]);
-                else                                #if u-cup-v is expressable by other cocycles in basis
-                    solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase5Lett[x]));
-                fi;
+            else                                #if u-cup-v is expressable by other cocycles in basis
+                solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase5Lett[x]));
             fi;
         fi;
         ####
@@ -1498,18 +1494,16 @@ for u in Gen3 do
         if cupped = List([1..Cohomology(TR,5)],x->0) then         #if u-cup-v is a coboundary
             solrel := [Lett1];
             
+        elif CupBase5 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+            Append(CupBase5,[cupped]);
+            Append(CupBase5Lett,[Lett1]);
         else
-            if CupBase5 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+            sol :=SolutionMat(CupBase5*Z(2),cupped*Z(2));
+            if sol = fail then                  #if u-cup-v is a genuine new cocycle
                 Append(CupBase5,[cupped]);
                 Append(CupBase5Lett,[Lett1]);
-            else
-                sol :=SolutionMat(CupBase5*Z(2),cupped*Z(2));
-                if sol = fail then                  #if u-cup-v is a genuine new cocycle
-                    Append(CupBase5,[cupped]);
-                    Append(CupBase5Lett,[Lett1]);
-                else                                #if u-cup-v is expressable by other cocycles in basis
-                    solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase5Lett[x]));
-                fi;
+            else                                #if u-cup-v is expressable by other cocycles in basis
+                solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase5Lett[x]));
             fi;
         fi;
         ####
@@ -1819,18 +1813,16 @@ for u in CupBase5 do
         if cupped = List([1..Cohomology(TR,6)],x->0) then         #if u-cup-v is a coboundary
             solrel := [Lett1];
             
+        elif CupBase6 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+            Append(CupBase6,[cupped]);
+            Append(CupBase6Lett,[Lett1]);
         else
-            if CupBase6 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+            sol :=SolutionMat(CupBase6*Z(2),cupped*Z(2));
+            if sol = fail then                  #if u-cup-v is a genuine new cocycle
                 Append(CupBase6,[cupped]);
                 Append(CupBase6Lett,[Lett1]);
-            else
-                sol :=SolutionMat(CupBase6*Z(2),cupped*Z(2));
-                if sol = fail then                  #if u-cup-v is a genuine new cocycle
-                    Append(CupBase6,[cupped]);
-                    Append(CupBase6Lett,[Lett1]);
-                else                                #if u-cup-v is expressable by other cocycles in basis
-                    solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase6Lett[x]));
-                fi;
+            else                                #if u-cup-v is expressable by other cocycles in basis
+                solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase6Lett[x]));
             fi;
         fi;
         ####
@@ -1931,18 +1923,16 @@ for u in CupBase4 do
             if cupped = List([1..Cohomology(TR,6)],x->0) then         #if u-cup-v is a coboundary
                 solrel := [Lett1];
               
+            elif CupBase6 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+                Append(CupBase6,[cupped]);
+                Append(CupBase6Lett,[Lett1]);
             else
-                if CupBase6 = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+                sol :=SolutionMat(CupBase6*Z(2),cupped*Z(2));
+                if sol = fail then                  #if u-cup-v is a genuine new cocycle
                     Append(CupBase6,[cupped]);
                     Append(CupBase6Lett,[Lett1]);
-                else
-                    sol :=SolutionMat(CupBase6*Z(2),cupped*Z(2));
-                    if sol = fail then                  #if u-cup-v is a genuine new cocycle
-                        Append(CupBase6,[cupped]);
-                        Append(CupBase6Lett,[Lett1]);
-                    else                                #if u-cup-v is expressable by other cocycles in basis
-                        solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase6Lett[x]));
-                    fi;
+                else                                #if u-cup-v is expressable by other cocycles in basis
+                    solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase6Lett[x]));
                 fi;
             fi;
             ####
@@ -2183,21 +2173,19 @@ for u in CupBase5 do
         if (SolutionMat(BasisImaged2*Z(2),cuppedRaw*Z(2)) = fail) = false then        #if u-cup-v is a coboundary
             solrel := [Lett1];
             
+        elif CupBase6Raw = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+            Append(CupBase6Raw,[cuppedRaw]);
+            Append(CupBase6Lett,[Lett1]);
+            Append(CupBase6RawCobandCoc,[cuppedRaw]);
         else
-            if CupBase6Raw = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+            sol :=SolutionMat(CupBase6RawCobandCoc*Z(2),cuppedRaw*Z(2));
+            if sol = fail then                  #if u-cup-v is a genuine new cocycle
                 Append(CupBase6Raw,[cuppedRaw]);
                 Append(CupBase6Lett,[Lett1]);
                 Append(CupBase6RawCobandCoc,[cuppedRaw]);
-            else
-                sol :=SolutionMat(CupBase6RawCobandCoc*Z(2),cuppedRaw*Z(2));
-                if sol = fail then                  #if u-cup-v is a genuine new cocycle
-                    Append(CupBase6Raw,[cuppedRaw]);
-                    Append(CupBase6Lett,[Lett1]);
-                    Append(CupBase6RawCobandCoc,[cuppedRaw]);
-                else                                #if u-cup-v is expressable by other cocycles in basis
-                    sol:=List([1..(Length(sol)-Length(BasisImaged2))],x->sol[x]);
-                    solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase6Lett[x]));
-                fi;
+            else                                #if u-cup-v is expressable by other cocycles in basis
+                sol1:=List([(Length(BasisImaged2)+1)..Length(sol)],x->sol[x]);
+                solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol1)),x->CupBase6Lett[x]));
             fi;
         fi;
         ####
@@ -2299,21 +2287,19 @@ for u in CupBase4 do
             if (SolutionMat(BasisImaged2*Z(2),cuppedRaw*Z(2)) = fail) = false then        #if u-cup-v is a coboundary
                 solrel := [Lett1];
             
+            elif CupBase6Raw = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+                Append(CupBase6Raw,[cuppedRaw]);
+                Append(CupBase6Lett,[Lett1]);
+                Append(CupBase6RawCobandCoc,[cuppedRaw]);
             else
-                if CupBase6Raw = [] then        #if no basis yet then push in the genuine cocycle u-cup-v to basis
+                sol :=SolutionMat(CupBase6RawCobandCoc*Z(2),cuppedRaw*Z(2));
+                if sol = fail then                  #if u-cup-v is a genuine new cocycle
                     Append(CupBase6Raw,[cuppedRaw]);
                     Append(CupBase6Lett,[Lett1]);
                     Append(CupBase6RawCobandCoc,[cuppedRaw]);
-                else
-                    sol :=SolutionMat(CupBase6RawCobandCoc*Z(2),cuppedRaw*Z(2));
-                    if sol = fail then                  #if u-cup-v is a genuine new cocycle
-                        Append(CupBase6Raw,[cuppedRaw]);
-                        Append(CupBase6Lett,[Lett1]);
-                        Append(CupBase6RawCobandCoc,[cuppedRaw]);
-                    else                                #if u-cup-v is expressable by other cocycles in basis
-                        sol:=List([1..(Length(sol)-Length(BasisImaged2))],x->sol[x]);
-                        solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase6Lett[x]));
-                    fi;
+                else                                #if u-cup-v is expressable by other cocycles in basis
+                    sol1:=List([(Length(BasisImaged2)+1)..(Length(sol))],x->sol[x]);
+                    solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol1)),x->CupBase6Lett[x]));
                 fi;
             fi;
             ####
@@ -2435,8 +2421,8 @@ for u in Gen3 do
                     Append(CupBase6Lett,[Lett1]);
                     Append(CupBase6RawCobandCoc,[cuppedRaw]);
                 else                                #if u-cup-v is expressable by other cocycles in basis
-                    sol:=List([1..(Length(sol)-Length(BasisImaged2))],x->sol[x]);
-                    solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol)),x->CupBase6Lett[x]));
+                    sol1:=List([(Length(BasisImaged2)+1)..(Length(sol))],x->sol[x]);
+                    solrel:=Concatenation([Lett1], List(IToPosition(GF2ToZ(sol1)),x->CupBase6Lett[x]));
                     if (Lett1 in CupBase6Lett) = false then
                         Append(CupRelsLett,[Lett1]);
                         Append(CupRel6Lett,[solrel]);
