@@ -2446,11 +2446,15 @@ od;
 #Append(CupBase6,Gen6); #But note that for 221-230, since resolution can only go up to deg 6, we cannot get Gen6.
 
 
-Print("Below is a detailed look at deg 6 elements and relations for groups 221-230: \n");
-Print("Chosen basis at degree 6:\n");
-PrintMonomialString(CupBase6Lett,GenDim1to4,",");
 
-Print("");#Print("Basisdim=", Length(CupBase6Raw),".\n");
+#Print("Chosen basis at degree 6:\n");
+#PrintMonomialString(CupBase6Lett,GenDim1to4,",");
+
+if Length(CupBase6) = [62,11,31,26,45,20,19,6,40,7][IT-220] then
+    Print("");#Print("dim(H^6)=", [62,11,31,26,45,20,19,6,40,7][IT-220],".\n");
+else
+    Print("!!!! No match!!!! dim(Chosen basis) - dim(H^6) = ", Length(CupBase6Raw) - [62,11,31,26,45,20,19,6,40,7][IT-220],"\n");
+fi;
 
 fi;
 #
