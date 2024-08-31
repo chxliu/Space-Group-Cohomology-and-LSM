@@ -2450,7 +2450,7 @@ od;
 #Print("Chosen basis at degree 6:\n");
 #PrintMonomialString(CupBase6Lett,GenDim1to4,",");
 
-if Length(CupBase6) = [62,11,31,26,45,20,19,6,40,7][IT-220] then
+if Length(CupBase6Raw) = [62,11,31,26,45,20,19,6,40,7][IT-220] then
     Print("");#Print("dim(H^6)=", [62,11,31,26,45,20,19,6,40,7][IT-220],".\n");
 else
     Print("!!!! No match!!!! dim(Chosen basis) - dim(H^6) = ", Length(CupBase6Raw) - [62,11,31,26,45,20,19,6,40,7][IT-220],"\n");
