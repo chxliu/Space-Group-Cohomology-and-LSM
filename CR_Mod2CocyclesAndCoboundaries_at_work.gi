@@ -784,7 +784,7 @@ od;
 #Print("Chosen basis at degree 2:\n");
 #PrintMonomialString(CupBase2Lett,GenDim1to4,",");
 
-if Length(CupBase2Lett) = Cohomology(TR,2) then
+if Length(CupBase2Lett) == Cohomology(TR,2) then
     Print("");#Print("dim(H^2)=", Cohomology(TR,2),", ");
 else
     Print("!!!! No match!!!! dim(Chosen basis) - dim(H^2) = ", Length(CupBase2Lett) - Cohomology(TR,2),"\n");
