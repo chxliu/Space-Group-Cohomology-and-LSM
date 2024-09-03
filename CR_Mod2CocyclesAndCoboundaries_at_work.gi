@@ -379,22 +379,22 @@ n:=arg[2];
 spacedim:=3;
 
 if Length(arg)=3 then
-spacedim:=arg[3];
+    spacedim:=arg[3];
 fi;
 
 if IsInt(arg[1]) then
-IT := arg[1];
-if IT = 133 or IT = 138 or IT = 210 or IT = 222 or IT = 224 then
-    GG := Image(IsomorphismPcpGroup(SpaceGroupIT(spacedim,IT)));
-else
-    GG := Image(IsomorphismPcpGroup(SpaceGroupBBNWZ(spacedim,IT)));
-fi;
-R := ResolutionAlmostCrystalGroup(GG,n+1);
+    IT := arg[1];
+    if IT = 133 or IT = 138 or IT = 210 or IT = 222 or IT = 224 then
+        GG := Image(IsomorphismPcpGroup(SpaceGroupIT(spacedim,IT)));
+    else
+        GG := Image(IsomorphismPcpGroup(SpaceGroupBBNWZ(spacedim,IT)));
+    fi;
+    R := ResolutionAlmostCrystalGroup(GG,n+1);
 
 else
     if IsGroup(arg[1]) then
-    GG := Image(IsomorphismPcpGroup(arg[1]));
-    R := ResolutionAlmostCrystalGroup(GG,n+1);
+        GG := Image(IsomorphismPcpGroup(arg[1]));
+        R := ResolutionAlmostCrystalGroup(GG,n+1);
     else
         R:=arg[1];
     fi;
@@ -408,9 +408,9 @@ CohomologyBasis:=function(Torsion)
 local i, v, Basis;
 Basis:=[];
 for i in [1..Length(Torsion)] do
-v:=List([1..Length(Torsion)], j->0);
-v[i]:=Torsion[i];
-Append(Basis, [v]);
+    v:=List([1..Length(Torsion)], j->0);
+    v[i]:=Torsion[i];
+    Append(Basis, [v]);
 od;
 return Basis;
 end;
@@ -784,7 +784,7 @@ od;
 #Print("Chosen basis at degree 2:\n");
 #PrintMonomialString(CupBase2Lett,GenDim1to4,",");
 
-if Length(CupBase2Lett) == Cohomology(TR,2) then
+if Length(CupBase2Lett) = Cohomology(TR,2) then
     Print("");#Print("dim(H^2)=", Cohomology(TR,2),", ");
 else
     Print("!!!! No match!!!! dim(Chosen basis) - dim(H^2) = ", Length(CupBase2Lett) - Cohomology(TR,2),"\n");
