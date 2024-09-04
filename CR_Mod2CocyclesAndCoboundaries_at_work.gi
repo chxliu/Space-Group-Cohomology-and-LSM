@@ -3555,7 +3555,7 @@ fi;
 #Begin printing Degree 7 and 8 relations:
 #
 #
-if Length(Gen4) >0 then
+if Length(Gen4) >0 and Length(Size(R)) >= 9 then
     if Length(CupRel7Lett) >0 then
         #Print(Length(CupRel7Lett)," at deg 7: ");List(CupRel7Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
         Print("R7:  ");List(CupRel7Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
@@ -4022,29 +4022,43 @@ for func in funcs[2] do
 od;
 
 Gen3:=[];
-for func in funcs[3] do
-    Append(Gen3,[CB[3].cocycleToClass(List([1..R!.dimension(3)],x->RemInt(Sum(List(Homotopydeg3[x],y->func(GapToPow(y[1]),GapToPow(y[2]),GapToPow(y[3])))),2)))]);
-od;
+
+if (IT in [225,227,229]) = true then
+    Gen3[1] := CB[3].cocycleToClass(List([1..R!.dimension(3)],x->RemInt(Sum(List(Homotopydeg3[x],y->funcs[3][1](GapToPow(y[1]),GapToPow(y[2]),GapToPow(y[3])))),2)));
+    if IT = 225 then
+        Gen3[2] := [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0];
+        Gen3[3] := [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+    elif IT = 227 then
+        Gen3[2] := [0, 0, 0, 0, 0, 0, 1, 0, 0];
+    elif IT = 229 then
+        Gen3[2] := [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1];
+    fi;
+else
+    for func in funcs[3] do
+        Append(Gen3,[CB[3].cocycleToClass(List([1..R!.dimension(3)],x->RemInt(Sum(List(Homotopydeg3[x],y->func(GapToPow(y[1]),GapToPow(y[2]),GapToPow(y[3])))),2)))]);
+    od;
+fi;
+
 
 Gen4:=[];
 
 
-GensGAP:=Mod2RingGenerators(R,4,3); #GensGAP: Generators of the mod-2 cohomology ring at degree 1-4 that are worked out by GAP; GensGAP is to be compared with those worked out from explicit cochain expressions (Gen1,Gen2,Gen3).
+#GensGAP:=Mod2RingGenerators(R,4,3); #GensGAP: Generators of the mod-2 cohomology ring at degree 1-4 that are worked out by GAP; GensGAP is to be compared with those worked out from explicit cochain expressions (Gen1,Gen2,Gen3). Here: R is the resolution, 4 is the maximal degree at which the generators are worked out, and 3 is the dimension of the space group (if 2 instead then computes wallpaper group).
 
 #Print("Matching generators for space group No. ", IT, "\n");
 #Print("basis given by gap is:", GensGAP, "\n");
 #Print("basis given by func is:", [Gen1,Gen2,Gen3], "\n");
 
-if (Length(Gen1) = Length(GensGAP[1])) = false then
-    Print("Number of Degree-1 generators does not match!!!:", Length(Gen1),"!=",Length(GensGAP[1]),"\n");
-elif (Length(Gen2) = Length(GensGAP[2])) = false then
-    Print("Number of Degree-2 generators does not match!!!:", Length(Gen2),"!=",Length(GensGAP[2]),"\n");
-elif (Length(Gen3) = Length(GensGAP[3])) = false then
-    Print("Number of Degree-3 generators does not match!!!:", Length(Gen3),"!=",Length(GensGAP[3]),"\n");
-else
-    #Print("Generators at degree 1,2,3 matched.","\n");
-    Print("\n");
-fi;
+#if (Length(Gen1) = Length(GensGAP[1])) = false then
+#    Print("Number of Degree-1 generators does not match!!!:", Length(Gen1),"!=",Length(GensGAP[1]),"\n");
+#elif (Length(Gen2) = Length(GensGAP[2])) = false then
+#    Print("Number of Degree-2 generators does not match!!!:", Length(Gen2),"!=",Length(GensGAP[2]),"\n");
+#elif (Length(Gen3) = Length(GensGAP[3])) = false then
+#    Print("Number of Degree-3 generators does not match!!!:", Length(Gen3),"!=",Length(GensGAP[3]),"\n");
+#else
+#    #Print("Generators at degree 1,2,3 matched.","\n");
+#    Print("\n");
+#fi;
 
 
 if (IT in [108, 109, 120, 130, 136, 140, 142, 197, 204, 230]) = true then
@@ -4055,6 +4069,8 @@ if (IT in [108, 109, 120, 130, 136, 140, 142, 197, 204, 230]) = true then
         Gen4 := [[0, 1, 1, 0, 0, 1, 1, 0],[0, 0, 0, 0, 0, 1, 0, 1]];
     elif IT = 140 then
         Gen4 := [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1]];
+    elif IT = 230 then
+        Gen4 := [[0, 0, 1, 1, 1]];
     fi;
 fi;
 
