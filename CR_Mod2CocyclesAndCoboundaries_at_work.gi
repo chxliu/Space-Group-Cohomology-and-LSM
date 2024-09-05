@@ -790,7 +790,14 @@ else
     Print("!!!! No match!!!! dim(Chosen basis) - dim(H^2) = ", Length(CupBase2Lett) - Cohomology(TR,2),"\n");
 fi;
 
-
+#Print("with relations:\n");
+#Print(CupRelsLett,"\n");
+##Begin printing the relations at deg 2:
+if Length(CupRel2Lett) > 0 then
+    #Print(Length(CupRel2Lett)," at deg 2: ");List(CupRel2Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+    Print("R2:  ");List(CupRel2Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+fi;
+##End printing the relations at deg 2.
 
 
 ####################### r = 3 ##########################
@@ -989,6 +996,12 @@ fi;
 
 
 
+##Begin printing the relations at deg 3:
+if Length(CupRel3Lett) > 0 then
+    #Print(Length(CupRel3Lett)," at deg 3: ");List(CupRel3Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+    Print("R3:  ");List(CupRel3Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+fi;
+##End printing the relations at deg 3.
 
 ####################### r = 4 ##########################
 
@@ -1238,6 +1251,12 @@ else
 fi;
 
 
+##Begin printing the relations at deg 4:
+if Length(CupRel4Lett) > 0 then
+    #Print(Length(CupRel4Lett)," at deg 4: ");List(CupRel4Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+    Print("R4:  ");List(CupRel4Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+fi;
+##End printing the relations at deg 4.
 
 ####################### r = 5 ##########################
 
@@ -1611,6 +1630,13 @@ else
     Print("!!!! No match!!!! dim(Chosen basis) - dim(H^5) = ", Length(CupBase5Lett) - Cohomology(TR,5),"\n");
 fi;
 
+
+##Begin printing the relations at deg 5:
+if Length(CupRel5Lett) >0 then
+    #Print(Length(CupRel5Lett)," at deg 5: ");List(CupRel5Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+    Print("R5:  ");List(CupRel5Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+fi;
+##End printing the relations at deg 5.
 
 
 ####################### r = 6 ##########################
@@ -2462,6 +2488,15 @@ fi;
 #
 #         ##Above ends the "Raw Method" for the degree 6 relations for groups 221-230, part2
 
+
+
+
+##Begin printing the relations at deg 6:
+if Length(CupRel6Lett) >0 then
+    #Print(Length(CupRel6Lett)," at deg 6: ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+    Print("R6:  ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
+fi;
+##End printing the relations at deg 6.
 
 ####################################################################################
 #The part of the code below only runs when relations at r=7 and r=8 are needed, which requires resolution at degree 9 constructed:
@@ -3529,28 +3564,6 @@ if Length(CupRel2Lett)+Length(CupRel3Lett)+Length(CupRel4Lett)+Length(CupRel5Let
         Print(">\n");
 fi;
 
-#Print("with relations:\n");
-#Print(CupRelsLett,"\n");
-if Length(CupRel2Lett) > 0 then
-    #Print(Length(CupRel2Lett)," at deg 2: ");List(CupRel2Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
-    Print("R2:  ");List(CupRel2Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
-fi;
-if Length(CupRel3Lett) > 0 then
-    #Print(Length(CupRel3Lett)," at deg 3: ");List(CupRel3Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
-    Print("R3:  ");List(CupRel3Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
-fi;
-if Length(CupRel4Lett) > 0 then
-    #Print(Length(CupRel4Lett)," at deg 4: ");List(CupRel4Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
-    Print("R4:  ");List(CupRel4Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
-fi;
-if Length(CupRel5Lett) >0 then
-    #Print(Length(CupRel5Lett)," at deg 5: ");List(CupRel5Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
-    Print("R5:  ");List(CupRel5Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
-fi;
-if Length(CupRel6Lett) >0 then
-    #Print(Length(CupRel6Lett)," at deg 6: ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
-    Print("R6:  ");List(CupRel6Lett,x->PrintMonomialString(x,GenDim1to4,"+",GENNAMES[IT]));Print("\n");
-fi;
 
 #Begin printing Degree 7 and 8 relations:
 #
@@ -3976,8 +3989,9 @@ fi;
 G:= Group(Concatenation([T1,T2,T3],PGGen));
 Gp:=IsomorphismPcpGroup(AffineCrystGroupOnRight(GeneratorsOfGroup(TransposedMatrixGroup(G))));
 #Gp:=IsomorphismPcpGroup(SpaceGroupBBNWZ(3,IT));
-
-
+if IT=222 then
+    Gp:=IsomorphismPcpGroup(SpaceGroupIT(3,222));
+fi;
 
 #Below constructs the resolution for the group:
 #
@@ -4222,55 +4236,57 @@ od;
 #
 #
 for v2 in PGind do
-    for x2 in [-2..2] do
-        for y2 in [-2..2] do
-            for z2 in [-2..2] do
-                g2 := Concatenation([x2,y2,z2],v2);
-                mat2 := [[1,0,0,x2],[0,1,0,y2],[0,0,1,z2],[0,0,0,1]] * PGMatinv[Position(PGind,v2)]^(-1);
-                if (mat2^2 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) then
-                    if Trace(mat2)=0 then                    #C2 rotation
-                        vec := TopoInvdeg3([g2],Base3Lett);
-                        sol :=SolutionMat(Mat*Z(2),vec*Z(2));
-                        if sol = fail then             #then we find a new non-LSM topo inv associated with C2 rotation
-                            Append(Mat,[vec]);
-                            Append(overcomplete_g,[[g2]]);
-                        fi;
-                    elif Trace(mat2)=2 then                  #Mirror
-                        vec := TopoInvdeg3([g2],Base3Lett);
-                        sol :=SolutionMat(Mat*Z(2),vec*Z(2));
-                        if sol = fail then             #then we find a new non-LSM topo inv associated with mirror
-                            Append(Mat,[vec]);
-                            Append(overcomplete_g,[[g2]]);
-                        fi;
-                        for v1 in PGind do
-                            for x1 in [-2..2] do
-                                for y1 in [-2..2] do
-                                    for z1 in [-2..2] do
-                                        g1 := Concatenation([x1,y1,z1],v1);
-                                        if ((g1 = (g1*0)) = false) and Prodg1g2Pow(g2,g1) = Prodg1g2Pow(g1,g2) then
-                                            vec := TopoInvdeg3([g1,g2],Base3Lett);
-                                            sol :=SolutionMat(Mat*Z(2),vec*Z(2));
-                                            if sol = fail then       #then we find a new non-LSM topo inv associated with commuting couples g1 and g2, where g2 is a mirror
-                                                Append(Mat,[vec]);
-                                                Append(overcomplete_g,[[g1,g2]]);
+    if (IT <= 220) or (v2[3] = 0) then
+        for x2 in [-2..2] do
+            for y2 in [-2..2] do
+                for z2 in [-2..2] do
+                    g2 := Concatenation([x2,y2,z2],v2);
+                    mat2 := [[1,0,0,x2],[0,1,0,y2],[0,0,1,z2],[0,0,0,1]] * PGMatinv[Position(PGind,v2)]^(-1);
+                    if (mat2^2 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) then
+                        if Trace(mat2)=0 then                    #C2 rotation
+                            vec := TopoInvdeg3([g2],Base3Lett);
+                            sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+                            if sol = fail then             #then we find a new non-LSM topo inv associated with C2 rotation
+                                Append(Mat,[vec]);
+                                Append(overcomplete_g,[[g2]]);
+                            fi;
+                        elif Trace(mat2)=2 then                  #Mirror
+                            vec := TopoInvdeg3([g2],Base3Lett);
+                            sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+                            if sol = fail then             #then we find a new non-LSM topo inv associated with mirror
+                                Append(Mat,[vec]);
+                                Append(overcomplete_g,[[g2]]);
+                            fi;
+                            for v1 in PGind do
+                                for x1 in [-2..2] do
+                                    for y1 in [-2..2] do
+                                        for z1 in [-2..2] do
+                                            g1 := Concatenation([x1,y1,z1],v1);
+                                            if ((g1 = (g1*0)) = false) and Prodg1g2Pow(g2,g1) = Prodg1g2Pow(g1,g2) then
+                                                vec := TopoInvdeg3([g1,g2],Base3Lett);
+                                                sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+                                                if sol = fail then       #then we find a new non-LSM topo inv associated with   commuting couples g1 and g2, where g2 is a mirror
+                                                    Append(Mat,[vec]);
+                                                    Append(overcomplete_g,[[g1,g2]]);
+                                                fi;
                                             fi;
-                                        fi;
+                                        od;
                                     od;
                                 od;
                             od;
-                        od;
+                        fi;
+                    elif (mat2^4 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) and (Trace(mat2)=2) then         #C4 rotation
+                        vec := TopoInvdeg3([g2,Prodg1g2Pow(g2,g2)],Base3Lett);
+                        sol :=SolutionMat(Mat*Z(2),vec*Z(2));
+                        if sol = fail then       #then we find a new non-LSM topo inv associated with commuting couples C4 and   C4^2
+                            Append(Mat,[vec]);
+                            Append(overcomplete_g,[[g2,Prodg1g2Pow(g2,g2)]]);
+                        fi;
                     fi;
-                elif (mat2^4 = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) and (Trace(mat2)=2) then         #C4 rotation
-                    vec := TopoInvdeg3([g2,Prodg1g2Pow(g2,g2)],Base3Lett);
-                    sol :=SolutionMat(Mat*Z(2),vec*Z(2));
-                    if sol = fail then       #then we find a new non-LSM topo inv associated with commuting couples C4 and C4^2
-                        Append(Mat,[vec]);
-                        Append(overcomplete_g,[[g2,Prodg1g2Pow(g2,g2)]]);
-                    fi;
-                fi;
+                od;
             od;
         od;
-    od;
+    fi;
 od;
 
 
