@@ -860,8 +860,8 @@ PC:=Image(PhomPC); #For some reason, good resolutions of finite pc groups
 
 Print("point group resolution to be constructed:\n");
 
-#RP:=ResolutionFiniteGroup(PC,K);
-RP:=ResolutionSmallGroup(PC,K,2);
+RP:=ResolutionFiniteGroup(PC,K,false,0,true);
+#RP:=ResolutionSmallGroup(PC,K,2);
 
 Print("point group resolution constructed\n");
 
