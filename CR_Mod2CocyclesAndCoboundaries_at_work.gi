@@ -13,6 +13,7 @@ LoadPackage("HAP");
 #Mod2RingGenerators
 #Mod2RingGensAndRels
 #PointGroupTranslationExtension
+#IrreducibleWyckoffPoints
 #SpaceGroupCohomologyRingGapInterface
 
 
@@ -3712,6 +3713,119 @@ end;
 
 
 
+#####################################################################
+#####################################################################
+IrreducibleWyckoffPoints:=function(arg)
+local
+    IT, Dim, SG, Rec, IWPs, x,
+    WyckoffPosRelations, WyckoffGraphRecord;
+    
+#####################################################################
+WyckoffPosRelations := function( W )
+    local S, T, d, len, gens, G, L, m, O, o, i, j, k, Si, Sj, index, lst;
+
+    S := WyckoffSpaceGroup( W[1] );
+    T := TranslationBasis( S );
+    d := DimensionOfMatrixGroup( S ) - 1;
+    len  := Length( W );
+    gens := GeneratorsOfGroup( S );
+    gens := Filtered( gens, g -> g{[1..d]}{[1..d]} <> IdentityMat( d ) );
+    if IsAffineCrystGroupOnLeft( S ) then
+        gens := List( gens, TransposedMat );
+    fi;
+    G := GroupByGenerators( gens, One( S ) );
+    L := List( W, w -> rec( translation := WyckoffTranslation( w ),
+                            basis       := WyckoffBasis( w ),
+                            spaceGroup  := S ) );
+
+    m := NullMat( len, len );
+    for i in [1..len] do
+        O := Orbit( G, L[i], ImageAffineSubspaceLattice );
+        for j in [1..len] do
+            Sj := WyckoffStabilizer( W[j] );
+            Si := WyckoffStabilizer( W[i] );
+            index := Size(Sj) / Size(Si);
+            if Length(L[j].basis) < Length(L[i].basis) and IsInt(index) then
+                lst := Filtered(O,o->IsSubspaceAffineSubspaceLattice(o,L[j]));
+                m[j][i] := Length( lst );
+            fi;
+        od;
+    od;
+
+    for i in Reversed([1..Length(W)]) do
+        for j in Reversed([1..i-1]) do
+            if m[j][i]<>0 then
+                for k in [1..j-1] do
+                    if m[k][j]<>0 then m[k][i]:=0; fi;
+                od;
+            fi;
+        od;
+    od;
+
+    return m;
+
+end;
+
+#############################################################################
+##
+#F  WyckoffGraphRecord( <lst> ) . . . . . . . Create record for Wyckoff graph
+##
+WyckoffGraphRecord := function( lst )
+
+    local L, m, R, i, level, j;
+
+    L := List( lst, w -> rec( wypos := w,
+                              dim   := Length( WyckoffBasis(w) ),
+                              size  := Size( WyckoffStabilizer(w) ),
+                              class := w!.class ) );
+    Sort( L, function(a,b) return a.size > b.size; end );
+
+    m := WyckoffPosRelations( List( L, x -> x.wypos ) );
+
+    R := rec( levels   := [],
+              classes  := [],
+              vertices := [],
+              edges    := [] );
+
+    for i in [1..Length(L)] do
+        level := [ L[i].dim, L[i].size ];
+        AddSet( R.levels, level );
+        AddSet( R.classes, [ L[i].class, level ] );
+        Add( R.vertices, [ L[i].wypos, level, L[i].class ] );
+        for j in [1..i-1] do
+            if m[j][i]<>0 then Add( R.edges, [ i, j, m[j][i] ] ); fi;
+        od;
+    od;
+
+    return R;
+
+end;
+#####################################################################
+
+IT := arg[1];
+if Length(arg) = 1 then
+    SG := SpaceGroupIT(3,IT);
+else
+    SG := SpaceGroupIT(arg[2],IT);  #arg[2] must give the dimension (either 2 or 3);
+fi;
+
+Rec := WyckoffGraphRecord(WyckoffPositions(SG));
+
+
+IWPs := Difference([1..Length(Rec.vertices)],Set(List(Rec.edges,x->x[1]))); #IWPs stores the index of the IWPs;
+
+for x in IWPs do
+    Print(Rec.vertices[x][1],": ", ["point","line","plane","volume"][1 + Rec.vertices[x][2][1]],"\n");
+od;
+
+Print("Number of IWPs for Group No.", IT, ": ",Length(IWPs),"\n");
+
+return Length(IWPs);
+end;
+#####################################################################
+#####################################################################
+
+
 
 #####################################################################
 #####################################################################
@@ -4112,9 +4226,9 @@ if (IT in [108, 109, 120, 130, 136, 140, 142, 197, 204, 230]) = true then
     elif IT = 140 then
         Gen4 := [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1]];     #Must use standard resolution!!
     elif IT = 142 then
-        Gen4 := [[0, 0, 1, 1, 1, 0, 1]];                                                  #Must use standard resolution!!
+        Gen4 := [[0, 1, 1, 0, 0, 0, 1]];                                                  #Must use standard resolution!!
     elif IT = 230 then
-        Gen4 := [[1, 1, 1, 0, 1]];                                                        #Must use standard resolution!!
+        Gen4 := [[0, 1, 1, 1, 1]];                                                        #Must use standard resolution!!
     fi;
 fi;
 
