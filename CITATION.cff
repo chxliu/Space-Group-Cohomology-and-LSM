@@ -1,0 +1,20 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Space-Group-Cohomology-and-LSM
+message: >-
+  If you use this dataset, please cite it using the metadata
+  from this file.
+type: dataset
+authors:
+  - given-names: Chunxiao
+    family-names: Liu
+  - given-names: Weicheng
+    family-names: Ye
+identifiers:
+  - type: url
+    value: >-
+      https://github.com/liuchx1993/Space-Group-Cohomology-and-LSM
+repository-code: >-
+  https://github.com/liuchx1993/Space-Group-Cohomology-and-LSM
