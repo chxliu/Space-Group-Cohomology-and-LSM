@@ -1,24 +1,22 @@
-LoadPackage("HAP");
-
-#Read("~/Downloads/SpaceGroupCohomologyFunctions.gi");
-
-
-#In this file (SpaceGroupCohomologyFunctions.gi) you will find:
+# Copyright (c) Chunxiao Liu 2024
+# Reference: Chunxiao Liu, Weicheng Ye, arXiv:2410.03607
 #
 #
-#GF2ToZ(vec);
-#Letter2Monomial(powvec,gensdim,gensnames);
-#PrintMonomialString(powvecs,gensdim,sep [,gensnames,space]);
-#CR_Mod2CocyclesAndCoboundaries(R,deg);
-#Mod2CupProduct(R,u,v,p,q);
-#Mod2RingGenerators(R,deg);
-#Mod2RingGensAndRels(IT [,3,R,gens]);
-#PointGroupTranslationExtension();
-#IrreducibleWyckoffPoints();
-#SpaceGroupCohomologyRingGapInterface(IT);
+# In this file (SpaceGroupCohomologyFunctions.gi) you will find:
+#
+# GF2ToZ(vec);
+# Letter2Monomial(powvec,gensdim,gensnames);
+# PrintMonomialString(powvecs,gensdim,sep [,gensnames,space]);
+# CR_Mod2CocyclesAndCoboundaries(R,deg);
+# Mod2CupProduct(R,u,v,p,q);
+# Mod2RingGenerators(R,deg);
+# Mod2RingGensAndRels(IT [,3,R,gens]);
+# PointGroupTranslationExtension();
+# IrreducibleWyckoffPoints();
+# SpaceGroupCohomologyRingGapInterface(IT);
 #
 #
-#Arguments of the functions:
+# Arguments of the functions:
 #
 # vec: any vector;
 # powvec: the vector recording powers of generators in a monomial;
@@ -36,9 +34,12 @@ LoadPackage("HAP");
 #
 #
 #
-# Written by Chunxiao Liu
-# Reference: Chunxiao Liu, Weicheng Ye, arXiv:2410.XXXXX
-##
+#
+
+
+LoadPackage("HAP");
+
+#Read("~/Downloads/SpaceGroupCohomologyFunctions.gi");
 
 
 #####################################################################
