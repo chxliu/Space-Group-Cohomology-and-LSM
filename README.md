@@ -1,6 +1,6 @@
 # Codes for the project *Crystallography, Group Cohomology, and Lieb–Schultz–Mattis Constraints* 
 # 
-## Reference: Chunxiao Liu, Weicheng Ye, [website (https://arxiv.org/abs/2410.03607)][arXiv:2410.03607]
+## Reference: Chunxiao Liu, Weicheng Ye, *Crystallography, Group Cohomology, and Lieb–Schultz–Mattis Constraints* [https://arxiv.org/abs/2410.03607]
 
 ## GAP codes: 
 #
