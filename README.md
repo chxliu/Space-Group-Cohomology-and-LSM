@@ -1,7 +1,7 @@
 # Codes for the project *Crystallography, Group Cohomology, and Lieb–Schultz–Mattis Constraints* 
 # 
 
-[![arXiv](https://img.shields.io/badge/arXiv-<arxiv_id>-b31b1b.svg)](https://arxiv.org/abs/<arxiv_id>)
+[![arXiv](https://img.shields.io/badge/arXiv-<arxiv_2410.03607>-b31b1b.svg)](https://arxiv.org/abs/2410.03607)
 
 ## Reference: Chunxiao Liu, Weicheng Ye, *Crystallography, Group Cohomology, and Lieb–Schultz–Mattis Constraints* [https://arxiv.org/abs/2410.03607]
 
