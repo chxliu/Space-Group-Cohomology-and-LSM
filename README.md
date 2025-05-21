@@ -26,15 +26,18 @@ Codes to obtain the explicit cochain representatives for degree-3 generators of 
 
 ## Reference
 
-If this repository is useful for your research, please consider citing the [arXiv preprint](https://arxiv.org/abs/2410.03607):
+If this repository is useful for your research, please consider citing the [Scipost](https://www.scipost.org/SciPostPhys.18.5.161) article:
 
 ```bibtex
-@misc{liu2024crystallography,
-    title={Crystallography, Group Cohomology, and Lieb–Schultz–Mattis Constraints},
-    author={Chunxiao Liu and Weicheng Ye},
-    year={2024},
-    eprint={2410.03607},
-    archivePrefix={arXiv},
-    primaryClass={cond-mat.str-el}
+@Article{10.21468/SciPostPhys.18.5.161,
+	title={{Crystallography, group cohomology, and Lieb–Schultz–Mattis constraints}},
+	author={Chunxiao Liu and Weicheng Ye},
+	journal={SciPost Phys.},
+	volume={18},
+	pages={161},
+	year={2025},
+	publisher={SciPost},
+	doi={10.21468/SciPostPhys.18.5.161},
+	url={https://scipost.org/10.21468/SciPostPhys.18.5.161},
 }
 ```
